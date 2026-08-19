@@ -7,7 +7,7 @@ conflicts as routine. Direction is decided; do not re-litigate it:
 `docs/design/kithcraft-brief.md` (ratified 2026-08-19) wins. Plan-of-record is the board;
 this file carries only ordering, doctrine, and the log.
 
-**Status:** draft · operator sign-off on lanes: pending
+**Status:** signed-off · operator sign-off on lanes: 2026-08-19 (sonnet tier confirmed, no escalation)
 <!-- Only the OPERATOR flips draft → signed-off (the author never pre-fills it). An
      executing session must refuse a runbook whose status it cannot verify. -->
 
