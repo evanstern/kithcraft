@@ -1,0 +1,38 @@
+---
+id: TASK-0002
+title: Draft the body protocol v0 (perceive / act / remember)
+status: To Do
+assignee: []
+created_date: '2026-08-19 18:36'
+labels:
+  - design-decision
+  - architecture
+milestone: m-0
+dependencies:
+  - TASK-0001
+documentation:
+  - docs/design/kithcraft-brief.md
+priority: high
+ordinal: 2000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+The brief's anti-corner move: a world-agnostic body protocol so minds never couple to Minecraft — the mod is the first body vendor, a future owned engine is a second. Draft v0 of the protocol: the perceive/act/remember surface, message shapes, and the perception model (what a villager sees/hears), porting promptworld I's epistemic hygiene rules (an agent knows only what it saw or was told, with provenance). Reference doctrine lives in promptworld I's docs/wiki/ (start from INDEX.md, load notes just-in-time); nothing imports I's code. Choice of mod stack (TASK-0001) informs what the first body vendor can feasibly expose.
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 A v0 protocol document exists covering perceive, act, and remember message shapes with a versioning story
+- [ ] #2 The perception model is specified: what a villager sees/hears and how provenance is attached (epistemic hygiene ported from promptworld I doctrine)
+- [ ] #3 The protocol is demonstrably world-agnostic: no Minecraft types leak across the seam, and the doc shows how a second body vendor would implement it
+- [ ] #4 Minds are testable without booting Minecraft: the doc specifies a test/fake body vendor
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Tests pass
+- [ ] #2 Docs and wiki are updated and pass freshness tests
+- [ ] #3 Spec and Backlog are in sync
+<!-- DOD:END -->
