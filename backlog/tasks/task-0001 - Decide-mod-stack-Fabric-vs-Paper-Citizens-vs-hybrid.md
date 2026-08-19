@@ -4,6 +4,7 @@ title: 'Decide mod stack: Fabric vs Paper/Citizens vs hybrid'
 status: To Do
 assignee: []
 created_date: '2026-08-19 18:36'
+updated_date: '2026-08-19 18:46'
 labels:
   - design-decision
 milestone: m-0
@@ -17,7 +18,9 @@ ordinal: 1000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Kithcraft (promptworld II) is a Minecraft server mod giving the player LLM villagers as company (see docs/design/kithcraft-brief.md — ratified, do not relitigate). The first open question is the mod stack. Evaluate Fabric vs Paper/Citizens2 vs a hybrid against the ratified decisions: villager-shaped smarter NPCs (not bot clients), small cast, real-time only, world-agnostic body protocol with the mod as first body vendor. Re-verify prior art (Citizens2, CraftAgent, AI_NPC, Fabric villager brain API) for maintenance status, target MC version support, and licenses before relying on any of it — the brief's links were verified 2026-08-19 and the space moves fast.
+As the Kithcraft team, we want the mod stack chosen (Fabric vs Paper/Citizens2 vs hybrid) with evidence, so that every downstream decision — entity implementation, body vendor, build plan — rests on a ratified foundation instead of an assumption.
+
+Context: Kithcraft (promptworld II) is a Minecraft server mod giving the player LLM villagers as company (see docs/design/kithcraft-brief.md — ratified, do not relitigate). Evaluate the options against the ratified decisions: villager-shaped smarter NPCs (not bot clients), small cast, real-time only, world-agnostic body protocol with the mod as first body vendor. Re-verify prior art (Citizens2, CraftAgent, AI_NPC, Fabric villager brain API) for maintenance status, target MC version support, and licenses before relying on any of it — the brief's links were verified 2026-08-19 and the space moves fast.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria

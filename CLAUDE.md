@@ -168,3 +168,13 @@ Features are specified with GitHub Spec Kit (`specify`) under `specs/NNN-<featur
   mirrored criteria are internal breakdown, not PR boundaries.
 <!-- pdlc:peer:spec-kit END -->
 <!-- pdlc:grounding END -->
+
+## Task conventions (project-specific)
+
+- **User stories whenever possible.** A task description opens with a user story —
+  `As a <who>, I want <what>, so that <why>` — because it expresses the task's intent
+  better than a bare directive. The "who" is whoever the work serves: the player, a
+  villager, the operator, or a future implementer/agent. Follow the story with whatever
+  handoff context the implementer needs (constraints, references, ratified decisions).
+  Where a story would be forced (pure chores, mechanical migrations), a plain outcome
+  statement is fine — don't contort.

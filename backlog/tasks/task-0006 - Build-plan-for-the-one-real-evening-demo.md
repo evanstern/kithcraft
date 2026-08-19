@@ -4,6 +4,7 @@ title: Build plan for the "one real evening" demo
 status: To Do
 assignee: []
 created_date: '2026-08-19 18:38'
+updated_date: '2026-08-19 18:47'
 labels:
   - planning
 milestone: m-0
@@ -21,7 +22,9 @@ ordinal: 6000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Once the mod stack, body protocol, entity implementation, and mind daemon decisions are ratified, author the build plan for the v1 demo defined in the brief: three villagers on a survival server with the player — names, generated personas and endogenous desires, schedules (wake/work/socialize/sleep), persistent memory; player posts a simple blueprint on the diegetic job-board book; one villager builds it while the player builds alongside; at dusk the villagers talk to each other about the day, the work, and the player. This task produces the plan (a Spec Kit spec sliced into buildable deliverable tasks on the board, likely runnable as a pdlc:sweep), not the implementation. Design against the spell-breakers: tedious player interactions, required micromanagement, politeness-simulator offense-taking.
+As a player, I want to spend one real evening with three villagers — post a blueprint on the job board, build alongside the one who takes it, and overhear them talk about the day (and me) at dusk — so that a survival world finally has company in it.
+
+Context: this task produces the build plan for that demo (a Spec Kit spec sliced into buildable deliverable tasks on the board, likely runnable as a pdlc:sweep), not the implementation. The demo per the brief: three villagers with names, generated personas and endogenous desires, schedules (wake/work/socialize/sleep), persistent memory; the diegetic job-board book; vanilla night danger making the player's walls and torches protect their friends. Requires the ratified decisions from TASK-0001 through TASK-0004. Design against the spell-breakers: tedious player interactions, required micromanagement, politeness-simulator offense-taking.
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria

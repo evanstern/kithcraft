@@ -4,6 +4,7 @@ title: Decide mind daemon language and LLM routing/budget for a small cast at 1x
 status: To Do
 assignee: []
 created_date: '2026-08-19 18:37'
+updated_date: '2026-08-19 18:46'
 labels:
   - design-decision
   - architecture
@@ -19,7 +20,9 @@ ordinal: 4000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-Two coupled open questions from the brief. (a) Mind daemon language: whether promptworld I's Go daemon survives behind the body-protocol seam or the mind layer is rebuilt fresh — an implementation detail behind the seam, but one that must be decided to start building. (b) LLM routing and budget for 3–6 villagers at 1x real time: which calls go to which model tier, expected call cadence (the reflex/planner split means scripted competence for doing, LLM only for choosing and relating), cost envelope for an evening of play, and latency posture (a villager taking 20s to decide is a person mulling — real time deletes the governor/speed-ladder machinery). Doctrine reference: promptworld I docs/wiki (event-sourced memory, reflex/planner split, salience+consolidation, persona firewall).
+As the operator, I want the mind daemon's language settled and an LLM routing/budget sketch for 3–6 villagers at 1x real time, so that an evening with my villagers has a known cost envelope and the mind layer can start being built.
+
+Context: two coupled open questions from the brief. (a) Mind daemon language: whether promptworld I's Go daemon survives behind the body-protocol seam or the mind layer is rebuilt fresh — an implementation detail behind the seam, but one that must be decided to start building. (b) LLM routing and budget: which cognition events call which model tier, expected call cadence (the reflex/planner split means scripted competence for doing, LLM only for choosing and relating), cost envelope for an evening of play, and latency posture (a villager taking 20s to decide is a person mulling — real time deletes the governor/speed-ladder machinery). Doctrine reference: promptworld I docs/wiki (event-sourced memory, reflex/planner split, salience+consolidation, persona firewall).
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
