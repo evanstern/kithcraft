@@ -4,7 +4,7 @@ title: 'Decide mod stack: Fabric vs Paper/Citizens vs hybrid'
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:36'
-updated_date: '2026-08-19 20:17'
+updated_date: '2026-08-19 20:20'
 labels:
   - design-decision
 milestone: m-0
@@ -30,7 +30,12 @@ Spec: specs/001-mod-stack-decision
 - [ ] #1 Comparison of Fabric, Paper/Citizens2, and hybrid options is written up with evidence (versions, maintenance status, licenses re-verified, dated)
 - [ ] #2 A recommendation with rationale is recorded as a Backlog decision record and ratified by the operator
 - [ ] #3 The recommendation explicitly addresses the body-protocol seam (mod as swappable body vendor) and the villager-shaped-not-bot-client constraint
+- [ ] #4 Spec phase: Phase 1 — Re-verify prior art
+- [ ] #5 Spec phase: Phase 2 — Comparison document
+- [ ] #6 Spec phase: Phase 3 — Recommendation & decision record
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
