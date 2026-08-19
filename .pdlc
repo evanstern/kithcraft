@@ -1,0 +1,14 @@
+{
+  "planted": "pdlc:bootstrap",
+  "version": "0.56.0",
+  "name": "Kithcraft",
+  "peers": [
+    "backlog",
+    "spec-kit"
+  ],
+  "peersOmitted": [],
+  "hooks": [
+    "root-guard"
+  ],
+  "plantedAt": "2026-08-19T18:19:29.511Z"
+}
