@@ -17,6 +17,6 @@
 
 ## Phase 3 — Recommendation & decision record
 
-- [ ] Recommendation written into the comparison doc: one stack, rationale mapped to body-protocol seam + villager-shaped constraints
-- [ ] Backlog decision record created (proposed — pending operator ratification)
-- [ ] Constraint-narrowing effects on TASK-0003 (entity implementation) stated explicitly
+- [x] Recommendation written into the comparison doc: one stack, rationale mapped to body-protocol seam + villager-shaped constraints
+- [x] Backlog decision record created (proposed — pending operator ratification)
+- [x] Constraint-narrowing effects on TASK-0003 (entity implementation) stated explicitly

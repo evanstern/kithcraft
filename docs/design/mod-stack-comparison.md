@@ -144,6 +144,54 @@ the same category CraftAgent occupies, one rung more alive.
 
 ## Recommendation
 
-*Pending Phase 3 — not addressed in this document.* Phase 3 will draft the recommendation
-(one stack, rationale mapped to R3) and the accompanying Backlog decision record, proposed for
-operator ratification. This document ends at the comparison and risk analysis above.
+**PROPOSED — pending operator ratification.** Decision record: `backlog/decisions/decision-0001
+- Mod-stack-Fabric-server-side-mod-proposed.md`.
+
+**Recommended: Option A — Fabric server-side mod**, driving vanilla `Villager` entities (or a
+custom entity on the same brain substrate, per TASK-0003) through the engine's brain API.
+
+**Rationale, mapped to R3:**
+
+- **Body-protocol seam.** Both Option A and Option B keep this seam clean — a Fabric mod and a
+  Paper plugin are equally thin server-side surfaces, and neither forces mind logic into the
+  mod/plugin process (see each option's "Constraint fit" above). The seam alone doesn't
+  discriminate between them; dependency health does. Option B's only viable NPC substrate,
+  Citizens2, is OSL-3.0 — a copyleft license not on the FSF/OSI GPL-compatible list — so a
+  body-vendor implementation tightly coupled to it risks pulling that code under copyleft terms
+  unless integration stays at arm's length. Option A has no such license entanglement: Fabric
+  Loader and Fabric API are both Apache-2.0, and the villager brain surface is vanilla engine
+  API, not a third-party dependency at all (prior-art.md §§1, 6). A clean, freely-relicensable
+  body-vendor seam favors Option A.
+- **Villager-shaped, not bot clients.** Both options satisfy this at the family level (real
+  server entities, no fake-player client). Option A is the strongest fit of the three: it drives
+  the actual vanilla villager entity/brain directly, with no intermediate NPC-behavior
+  abstraction in between. Option B's Citizens2 layer is its own goals/behavior-tree system
+  impersonating an entity type — a real server entity, but not the vanilla villager brain.
+- **Village fiction (beds, workstations, schedules) — the deciding factor.** This is where the
+  options diverge most concretely. Option A's fit is direct: reading/using the vanilla
+  `Schedule`/`Activity`/`MemoryModuleType`/POI machinery is plain API access on the real
+  villager brain (prior-art.md §6). Option B's fit requires either bypassing Citizens2's own
+  behavior system to reach into the vanilla brain underneath, or reimplementing schedule/POI
+  logic in the plugin — friction the comparison above documents as inherent to Citizens2's
+  design, not incidental.
+- **Option C (hybrid) rejected.** No prior art demonstrates a Fabric+Citizens2 (or similar)
+  combination working end-to-end; a hybrid accumulates both options' risks (the OSL-3.0 flag if
+  Citizens2 is anywhere in the stack, the Mixin engineering burden if Fabric-brain internals are
+  anywhere in the stack) rather than averaging them, for a v1 cast of 3–6 NPCs that doesn't
+  require either option's dependency set stretched this way.
+
+**Accepted risks (carried into TASK-0002/0003/0006, not resolved by this decision):** no
+off-the-shelf LLM-NPC framework to build on (CraftAgent is a documented dead end; SecondBrain is
+design reference only); extending the brain substrate beyond what vanilla defines requires
+Mixin/accessor code the project owns directly. Both are detailed under Option A's Risks above.
+
+**What this narrows for TASK-0003 (entity implementation).** TASK-0003 chooses between a custom
+entity and an augmented vanilla villager — that choice remains fully open; this decision does
+not pick a side. What it does foreclose is the *substrate* that choice is made within: both
+TASK-0003 sub-options now sit on the vanilla Fabric brain API (Schedule/Activity/MemoryModuleType/
+POI, prior-art.md §6), not on a Citizens2-style goals/behavior-tree system. A "custom entity"
+under this decision means a Fabric entity class still wired into the vanilla brain substrate
+(extending or composing with `Brain<E>`), not a Citizens2-authored NPC with its own behavior
+layer — that path is closed off by choosing Option A over Option B. TASK-0003 therefore inherits
+Mixin/accessor access as the mechanism for anything beyond vanilla brain capabilities, for
+either sub-option it picks.
