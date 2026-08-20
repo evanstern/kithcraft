@@ -11,9 +11,9 @@
 
 ## Phase 2 — Comparison document
 
-- [ ] docs/design/mod-stack-comparison.md drafted: per-option fit against ratified constraints, dependency health, risks
-- [ ] Hybrid option evaluated honestly (what it buys, what it costs)
-- [ ] Every claim carries a URL and accessed date
+- [x] docs/design/mod-stack-comparison.md drafted: per-option fit against ratified constraints, dependency health, risks
+- [x] Hybrid option evaluated honestly (what it buys, what it costs)
+- [x] Every claim carries a URL and accessed date
 
 ## Phase 3 — Recommendation & decision record
 
