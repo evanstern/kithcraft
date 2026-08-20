@@ -127,3 +127,4 @@ done.
 
 | date | task | PR | merge | tokens/cost (best-effort) | notes |
 |------|------|----|-------|---------------------------|-------|
+| 2026-08-19 | TASK-0001 | — | — | — | in flight: claimed (main aae1b84), spec cycle committed on branch (b591b7d, pushed), phase ACs seeded (main d77d20e). Phase 1 dispatch BLOCKED: agent registry predates this session's tier agents ("sonnet-implementer not found") — session restart required before any dispatch. Resume: verify branch task-0001-mod-stack-decision + worktree .worktrees/task-0001 intact, then dispatch Phase 1 per tasks.md at sonnet (cc/claude-sonnet-5[1m]); verify served model from first transcript. |

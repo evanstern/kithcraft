@@ -1,10 +1,10 @@
 ---
 id: TASK-0001
 title: 'Decide mod stack: Fabric vs Paper/Citizens vs hybrid'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-19 18:36'
-updated_date: '2026-08-19 18:46'
+updated_date: '2026-08-19 20:20'
 labels:
   - design-decision
 milestone: m-0
@@ -21,6 +21,8 @@ ordinal: 1000
 As the Kithcraft team, we want the mod stack chosen (Fabric vs Paper/Citizens2 vs hybrid) with evidence, so that every downstream decision — entity implementation, body vendor, build plan — rests on a ratified foundation instead of an assumption.
 
 Context: Kithcraft (promptworld II) is a Minecraft server mod giving the player LLM villagers as company (see docs/design/kithcraft-brief.md — ratified, do not relitigate). Evaluate the options against the ratified decisions: villager-shaped smarter NPCs (not bot clients), small cast, real-time only, world-agnostic body protocol with the mod as first body vendor. Re-verify prior art (Citizens2, CraftAgent, AI_NPC, Fabric villager brain API) for maintenance status, target MC version support, and licenses before relying on any of it — the brief's links were verified 2026-08-19 and the space moves fast.
+
+Spec: specs/001-mod-stack-decision
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -28,7 +30,18 @@ Context: Kithcraft (promptworld II) is a Minecraft server mod giving the player 
 - [ ] #1 Comparison of Fabric, Paper/Citizens2, and hybrid options is written up with evidence (versions, maintenance status, licenses re-verified, dated)
 - [ ] #2 A recommendation with rationale is recorded as a Backlog decision record and ratified by the operator
 - [ ] #3 The recommendation explicitly addresses the body-protocol seam (mod as swappable body vendor) and the villager-shaped-not-bot-client constraint
+- [ ] #4 Spec phase: Phase 1 — Re-verify prior art
+- [ ] #5 Spec phase: Phase 2 — Comparison document
+- [ ] #6 Spec phase: Phase 3 — Recommendation & decision record
 <!-- AC:END -->
+
+
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Claimed by sweep (runbook docs/design/task-0001-mod-stack-runbook.md, signed-off 2026-08-19). Spec dir: specs/001-mod-stack-decision. Tier: sonnet (default) · model cc/claude-sonnet-5[1m] — rubric: research/comparison executed against a written spec; the judgment call (ratification) is an operator checkpoint. Served model to be verified from first dispatch transcript.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
