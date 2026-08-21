@@ -11,9 +11,9 @@
 
 ## Phase 2 — Comparison document
 
-- [ ] docs/design/entity-implementation-comparison.md drafted: both options against all six constraint areas, per-option Mixin surface and risks
-- [ ] Interactions with the body-protocol seam flagged without deciding for TASK-0002
-- [ ] Every claim carries a URL and accessed date
+- [x] docs/design/entity-implementation-comparison.md drafted: both options against all six constraint areas, per-option Mixin surface and risks
+- [x] Interactions with the body-protocol seam flagged without deciding for TASK-0002
+- [x] Every claim carries a URL and accessed date
 
 ## Phase 3 — Recommendation & decision record
 
