@@ -31,11 +31,13 @@ Spec: specs/005-death-mechanics
 - [ ] #1 A death-mechanics design doc exists covering causes of death, physical remains, and how survivors' memories and conversations carry the dead
 - [ ] #2 The design addresses the micromanagement spell-breaker: villagers are not so fragile that keeping them alive becomes babysitting
 - [ ] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
-- [x] #4 Operator has ratified the design
-- [ ] #5 Spec phase: Phase 1 — Death surface evidence
+- [ ] #4 Operator has ratified the design
+- [x] #5 Spec phase: Phase 1 — Death surface evidence
 - [ ] #6 Spec phase: Phase 2 — Design document
 - [ ] #7 Spec phase: Phase 3 — Ratification prep
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
