@@ -7,7 +7,7 @@ conflicts as routine. Direction is decided; do not re-litigate it:
 `docs/design/kithcraft-brief.md` (ratified 2026-08-19) wins. Plan-of-record is the board;
 this file carries only ordering, doctrine, and the log.
 
-**Status:** signed-off · operator sign-off on lanes: 2026-08-19 (sonnet tier confirmed, no escalation)
+**Status:** done · completed 2026-08-20 (TASK-0001 merged PR #1, ratified, synced Done)
 <!-- Only the OPERATOR flips draft → signed-off (the author never pre-fills it). An
      executing session must refuse a runbook whose status it cannot verify. -->
 
@@ -129,3 +129,4 @@ done.
 |------|------|----|-------|---------------------------|-------|
 | 2026-08-19 | TASK-0001 | — | — | — | in flight: claimed (main aae1b84), spec cycle committed on branch (b591b7d, pushed), phase ACs seeded (main d77d20e). Phase 1 dispatch BLOCKED: agent registry predates this session's tier agents ("sonnet-implementer not found") — session restart required before any dispatch. Resume: verify branch task-0001-mod-stack-decision + worktree .worktrees/task-0001 intact, then dispatch Phase 1 per tasks.md at sonnet (cc/claude-sonnet-5[1m]); verify served model from first transcript. |
 | 2026-08-20 | TASK-0001 | — | — | — | resumed: registry has tier agents, tiers --check green (all unchanged), worktree+branch intact, origin/main merged in (569ee7c; spec.md add/add resolved to branch's real spec). Root is read-only (root-guard) so runbook/board bookkeeping rides this branch. phases: 1 done (f99016d, served model VERIFIED cc/claude-sonnet-5[1m] from transcript, ~114k tokens; AI_NPC license unverifiable — documented dead end), 2 done (73b3ddd, sonnet verified, ~90k tokens, no new research needed), 3 done (c07a2ea, sonnet verified, ~96k tokens; decision-0001 Fabric PROPOSED). All 12 tasks.md boxes ticked; card ACs 1,3-6 ticked, AC 2 awaits ratification. PR #1 open (https://github.com/evanstern/kithcraft/pull/1) — STOPPED at operator checkpoint 3: ratify recommendation, then merge, then spec-bridge:sync moves card Done. ~300k subagent tokens total across 3 phases. |
+| 2026-08-20 | TASK-0001 | #1 | 71baeb8 | ~300k subagent + orchestrator overhead | operator merged PR #1 and ratified (checkpoint 3 satisfied, order inverted: merge preceded ratification, both operator acts). decision-0001 flipped to accepted; AC #2 ticked; spec-bridge:sync derived In Progress → Done (plan idempotent, check green). Worktree task-0001 + branch removed after merge verified. Closures land via wrap-up PR (no-main-push mode; root-guard). Sweep DONE. |

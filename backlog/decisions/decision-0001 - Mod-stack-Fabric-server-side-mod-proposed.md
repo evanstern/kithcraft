@@ -1,8 +1,8 @@
 ---
 id: decision-0001
-title: 'Mod stack: Fabric server-side mod (proposed)'
+title: 'Mod stack: Fabric server-side mod'
 date: '2026-08-20 14:48'
-status: proposed
+status: accepted
 ---
 ## Context
 
@@ -11,7 +11,7 @@ brief (`docs/design/kithcraft-brief.md`): Fabric server-side mod, Paper plugin +
 and a hybrid. Full evidence: `specs/001-mod-stack-decision/research/prior-art.md` (re-verified
 2026-08-20) and `docs/design/mod-stack-comparison.md` (comparison + recommendation).
 
-**Status: PROPOSED — pending operator ratification.** This decision is not yet in force.
+**Status: ACCEPTED — ratified by the operator 2026-08-20** (PR #1 review; merge 71baeb8). In force.
 
 ## Decision
 
@@ -53,5 +53,6 @@ Rationale (full detail in `docs/design/mod-stack-comparison.md` §Recommendation
 - Accepted risk: extending the brain substrate (new activities, memory types, POI types)
   requires Mixin/accessor code the project owns directly — standard Fabric practice, not a
   blocker, but real engineering surface area.
-- Ratification: this decision takes effect only once the operator ratifies it (sweep
-  checkpoint); until then it is proposed guidance for TASK-0002/0003/0006, not settled fact.
+- Ratification: ratified by the operator 2026-08-20 at PR #1 review (merge 71baeb8). The
+  decision is settled fact for TASK-0002/0003/0006. (Status flipped by direct edit: the
+  backlog CLI's decision command supports only `create`, no edit verb.)
