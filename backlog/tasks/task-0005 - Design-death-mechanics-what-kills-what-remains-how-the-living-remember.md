@@ -4,7 +4,7 @@ title: 'Design death mechanics: what kills, what remains, how the living remembe
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:18'
+updated_date: '2026-08-21 21:21'
 labels:
   - design-decision
   - gameplay
@@ -32,7 +32,12 @@ Spec: specs/005-death-mechanics
 - [ ] #2 The design addresses the micromanagement spell-breaker: villagers are not so fragile that keeping them alive becomes babysitting
 - [ ] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
 - [ ] #4 Operator has ratified the design
+- [ ] #5 Spec phase: Phase 1 — Death surface evidence
+- [ ] #6 Spec phase: Phase 2 — Design document
+- [ ] #7 Spec phase: Phase 3 — Ratification prep
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
