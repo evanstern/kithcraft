@@ -4,7 +4,7 @@ title: Build plan for the "one real evening" demo
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:38'
-updated_date: '2026-08-21 23:22'
+updated_date: '2026-08-21 23:33'
 labels:
   - planning
 milestone: m-0
@@ -32,10 +32,10 @@ Spec: specs/006-evening-demo-build-plan
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 A build plan exists that decomposes the demo into deliverable tasks on the board, each mapping to one PR
-- [ ] #2 The plan covers all demo beats: personas/desires generation, schedules, persistent memory, job-board book, blueprint build, dusk conversation, night danger
-- [ ] #3 The plan honors the two load-bearing constraints (loneliness-cure thesis, minds-are-others) and names the spell-breakers as design checks
+- [x] #2 The plan covers all demo beats: personas/desires generation, schedules, persistent memory, job-board book, blueprint build, dusk conversation, night danger
+- [x] #3 The plan honors the two load-bearing constraints (loneliness-cure thesis, minds-are-others) and names the spell-breakers as design checks
 - [ ] #4 Operator has signed off on the plan
-- [ ] #5 Spec phase: Phase 1 — Decomposition
+- [x] #5 Spec phase: Phase 1 — Decomposition
 - [ ] #6 Spec phase: Phase 2 — Board landing & sign-off prep
 <!-- AC:END -->
 
@@ -43,6 +43,8 @@ Spec: specs/006-evening-demo-build-plan
 
 <!-- SECTION:NOTES:BEGIN -->
 Tier: opus (operator-escalated at runbook sign-off 2026-08-21 — demo decomposition is planning judgment the spec does not settle). Model ID: cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]. Opus tier already verified serving in this sweep (TASK-0004 all phases).
+
+Phase 1 done (da7b43e, opus verified, ~159k tokens): docs/design/demo-build-plan.md — 16 tasks in 4 groups (seam S1-S2, mind M1-M7, vendor V1-V5, integration I1-I2), lanes 0-5 with S1 (transport) blocking everything, critical path 7 merges deep. Nine punted open items ruled in-plan (R-1..R-9). Tier floor sonnet ×16; proposed escalations for next sweep's sign-off: S1 → opus, V5 trigger-named. Spell-breakers attached as named checks on specific tasks.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
