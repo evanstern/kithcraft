@@ -191,5 +191,5 @@ harness/transcript, so future runbook authoring budgets against real numbers.
 
 | date | task | PR | merge | tokens/cost (best-effort) | notes |
 |------|------|----|-------|---------------------------|-------|
-| 2026-08-21 | TASK-0002 | — | — | — | in flight: claimed (340c3a2), spec cycle committed (34cb2df), phase ACs seeded (494f823). phases: 1 dispatching (opus-implementer, cc/claude-opus-5[1m] — operator-escalated at sign-off; served model to be verified from first transcript). |
+| 2026-08-21 | TASK-0002 | — | — | — | in flight: claimed (340c3a2), spec cycle committed (34cb2df), phase ACs seeded (494f823). phases: 1 done (e196d82, served model VERIFIED cc/claude-opus-5[1m] from report, ~148k tokens; 6 hygiene + 11 perception rules ported with divergences noted — salience split at the seam, hearing derived not ported, bake-at-emission re-justified), 2 dispatching (opus). |
 | 2026-08-21 | TASK-0003 | — | — | — | in flight: claimed (2fe6f9c), spec cycle committed (b1b1439), phase ACs seeded (92f8c49). phases: 1 done (7da9303, served model VERIFIED cc/claude-sonnet-5[1m] from report, ~146k tokens; key finding: custom entities invisible to vanilla clients — registry-sync kicks unmodded clients — decisive evidence for drop-in-multiplayer constraint), 2 dispatching (sonnet). |
