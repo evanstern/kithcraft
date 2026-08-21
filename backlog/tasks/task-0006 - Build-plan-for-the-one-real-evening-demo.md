@@ -1,10 +1,10 @@
 ---
 id: TASK-0006
 title: Build plan for the "one real evening" demo
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-19 18:38'
-updated_date: '2026-08-21 23:44'
+updated_date: '2026-08-21 23:50'
 labels:
   - planning
 milestone: m-0
@@ -34,7 +34,7 @@ Spec: specs/006-evening-demo-build-plan
 - [x] #1 A build plan exists that decomposes the demo into deliverable tasks on the board, each mapping to one PR
 - [x] #2 The plan covers all demo beats: personas/desires generation, schedules, persistent memory, job-board book, blueprint build, dusk conversation, night danger
 - [x] #3 The plan honors the two load-bearing constraints (loneliness-cure thesis, minds-are-others) and names the spell-breakers as design checks
-- [ ] #4 Operator has signed off on the plan
+- [x] #4 Operator has signed off on the plan
 - [x] #5 Spec phase: Phase 1 — Decomposition
 - [x] #6 Spec phase: Phase 2 — Board landing & sign-off prep
 <!-- AC:END -->
@@ -48,6 +48,12 @@ Phase 1 done (da7b43e, opus verified, ~159k tokens): docs/design/demo-build-plan
 
 Phase 2 done (a6bc694 + 1a8f547 + CAPSULES 5e4bce2, opus verified, ~137k tokens): 16 tasks created TASK-0007..0022, 1:1 with plan, milestone m-0, deps by real id, spaced ordinals; plan doc §8 coverage cross-check (all 9 beats trace); v1-demo re-verified + re-pinned to a6bc694. Card ACs 1-3 satisfied; AC 4 (operator sign-off) pending at PR review.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Build plan signed off (operator merged PR #10, merge 8ef4a5f, 2026-08-21). Deliverables: docs/design/demo-build-plan.md (16-task decomposition, lanes 0-5, coverage cross-check, R-1..R-9 rulings) and TASK-0007..0022 created on the board (milestone m-0, user stories, done-proves ACs, deps by id, spell-breaker checks, suggested tiers). v1-demo re-verified + re-pinned; CAPSULES regenerated. Escalation proposals for next sweep's runbook: TASK-0007 (transport) → opus; TASK-0019 conditional on its named trigger. Both phases served by verified cc/claude-opus-5[1m]. The next sweep's input is ready.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
