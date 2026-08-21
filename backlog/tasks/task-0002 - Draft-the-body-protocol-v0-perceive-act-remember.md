@@ -4,7 +4,7 @@ title: Draft the body protocol v0 (perceive / act / remember)
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:36'
-updated_date: '2026-08-21 19:46'
+updated_date: '2026-08-21 19:48'
 labels:
   - design-decision
   - architecture
@@ -33,7 +33,12 @@ Spec: specs/002-body-protocol-v0
 - [ ] #2 The perception model is specified: what a villager sees/hears and how provenance is attached (epistemic hygiene ported from promptworld I doctrine)
 - [ ] #3 The protocol is demonstrably world-agnostic: no Minecraft types leak across the seam, and the doc shows how a second body vendor would implement it
 - [ ] #4 Minds are testable without booting Minecraft: the doc specifies a test/fake body vendor
+- [ ] #5 Spec phase: Phase 1 — Doctrine port & feasibility
+- [ ] #6 Spec phase: Phase 2 — Protocol draft
+- [ ] #7 Spec phase: Phase 3 — Prove the seam
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
