@@ -8,11 +8,11 @@
 
 ## Phase 2 — Protocol draft
 
-- [ ] docs/design/body-protocol-v0.md: perceive surface with field-level message shapes and provenance attachment
-- [ ] act surface with field-level message shapes (intent/result split stated)
-- [ ] remember surface: the mind's durable-memory contract across sessions
-- [ ] Versioning story: version field, breaking vs additive rules
-- [ ] Abstraction rule for world-specific concepts stated and applied (no Minecraft types across the seam)
+- [x] docs/design/body-protocol-v0.md: perceive surface with field-level message shapes and provenance attachment
+- [x] act surface with field-level message shapes (intent/result split stated)
+- [x] remember surface: the mind's durable-memory contract across sessions
+- [x] Versioning story: version field, breaking vs additive rules
+- [x] Abstraction rule for world-specific concepts stated and applied (no Minecraft types across the seam)
 
 ## Phase 3 — Prove the seam
 
