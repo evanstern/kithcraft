@@ -1,10 +1,10 @@
 ---
 id: TASK-0005
 title: 'Design death mechanics: what kills, what remains, how the living remember'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-19 18:47'
+updated_date: '2026-08-21 21:46'
 labels:
   - design-decision
   - gameplay
@@ -22,15 +22,32 @@ ordinal: 5000
 As a player, I want a villager's death to be permanent and to leave real traces — a grave, belongings, survivors who remember and tell stories — so that loss stings and the friends I keep alive matter more.
 
 Context: ratified posture — permadeath is real; graves, persisting memories of the dead, and stories told about them are the intended texture (mechanics were deferred to this design pass). Resolve the brief's open question: what can kill a villager (night danger, hunger, falls?), what remains in the world (grave, belongings), and how surviving villagers remember and talk about the dead (memory entries, dusk conversation material). Constraint from the spell-breakers list: micromanagement required to keep villagers alive is a failure mode — death must be possible without turning play into babysitting. Replenishment is punted in v1 (no spawning/wanderers), so death permanently shrinks the cast; the design must account for that.
+
+Spec: specs/005-death-mechanics
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A death-mechanics design doc exists covering causes of death, physical remains, and how survivors' memories and conversations carry the dead
-- [ ] #2 The design addresses the micromanagement spell-breaker: villagers are not so fragile that keeping them alive becomes babysitting
-- [ ] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
+- [x] #1 A death-mechanics design doc exists covering causes of death, physical remains, and how survivors' memories and conversations carry the dead
+- [x] #2 The design addresses the micromanagement spell-breaker: villagers are not so fragile that keeping them alive becomes babysitting
+- [x] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
 - [ ] #4 Operator has ratified the design
+- [x] #5 Spec phase: Phase 1 — Death surface evidence
+- [x] #6 Spec phase: Phase 2 — Design document
+- [x] #7 Spec phase: Phase 3 — Ratification prep
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Tier: sonnet (default tier — design fleshes out ratified posture, judgment gate is operator ratification at AC #4). Model ID: cc/claude-sonnet-5[1m]. Served model to be verified from first dispatch transcript.
+
+Phase 1 done (dda2a19): death-surface evidence committed. Served model VERIFIED: cc/claude-sonnet-5[1m] (from implementer report, 2026-08-21). Key facts: no villager hunger death; zombie kill usually converts (50%/100%) rather than kills; death drops nothing (inventory lost), POIs released, murder gossip broadcast.
+
+Phase 2 done (4fe6f9d): docs/design/death-mechanics.md committed. Key rulings: night danger admitted; zombie conversion = true death in v1 (no curing); sieges suppressed via Mixin; guaranteed mod-placed grave + belongings bundle + POI grief-period; memory carry uses existing percepts (no protocol extension); micromanagement answered by vanilla competence + siege suppression; shrinking cast accepted, tuning pushed to TASK-0006.
+
+Phase 3 done (36bdae9): design checks pass all three spell-breakers; seam audit confirms zero protocol extension; wiki notes extended-but-consistent (no re-pin). Card ACs 1-3 satisfied; AC 4 (operator ratification) pending at PR review.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
