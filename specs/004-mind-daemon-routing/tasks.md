@@ -16,7 +16,7 @@
 
 ## Phase 3 — Recommendation & decision record
 
-- [ ] Recommendation written into the routing/budget doc: one language/reuse choice, rationale mapped to R1 criteria and doctrine-transfer checklist
-- [ ] Backlog decision record created (proposed — pending operator ratification)
-- [ ] Narrowing effects on TASK-0006 (demo build plan) stated explicitly
-- [ ] [[promptworld-lineage]] re-verified (sources/prose) if the assessment adds sources or contradicts it
+- [x] Recommendation written into the routing/budget doc: one language/reuse choice, rationale mapped to R1 criteria and doctrine-transfer checklist
+- [x] Backlog decision record created (proposed — pending operator ratification)
+- [x] Narrowing effects on TASK-0006 (demo build plan) stated explicitly
+- [x] [[promptworld-lineage]] re-verified (sources/prose) if the assessment adds sources or contradicts it

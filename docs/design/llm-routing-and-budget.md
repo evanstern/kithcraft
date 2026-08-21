@@ -1,6 +1,6 @@
 # LLM routing and cost envelope — a 3-villager evening at 1x
 
-**Status:** spec 004 Phase 2 deliverable. Board task TASK-0004, milestone m-0.
+**Status:** spec 004 Phase 2 + Phase 3 deliverable. Board task TASK-0004, milestone m-0.
 **Authority:** `docs/design/kithcraft-brief.md` (ratified 2026-08-19 — reflex/planner split,
 real-time-only, 3–6 villagers); `docs/design/body-protocol-v0.md` (contract accepted
 2026-08-21) fixes the percept/intent surfaces this routing sits behind; decision-0002
@@ -8,12 +8,13 @@ real-time-only, 3–6 villagers); `docs/design/body-protocol-v0.md` (contract ac
 Phase 1 evidence: `specs/004-mind-daemon-routing/research/daemon-assessment.md`.
 
 **What this is.** Which villager cognition events call a language model, at which tier, how
-often, with what latency budget, and what an evening costs. It answers R2 and R3 of
-`specs/004-mind-daemon-routing/spec.md`.
+often, with what latency budget, and what an evening costs (§1–§7, answering R2 and R3 of
+`specs/004-mind-daemon-routing/spec.md`) — and, in **§8, the language/reuse recommendation**
+those demands and Phase 1's evidence together support (R1).
 
-**What this is not.** No language or reuse recommendation — that is Phase 3, and nothing here
-prefers a candidate. No transport decision (seam Q-1 stays open). No re-litigation of
-real-time-only, the cast size, or the split.
+**What this is not.** No transport decision (seam Q-1 stays open — §7 item 4, §8.6). No
+re-litigation of real-time-only, the cast size, or the split. §1–§7 were written **before**
+the recommendation and deliberately prefer no candidate; §8 is the only section that chooses.
 
 **Evidence discipline.** Pricing carries URL + accessed date. Cadence and token figures are
 **assumptions, labelled as such** — every one is numbered `A-n` in §3 so a later measurement
@@ -490,3 +491,240 @@ gate handles the rest.
 | 3 | **Formativeness, if consolidation-only proves insufficient.** §1.3's upgrade path, gated on the §6.3 instrument. | deferred, measured |
 | 4 | **Transport (seam Q-1) stays open.** Nothing in this routing forces it: RT-1…RT-7 are demands on the *model client*, not on the mind↔vendor wire. One observation for the record — E4's <3 s budget is a mind-internal latency, and the seam adds only the `speak` intent hop, so no candidate transport in §8's constraint list is excluded by anything here. **Flagged, not decided.** | spec 002 successor |
 | 5 | **Re-baseline every A-n against the first playtest**, and re-check §3's prices, which rot. | first playtest |
+
+---
+
+## 8. Recommendation — the mind daemon's language and reuse posture
+
+**Status: PROPOSED.** Recorded as `backlog/decisions/decision-0003`, pending operator
+ratification at the TASK-0004 PR checkpoint (R4). Until ratified it is a recommendation, not
+settled fact.
+
+Evidence: `specs/004-mind-daemon-routing/research/daemon-assessment.md` (Phase 1, checked live
+2026-08-21) and §1–§7 above (Phase 2). This section weighs; it does not re-gather.
+
+### 8.1 The recommendation
+
+> **Write the mind daemon in Go, as a new program, reusing promptworld I's four portable
+> assets as source material rather than as a codebase.**
+
+Three clauses, each load-bearing, and the second is the one that gets misread:
+
+1. **Go** — the language, its Anthropic SDK, and the operator's fluency carry forward.
+2. **A new program, architected inside-out around the vendor port.** This is *not* "lift
+   `internal/mind` behind the seam", and the option named "keep Go" in the spec does not
+   survive contact with the evidence. Phase 1 §1.2 measured `internal/mind` as a **co-process
+   of the world engine**: it holds a replica of `sim.State` and applies every event to it,
+   reads that state directly for prompt assembly, lands output through in-process injection
+   doors typed in world-engine terms (`InjectIntent(sim.InjectArgs)`), and bakes the cast size
+   into ten fixed-size array types over `sim.AgentCount = 8`. Under the seam all four are
+   replaced — replica → percept inbox, direct state reads → a private provenance-stamped
+   belief store, injection doors → `intent`/`act_result`, fixed arrays → a variable cast with
+   permadeath. **The daemon does not survive the seam in any language**, so the real question
+   was never keep-vs-rebuild; it was which language carries the doctrine, the portable assets,
+   and the operator at the lowest total cost. The answer to *that* is Go, and the answer to
+   keep-vs-rebuild is rebuild — in every candidate, including the incumbent.
+3. **The four assets are source material.** `toolloop` (994 lines, sim-agnostic by
+   construction — its only project imports are `llm` and `tool`), `persona` (475 lines,
+   `personas.go` imports nothing at all), `tool`'s registry *mechanism* (vocabulary replaced
+   wholesale by the manifest), and `llm`'s provider/breaker/budget shape minus its dead
+   `cognition` dependency. Read them, lift what earns its place, and delete the rest — do not
+   vendor the packages wholesale. `llm` in particular is 3,770 lines of which a large fraction
+   exists to serve the staleness router that dies with real-time-only (brief #8); what this
+   daemon needs from it is providers, retries, a budget meter, and concurrency.
+
+**Which candidate this is, in the spec's own terms: rebuild-Go.** Keep-Go is rejected because
+the thing it proposes to keep is not portable. Rebuild-TypeScript and rebuild-JVM are
+rejected on the balance below.
+
+### 8.2 Rationale, mapped to R1's criteria
+
+Phase 1's central negative finding sets the frame: **SDK maturity does not discriminate.** All
+four candidate SDKs are first-party, MIT, generated from one spec by the same Stainless
+toolchain, and were pushed within hours of each other on 2026-08-21 (assessment §3.1). Nor does
+the async story: the load is 3–6 concurrent calls at human cadence with no CPU-bound work, and
+every candidate has a first-class cancellation primitive (§3.2). So two of the five criteria are
+**ties**, and the decision rests on the other three plus the assets.
+
+| R1 criterion | Finding | Weight |
+|---|---|---|
+| **LLM-orchestration fit / SDK** | **Tie on the client SDK — broken by proof, not by features.** promptworld I ships `anthropic-sdk-go` in production at *this exact workload*: full tool-use wire, `NewCacheControlEphemeralParam` prompt caching, `Stop` reason mapping (`[I:internal/llm/providers.go:592-800]`). §6.1's RT-1…RT-7 are therefore not a bet in Go; RT-3 (caching, 23% of the bill) and RT-7 (the truncation ceiling) are *already demonstrated* against this SDK. No other candidate offers evidence stronger than a README. | **Go, on evidence** |
+| **Async story** | Tie. Goroutines/`context` proven under `-race` at this load with in-flight cancellation on `agent.slept`/`agent.died`; `AbortSignal` and structured concurrency are equally adequate. §5.5's interrupt *is* cancellation, and `context.Context` on every SDK call makes it the same primitive as everything else. | tie |
+| **Seam-contract effort** | **Go's one real weakness, and it lands where the contract already mandates a component.** V-5 ("malformed, never defaulted") is against Go's grain — zero values are indistinguishable from absent for non-pointer types, and I hit exactly this (pointer fields + `omitempty`, on the record). TS discriminated unions give V-3 exhaustiveness at compile time; Pydantic makes V-5/V-6 near-declarative. **But harness H-1 requires seam-boundary validation as a distinct stage *before any state mutation* in every language.** The component exists regardless; Go's cost is that it must be written explicitly rather than derived from types. That is one file of boring code, paid once, against a criterion where the alternatives' advantage is ergonomic rather than structural (assessment §3.3: "no candidate has a structural difficulty with the contract"). | **TS/Python edge, small and bounded** |
+| **Fake-vendor testability** | **Go's structural interfaces are the idiom §2.2 asks for.** The synthesized demand is a daemon "designed inside-out around a scriptable vendor port"; in Go a port is an interface declared *at the consumer*, satisfied without declaration — which is exactly how I already tests (`Submitter`/`Injector`/`SocialInjector` declared in `internal/mind`; `scriptedModel` returning queued replies). Test-to-code ratio 1.6:1 in `mind`, 2.3:1 in `toolloop`, no framework. One caution recorded against TS: the ecosystem's module-mocking reflex is in direct tension with §10.5's prohibition on a mind-readable test API. | **Go, narrowly** |
+| **Operator maintainability** | **The largest genuine differential in the whole assessment.** The operator wrote and maintains ~72k non-test lines of Go *at this problem shape* — the LLM orchestrator, the tool loop, the consolidation driver, and the persona firewall this project rebuilds. Single static binary, no runtime to install, 7 direct dependencies. Against that: no evidence in either repo of the operator running a TS or Python service. This is a long-running always-on daemon holding durable per-villager state, and the operator has run precisely that shape before (daemon + pidfile + recovery + signal handling). | **Go, decisively** |
+
+**The Agent SDK asymmetry, weighed honestly.** It is real — `@anthropic-ai/claude-agent-sdk`
+and its Python sibling have no Go or Java equivalent (assessment §3.1) — and it is the single
+strongest argument for TypeScript. It does not carry, for one reason: **this daemon does not
+want a generic agent loop.** promptworld I deliberately wrote its own bounded loop encoding
+doctrine the framework loop does not have — *"a tool call is a REQUEST; an event is the FACT;
+the gate decides"* — and that doctrine maps **exactly** onto the seam's
+`intent` / `intent_ack` / `act_result` split (`body-protocol-v0.md` §5.1). A framework whose
+loop executes tools and returns results would have to be prevented from doing the one thing it
+exists to do, because under this contract the mind **never** learns the outcome of its own act
+except as a percept the vendor sends back. The asymmetry would be decisive for a daemon that
+wanted the framework's loop; for this one, adopting it means fighting it. Recorded as the
+strongest counter-argument and rejected on fit, not on availability.
+
+**The JVM co-location option, weighed honestly.** One-language-project is a genuine
+maintainability argument and the body vendor is already a JVM artifact (decision-0001). Three
+things sink it:
+
+- **SI-1 breach risk is the decisive one.** Co-locating mind and vendor in one process makes
+  the seam a method call — which makes T-7's in-process fake vendor trivial *and* makes it
+  trivially easy to hand the mind a world handle. The contract names this exact hazard: "a
+  vendor that lets a mind read the [resolution index] has reintroduced omniscience no matter
+  how the protocol is worded" (§6.1). SI-1 is the invariant the entire project's architecture
+  rests on — the reason minds never couple to Minecraft and a V2 world is a second vendor, not
+  a rewrite. **A separate process makes the breach structurally impossible rather than merely
+  forbidden**, and that is worth more than a saved language.
+- **"One language" overstates the saving.** The mod's toolchain is Gradle/Mixin/Yarn-mappings
+  with mappings that churn across MC versions — a different maintenance world from a plain JVM
+  service. The operator would be running two build systems either way.
+- **The JDK target is unpinned by any evidence in this project** (assessment §3.5): the
+  prior-art pass carries JVM requirements for the *surrounding* stack (PaperMC 26.1+ → Java 25;
+  CraftAgent → Java 17/21), not for the chosen Fabric path. Choosing JVM on a
+  one-language argument means committing to a version nobody has checked.
+
+**And Phase 2's demands do not move the ranking.** RT-1…RT-7 are demands on the *model client*,
+and §3.1's finding holds: every candidate's SDK ships streaming, retries, caching, and
+per-call model selection. What §5 adds is an *architectural* demand — §5.1's "a deliberation
+call in flight must never block the body", and §5.4's three-simultaneous-Opus-calls spike —
+and Go's goroutine-per-call-with-`context` shape is the one this project has already run under
+`-race` at a heavier load than the demo asks for.
+
+### 8.3 The doctrine-transfer checklist
+
+R1 requires the winning choice to state how each transferred doctrine item is carried. The
+mechanisms are `port asset X`, `reimplement to contract`, and `already in the protocol` — and
+the honest summary is that **most of the doctrine is already carried by the protocol, not by
+any code decision**, which is itself the strongest evidence that the language choice is a
+smaller decision than it looked.
+
+| Doctrine item | How Go carries it | Mechanism |
+|---|---|---|
+| **Event-sourced memory** | **Reimplement to contract, ~400 lines.** The pattern — append-only log, immutability in the schema (SQLite `no_update`/`no_delete` triggers raising `ABORT`) not in convention, state as a reducer over the log — ports as doctrine and is small enough that porting is not the operation. What is **deliberately not carried**: I's event *vocabulary* (world events the mind never sees under SI-1), and the whole `log_format_version` migration chain, whose justification was determinism-for-replay and dies with it. A Kithcraft mind's log is a memory store, not a replayable world. | reimplement to contract |
+| **Reflex / planner split** | **Reflex half: not carried — the engine owns it now.** Under decision-0002 the augmented vanilla villager's `Brain<E>`/`Schedule`/`Activity`/POI stack *is* the reflex half, and AR-4 forbids the mind doing spatial arithmetic at all, so I's BFS pathfinder and 2-D survival ladder are doubly dead. **Planner half: port `toolloop`'s shape** (994 lines, sim-agnostic by construction) — its REQUEST/FACT/gate doctrine maps onto `intent`/`intent_ack`/`act_result` one-to-one, which is the strongest single portability finding in the assessment. `tool`'s registry *mechanism* ports; its vocabulary is replaced by `session_open`'s runtime manifest, which is a better design than I's compiled-in registry. §1.1–1.3 above are this doctrine item applied to spend: engine reflexes are free, the daemon's deterministic machinery is free, and only the six E-classes cost money. | port asset (`toolloop`, `tool` mechanism) + already in protocol (the manifest) |
+| **Salience / consolidation** | **Split three ways.** (a) *Salience-as-a-world-side-table:* **forbidden** — §2.8 bans a `salience`/`importance`/`weight` field on any percept; urgency stays body-side, formativeness is mind-side and does not cross. (b) *Consolidation machinery:* **port the shape and its measured lessons** — the once-per-night event-sourced ledger, the ordinal `m1..mN` prompt convention, the `(tick, hash)` durable identity mapping, the truncation lesson (I's digest silently outgrew a 1,024-token cap and every night was rejected from day 20 on), and "a transport failure lands **no marker**". Encoded above as E6's tier, §2.3's `max_tokens` rule, and §5.4's retry posture. (c) *Formativeness:* **new design, stated in §1.3** — v1 has no scoring pass; a deterministic admission gate (§6.3) feeds a single Opus-tier E6 that decides what mattered. The situated-memory `Where`/`Why` split is already relocated correctly by the contract (§2.4/§5.2): the vendor composes `place.descriptor`, the mind supplies `intent.reason`. | port asset (`mind/consolidate.go` shape) + new design (formativeness) + already in protocol (situated split) |
+| **Epistemic hygiene** | **Already carried — into the protocol, not into code.** `direct_perception(origin)` is a contract obligation (§2.7) with `DIRECT_ORIGINS` defined in the contract so mind and vendor cannot disagree, a MUST NOT against a `direct` boolean on the wire, and harness H-3 proving the classifier ignores prose. `enforceProvenance`'s coerce-never-reject posture is RM-2/RM-3. The mechanisms were always tiny (`DirectPerception` 8 lines, `enforceProvenance` 30) — the value was the knowledge, and the knowledge is now binding text. `mentalmap.go` is the most self-contained file in I and the least portable in substance: its content is 2-D coordinates AR-4 forbids crossing the seam. **Reimplement RM-1…RM-7 to the contract; port nothing.** §1.2 above hard-codes the consequence: none of these may become a model call. | already in protocol |
+| **Persona firewall** | **Port `persona` (475 lines, no imports) — the cleanest carry in the assessment.** The doctrine is the two-half design: *structural* impossibility (written once at mode 0444, no post-genesis write path exists anywhere) plus *validatory* mechanism (a model-free anchor echo under normalization, plus an authored drift lexicon matched word-boundary — so rejection is a testable 100% guarantee, which a second model call would downgrade to a guarantee about a distribution). Brief #5 changes the *source* — personas generated at birth (E1, Opus 5, §1.3), not authored at genesis for a fixed cast — and the firewall is unchanged by that: decision 5's demand *is* the structural half. The honest limit transfers with it: the lexicon catches *stated* drift; subtle drift needs the parked model-judged validator. | port asset (`persona`) |
+
+**Carried by the choice, not by the doctrine list: two operational assets.** I's LLM layer
+contributes its provider registry, circuit breakers, and budget-meter shape (minus the
+`cognition` staleness router that dies), which is directly what §6.2's "cost and token
+accounting instrumented from the first call" requires. And I ran this exact process shape —
+long-running daemon, pidfile, recovery, signal handling — which is a maintainability asset
+independent of any package.
+
+### 8.4 What would change this recommendation
+
+Named so a future reader can check them rather than re-argue the whole decision. Any one of
+these is grounds to reopen; none is true today.
+
+1. **A second maintainer whose language is not Go.** The maintainability criterion is the
+   decisive one and it is a fact about *this operator*, not about Go. If the project acquires
+   a contributor fluent in TypeScript and not Go, the largest term in the balance changes sign.
+2. **The Agent SDK becoming load-bearing.** If the mind's design moves toward wanting a
+   framework-provided loop — sub-agents, MCP tooling inside the mind, a managed runtime —
+   TypeScript's advantage stops being about a loop this daemon rejects. The test is concrete:
+   does the framework let a gate sit between the model's tool call and the fact that the mind
+   is allowed to believe? If yes, re-weigh.
+3. **Transport (Q-1) resolving to in-process-with-the-mod.** Then JVM's argument becomes
+   structural rather than stylistic. Note the direction of causation in §8.6: this
+   recommendation *forecloses* that resolution rather than waiting on it, and does so
+   deliberately.
+4. **The percept surface growing far beyond §2.1's shapes.** Go's V-5 weakness is bounded
+   because the boundary is small. If a successor protocol multiplies percept types and nested
+   optional structures, the "one file of boring code" grows into a hand-rolled schema layer,
+   and Pydantic or a TS validator starts to earn its keep.
+5. **`anthropic-sdk-go` falling materially behind.** The SDKs are Stainless-generated from one
+   spec and shipped same-day today. If Go's lags on a capability §6.1 depends on — streaming,
+   caching breakpoints, structured outputs — the tie in the first criterion breaks the other
+   way. This is the cheapest of the five to monitor and the least likely.
+
+### 8.5 What this narrows for TASK-0006 (demo build plan)
+
+The three TASK-0004 outputs — the language choice, the tier routing, and the cost envelope —
+each fix something TASK-0006 would otherwise have to decide. Stated explicitly so the demo plan
+inherits them rather than reopening them.
+
+**From the language choice:**
+
+- **Mind tasks are Go tasks; body tasks are Java/Fabric tasks; the split is the seam.** The
+  demo is a **two-language, two-artifact project**: a Fabric mod jar and a Go daemon binary.
+  TASK-0006's decomposition splits at the seam and **every deliverable task lands wholly on one
+  side of it** — a task that spans both is a task that has smuggled coupling across SI-1 and
+  should be split. The mind daemon is its own module (its own repo or a top-level directory
+  with its own `go.mod`); it does not live inside the mod's Gradle build.
+- **The demo needs two run targets and an ordering.** A daemon binary and a mod jar, started
+  independently — T-7 requires mind-restart to be independent of vendor-restart, so "restart
+  the daemon mid-session and the villagers keep their memories" is a demo-plan acceptance
+  check, not an aspiration.
+- **The fake-vendor harness is a Go test suite, and it is a demo-plan task, not an afterthought.**
+  `body-protocol-v0.md` §10's six tests (H-1…H-6) plus the canonical end-to-end scenario are the
+  mind's development environment: they are how mind work proceeds **before the mod exists**, and
+  they gate the mind side of every demo beat. The vendor-facing port is an interface declared at
+  the consumer; the fake satisfies it in-process.
+- **Two named porting tasks, and only two.** Lifting `toolloop`'s bounded-loop shape onto the
+  intent/ack/act_result split, and lifting `persona`'s two-half firewall. Everything else in
+  the mind is written fresh against the contract. TASK-0006 should not budget a "port the
+  daemon" task — there is no such task, and Phase 1's measurement is why.
+- **One boundary-decode component, explicitly scheduled.** Go's V-5 cost (§8.2) is one file
+  that must exist before any percept handling: presence-checked decode, then validate, then
+  mutate — harness H-1's ordering, made a task so it is not discovered late.
+
+**From the routing tiers (§1.3), beat by beat.** Every demo beat in the brief, resolved to its
+call profile:
+
+| Demo beat | LLM? | Class / tier | Note |
+|---|---|---|---|
+| Personas, desires generated at birth | **Yes** | E1 — **Opus 5**, 3 calls total | Pre-session, unbounded latency, mode-0444 output. The persona firewall's structural half is a demo requirement, not a later hardening. |
+| Schedules (wake / work / socialize / sleep) | **No** | engine `Schedule`/`Activity` | Zero cost, zero latency. Decision-0002's inheritance. |
+| Walking, building, mining, pathing, door use | **No** | engine `Brain<E>` + mod handlers | AR-4: the mind names a token, the engine resolves it. |
+| Player posts a blueprint on the job board | **Yes** | E3 — **Sonnet 5**, ~24 calls | The centerpiece. *Reluctance is the product* (brief #6): a villager that always cheerfully accepts has broken the demo. 20–30 s latency is the scene, not a cost. |
+| One villager builds it alongside the player | **Mostly no** | E2 — **Sonnet 5** at decision points only | The *building* is engine-side. The mind is consulted on taking the job, on interruptions, and at schedule transitions — 8/villager/cycle. |
+| Dusk conversation about the day, the work, the player | **Yes** | E4 — **Sonnet 5**, ~138 calls | **The one hard latency ceiling: <3 s to first token.** Streaming on, `effort: low`, thinking off, cached prefix, `max_tokens` ~300. Opus is *too slow* here — the tier is constrained from above. Pre-generating the opening turn during pair-formation pathing is a demo-plan task. |
+| Grumbling at the fire, greetings, passing remarks | **Yes, offline** | E5 — **Haiku 4.5**, 27 batched calls | A daily pre-generated pool served in <200 ms. Never a live call on the critical path. |
+| Persistent memory across the evening | **Yes, offline** | E6 — **Opus 5**, 27 calls | Nightly, in the ~5.8-minute sleep window. Plus the deterministic admission gate (§6.3) — **not** a model call, and the highest-leverage component in the cost model. |
+| Night danger; walls and torches protect friends | **No** | vanilla goal/sensor stack | Panic and flee are inherited. The mind is consulted *after*, at the next natural break (§5.5) — an urgent percept cancels an in-flight deliberation and enqueues one; it does not fire its own call. |
+
+Two demo-plan consequences fall straight out: **the villager must never freeze while thinking**
+(§5.1 — a 20-second thought with a motionless body is a 20-second bug, and no tier change fixes
+it), and **"nine dusks or one"** (§7 item 1) is TASK-0006's call — the vanilla cycle gives 9
+day/night cycles in 3 hours, so the demo either accepts nine dusks or lengthens the in-game
+day. Routing models the vanilla case; either choice only makes the bill smaller.
+
+**From the cost envelope:**
+
+- **Plan against a ceiling of ~$20 per demo evening**, not the $5.17 baseline. Baseline is
+  $5.17 (≈$4.00 with caching on E2/E3/E4); the realistic worst case within the brief's own
+  bounds — 6 villagers, chatty — is **$16–17**. The ceiling is the number a demo plan budgets
+  against; the baseline is the number it measures toward.
+- **Cost is not the binding constraint, so do not let TASK-0006 optimize for it.** The entire
+  tier ladder is worth about $8 on the demo. Latency (§5) and episodic-buffer growth (§6.3)
+  are the constraints; engineering effort goes there.
+- **Three items are demo-plan tasks because money cannot buy them back later:** prompt caching
+  with a genuinely stable prefix (23% of the bill *and* part of E4's latency budget — and
+  rendering "today is day 4" into the prefix silently destroys both); the `change_report`
+  delivery restriction of `body-protocol-v0.md` §4.10 (A-8 — a protocol rule with a
+  $1.30/evening price tag that grows with the cast and the weeks); and **per-class call and
+  token instrumentation from the first call**, since every A-n assumption is a number the first
+  playtest replaces only if calls are counted by class.
+- **The one metric to instrument for the long run is E6 input tokens per villager over time**,
+  not dollars per evening. RM-7 forbids silent forgetting, so growth is by design; what bounds
+  cost is what the mind *loads*, not what it stores.
+
+### 8.6 One consequence for transport (Q-1) — flagged, and the direction is one-way
+
+The spec's non-goals say to flag a language finding that bears on transport, not to decide
+transport. The finding: **choosing a Go daemon against a JVM mod forecloses the in-process
+option.** Mind and vendor are separate processes, so Q-1 is a choice among real wires (UDS,
+TCP, stdio) rather than a choice between a wire and a method call.
+
+This is a narrowing of Q-1's option set, not an answer to it, and it is a **deliberate** one:
+T-7 requires the seam be "process-separable but not process-required", and separate processes
+make an SI-1 breach structurally impossible rather than merely forbidden. Nothing in §1–§7
+excludes any remaining candidate — RT-1…RT-7 are demands on the model client, not on the
+mind↔vendor wire, and E4's <3 s budget is mind-internal latency to which the seam adds only the
+`speak` intent hop. **The wire itself remains open for the spec 002 successor.**
