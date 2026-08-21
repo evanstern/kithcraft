@@ -1,10 +1,10 @@
 ---
 id: TASK-0003
 title: 'Decide entity implementation: custom entity vs augmented vanilla villager'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 19:49'
+updated_date: '2026-08-21 20:50'
 labels:
   - design-decision
 milestone: m-0
@@ -30,20 +30,28 @@ Spec: specs/003-entity-implementation
 <!-- AC:BEGIN -->
 - [ ] #1 Custom entity vs augmented vanilla villager trade-offs are written up against the ratified constraints (village fiction reuse, real night danger, permadeath, drop-in multiplayer)
 - [ ] #2 A recommendation with rationale is recorded as a Backlog decision record and ratified by the operator
-- [ ] #3 Spec phase: Phase 1 — Engine behavior evidence
-- [ ] #4 Spec phase: Phase 2 — Comparison document
-- [ ] #5 Spec phase: Phase 3 — Recommendation & decision record
+- [x] #3 Spec phase: Phase 1 — Engine behavior evidence
+- [x] #4 Spec phase: Phase 2 — Comparison document
+- [x] #5 Spec phase: Phase 3 — Recommendation & decision record
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Dispatch tier: sonnet (cc/claude-sonnet-5[1m], no fallback declared) — default tier: trade-off analysis against ratified constraints, same shape as TASK-0001's comparison which sonnet served (verified 2026-08-20). Served model to be re-verified from Phase 1 transcript.
+
+spec-bridge sync: Phase 1 — Engine behavior evidence: 6/6 · Phase 2 — Comparison document: 3/3 · Phase 3 — Recommendation & decision record: 3/3 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — Engine behavior evidence: 6/6 · Phase 2 — Comparison document: 3/3 · Phase 3 — Recommendation & decision record: 3/3). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
 - [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
-- [ ] #3 Spec and Backlog are in sync
+- [x] #2 Docs and wiki are updated and pass freshness tests
+- [x] #3 Spec and Backlog are in sync
 <!-- DOD:END -->

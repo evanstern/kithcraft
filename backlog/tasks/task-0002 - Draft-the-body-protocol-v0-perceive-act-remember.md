@@ -1,10 +1,10 @@
 ---
 id: TASK-0002
 title: Draft the body protocol v0 (perceive / act / remember)
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-19 18:36'
-updated_date: '2026-08-21 19:49'
+updated_date: '2026-08-21 20:50'
 labels:
   - design-decision
   - architecture
@@ -33,20 +33,28 @@ Spec: specs/002-body-protocol-v0
 - [ ] #2 The perception model is specified: what a villager sees/hears and how provenance is attached (epistemic hygiene ported from promptworld I doctrine)
 - [ ] #3 The protocol is demonstrably world-agnostic: no Minecraft types leak across the seam, and the doc shows how a second body vendor would implement it
 - [ ] #4 Minds are testable without booting Minecraft: the doc specifies a test/fake body vendor
-- [ ] #5 Spec phase: Phase 1 — Doctrine port & feasibility
-- [ ] #6 Spec phase: Phase 2 — Protocol draft
-- [ ] #7 Spec phase: Phase 3 — Prove the seam
+- [x] #5 Spec phase: Phase 1 — Doctrine port & feasibility
+- [x] #6 Spec phase: Phase 2 — Protocol draft
+- [x] #7 Spec phase: Phase 3 — Prove the seam
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Dispatch tier: opus (cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]) — ESCALATED by operator at runbook sign-off 2026-08-21: protocol drafting is design work on the seam (the project's one-way door), a judgment call the spec does not settle. Served model to be verified from Phase 1 transcript.
+
+spec-bridge sync: Phase 1 — Doctrine port & feasibility: 3/3 · Phase 2 — Protocol draft: 5/5 · Phase 3 — Prove the seam: 4/4 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — Doctrine port & feasibility: 3/3 · Phase 2 — Protocol draft: 5/5 · Phase 3 — Prove the seam: 4/4). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
 - [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
-- [ ] #3 Spec and Backlog are in sync
+- [x] #2 Docs and wiki are updated and pass freshness tests
+- [x] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
