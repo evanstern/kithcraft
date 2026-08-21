@@ -225,5 +225,5 @@ harness/transcript, so future runbook authoring budgets against real numbers.
 
 | date | task | PR | merge | tokens/cost (best-effort) | notes |
 |------|------|----|-------|---------------------------|-------|
-| 2026-08-21 | TASK-0004 | — | — | — | in flight: claimed (35f2175), spec cycle committed (41268d6), phase ACs seeded (793d251), tier note (07d8a85). phases: 1 dispatching (opus). |
-| 2026-08-21 | TASK-0005 | — | — | — | in flight: claimed (30d7702), spec cycle committed (72e4683), phase ACs seeded (ae62b5b), tier note (e88d029). phases: 1 pending — dispatches after TASK-0004's served model is verified. |
+| 2026-08-21 | TASK-0004 | — | — | — | in flight: claimed (35f2175), spec cycle committed (41268d6), phase ACs seeded (793d251), tier note (07d8a85). phases: 1 done (58a733e, served model VERIFIED cc/claude-opus-5[1m] from report, ~239k tokens; headline: promptworld I daemon is a co-process of the dead engine — 151 sim.* refs, 62% of non-test lines die — no daemon survives the seam in any language; portable assets: toolloop, persona, tool registry, llm layer minus cognition; rebuild-JVM added as 4th candidate), 2 dispatched. |
+| 2026-08-21 | TASK-0005 | — | — | — | in flight: claimed (30d7702), spec cycle committed (72e4683), phase ACs seeded (ae62b5b), tier note (e88d029). phases: 1 dispatched (sonnet; cleared by TASK-0004 model verification). |
