@@ -9,11 +9,11 @@
 
 ## Phase 2 — Design document
 
-- [ ] docs/design/death-mechanics.md: causes of death — admitted vs suppressed per source, argued from the thesis
-- [ ] Remains design: grave, belongings, world markers (empty bed, unclaimed workstation), each argued for emotional weight
-- [ ] Memory/conversation carry: witness vs told-about memory entries (seam-compatible provenance), dusk-conversation surfacing, decay/consolidation posture
-- [ ] Micromanagement spell-breaker section: fragility posture, self-preservation competence, named failure mode and answers (card AC #2)
-- [ ] Shrinking-cast section: what death means for the v1 demo, accepted or scoped (card AC #3)
+- [x] docs/design/death-mechanics.md: causes of death — admitted vs suppressed per source, argued from the thesis
+- [x] Remains design: grave, belongings, world markers (empty bed, unclaimed workstation), each argued for emotional weight
+- [x] Memory/conversation carry: witness vs told-about memory entries (seam-compatible provenance), dusk-conversation surfacing, decay/consolidation posture
+- [x] Micromanagement spell-breaker section: fragility posture, self-preservation competence, named failure mode and answers (card AC #2)
+- [x] Shrinking-cast section: what death means for the v1 demo, accepted or scoped (card AC #3)
 
 ## Phase 3 — Ratification prep
 
