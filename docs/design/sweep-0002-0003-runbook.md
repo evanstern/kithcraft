@@ -8,7 +8,11 @@ conflicts as routine. Direction is decided; do not re-litigate it:
 accepted 2026-08-20) win. Plan-of-record is the board; this file carries only ordering,
 doctrine, and the log.
 
-**Status:** draft · operator sign-off on lanes: pending
+**Status:** signed-off · operator sign-off on lanes: 2026-08-21
+<!-- Sign-off ruling (2026-08-21): lanes approved as authored; TASK-0002 tier ESCALATED
+     to opus by the operator (the protocol is the project's one-way door — buy the
+     thinking tier for it). TASK-0003 stays sonnet. Checkpoint 1 satisfied; the
+     escalation checkpoint for opus dispatch is recorded here per the tier rubric. -->
 <!-- Only the OPERATOR flips draft → signed-off (the author never pre-fills it). An
      executing session must refuse a runbook whose status it cannot verify. -->
 
@@ -42,12 +46,12 @@ the board dir and this file (see hotspots).
 
 **Lane 1 — start immediately, in parallel:**
 
-- **TASK-0002 (sonnet · model `cc/claude-sonnet-5[1m]`, no fallback declared for this
-  tier — default tier: the spec cycle settles the protocol's evaluation criteria
-  (world-agnosticism test, epistemic-hygiene port from promptworld I doctrine,
-  fake-vendor testability), and drafting message shapes against settled criteria is
-  work-to-a-written-spec; the load-bearing judgment — accepting the contract — is the
-  operator's PR review regardless of tier)** — draft body protocol v0
+- **TASK-0002 (opus · model `cc/claude-opus-5[1m]`, fallback `cc/claude-opus-4-8[1m]` —
+  ESCALATED by operator at sign-off 2026-08-21: protocol drafting is design work on the
+  project's one-way door (the seam), a judgment call the spec does not settle; the
+  escalation checkpoint the tier rubric requires is the sign-off ruling recorded at the
+  status line. The final human gate — accepting the contract — remains the operator's
+  PR review)** — draft body protocol v0
   (perceive/act/remember message shapes, versioning story, perception model with
   provenance, fake/test vendor spec). Spec 002. **Contract-shaped: its merged protocol
   doc is the interface every future mind/vendor task consumes** — it merges first if
@@ -61,10 +65,9 @@ the board dir and this file (see hotspots).
 
 Tiers and their model IDs come from **`.claude/model-tiers.json`** — `tiers.mjs --root .
 --check` exited 0 on 2026-08-21 before these lanes were authored (all three agent
-definitions `unchanged`; no regeneration, so no session restart required). Escalation to
-opus (`cc/claude-opus-5[1m]`, fallback `cc/claude-opus-4-8[1m]`) was offered to the
-operator at sign-off for TASK-0002 (protocol drafting is design-adjacent); the
-operator's ruling is recorded in the sign-off note below the status line.
+definitions `unchanged`; no regeneration, so no session restart required). The opus
+escalation for TASK-0002 was offered and TAKEN at sign-off — ruling recorded at the
+status line; dispatch names `opus-implementer`.
 
 Record the model tier + explicit model ID + rubric justification on each board task at
 dispatch, including which model actually served (**verify from the first dispatch's
@@ -159,8 +162,8 @@ it.** The sweep's Output gate re-checks the first two lines at the end.
 
 ## Operator checkpoints (do not proceed silently)
 
-1. **Sign-off on these lanes** — including the TASK-0002 tier question (sonnet default
-   vs opus escalation for protocol drafting). Recorded at the status line.
+1. **Sign-off on these lanes** — SATISFIED 2026-08-21: lanes approved, TASK-0002
+   escalated to opus (ruling at the status line).
 2. **TASK-0002 protocol acceptance:** PR review is the human gate on the contract —
    the seam is the project's one-way door. Surface the PR and stop before merging.
 3. **TASK-0003 ratification (card AC #2):** operator ratifies the entity
