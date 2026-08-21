@@ -1,10 +1,10 @@
 ---
 id: TASK-0006
 title: Build plan for the "one real evening" demo
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-19 18:38'
-updated_date: '2026-08-19 18:47'
+updated_date: '2026-08-21 23:21'
 labels:
   - planning
 milestone: m-0
@@ -25,6 +25,8 @@ ordinal: 6000
 As a player, I want to spend one real evening with three villagers — post a blueprint on the job board, build alongside the one who takes it, and overhear them talk about the day (and me) at dusk — so that a survival world finally has company in it.
 
 Context: this task produces the build plan for that demo (a Spec Kit spec sliced into buildable deliverable tasks on the board, likely runnable as a pdlc:sweep), not the implementation. The demo per the brief: three villagers with names, generated personas and endogenous desires, schedules (wake/work/socialize/sleep), persistent memory; the diegetic job-board book; vanilla night danger making the player's walls and torches protect their friends. Requires the ratified decisions from TASK-0001 through TASK-0004. Design against the spell-breakers: tedious player interactions, required micromanagement, politeness-simulator offense-taking.
+
+Spec: specs/006-evening-demo-build-plan
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
