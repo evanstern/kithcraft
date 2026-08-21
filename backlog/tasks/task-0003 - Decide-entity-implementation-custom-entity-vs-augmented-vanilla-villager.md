@@ -4,7 +4,7 @@ title: 'Decide entity implementation: custom entity vs augmented vanilla village
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 19:46'
+updated_date: '2026-08-21 19:49'
 labels:
   - design-decision
 milestone: m-0
@@ -30,7 +30,12 @@ Spec: specs/003-entity-implementation
 <!-- AC:BEGIN -->
 - [ ] #1 Custom entity vs augmented vanilla villager trade-offs are written up against the ratified constraints (village fiction reuse, real night danger, permadeath, drop-in multiplayer)
 - [ ] #2 A recommendation with rationale is recorded as a Backlog decision record and ratified by the operator
+- [ ] #3 Spec phase: Phase 1 — Engine behavior evidence
+- [ ] #4 Spec phase: Phase 2 — Comparison document
+- [ ] #5 Spec phase: Phase 3 — Recommendation & decision record
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
