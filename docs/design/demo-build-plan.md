@@ -811,3 +811,74 @@ multiplayer (brief #9, deferred to V2); no second body vendor (the seam makes it
 demo does not need it); no formativeness scoring pass (routing §1.3's upgrade path, gated on a
 measured instrument); no client jar or custom skins; and no post-demo hardening. Each of those
 is a task the *next* plan may want. None of them is on the path to one real evening.
+
+---
+
+## 8. Coverage cross-check — plan labels to board ids (Phase 2)
+
+The sixteen tasks of §3 were created on the board in dependency order as **TASK-0007 …
+TASK-0022**, all on milestone **m-0**, all in `To Do`. No task was added, dropped, merged or
+split at landing: the mapping is 1:1 with §3, and each card carries its §3 user story, its
+scope boundary, its "done proves" bullets as acceptance criteria, its named spell-breaker and
+constraint checks, and a reference block naming this document plus the ratified surfaces it
+consumes.
+
+| Label | Board id | Title | Depends on (ids) |
+|---|---|---|---|
+| **S1** | **TASK-0007** | Decide the seam transport and pin the wire | — |
+| **M1** | **TASK-0008** | Mind daemon skeleton | TASK-0007 |
+| **V1** | **TASK-0009** | Fabric mod skeleton, vendor session, manifest, token registry | TASK-0007 |
+| **M2** | **TASK-0010** | Event-sourced memory, belief store, admission gate | TASK-0008 |
+| **M4** | **TASK-0011** | Model client, prompt assembly, tier routing, instrumentation | TASK-0008 |
+| **V2** | **TASK-0012** | Body-vendor conformance: percepts out, intents in | TASK-0009 |
+| **M3** | **TASK-0013** | Persona genesis and the persona firewall | TASK-0008, TASK-0011 |
+| **V3** | **TASK-0014** | The augmented villager: brain, schedule, cast, pair formation | TASK-0009 |
+| **S2** | **TASK-0015** | Fake body vendor and the protocol-rule harness | TASK-0008, TASK-0010 |
+| **M5** | **TASK-0016** | Deliberation and the job-board decision (E2, E3) | TASK-0010, TASK-0011 |
+| **M6** | **TASK-0017** | Dusk conversation and the ambient pool (E4, E5) | TASK-0010, TASK-0011 |
+| **M7** | **TASK-0018** | Nightly consolidation; how the dead stay conversationally alive (E6) | TASK-0010, TASK-0011 |
+| **V5** | **TASK-0019** | Death, danger, and what remains | TASK-0012, TASK-0014 |
+| **V4** | **TASK-0020** | The job-board book and the blueprint build | TASK-0012, TASK-0014, TASK-0016 |
+| **I1** | **TASK-0021** | Demo configuration and the two run targets | TASK-0013, TASK-0018, TASK-0014, TASK-0019 |
+| **I2** | **TASK-0022** | The evening: run it, measure it, check it against the brief | all fifteen |
+
+### 8.1 Every beat in `[[v1-demo]]`, traced to a created task
+
+The wiki note is the beat list of record (it mirrors the brief's "v1 demo" paragraph). Each
+row is a beat as the note states it; every one lands on at least one created id.
+
+| Beat, as `[[v1-demo]]` states it | Created tasks |
+|---|---|
+| Three villagers with **names, generated personas and desires** | **TASK-0013** (E1 genesis, firewall, endogenous desires) · **TASK-0014** (cast: profession × biome variant, nameplates) · **TASK-0021** (seeding and binding) |
+| **Schedules** — wake / work / socialize / sleep | **TASK-0014** (`Schedule`/`Activity`, POI bed claim, sleep pathing) · **TASK-0016** (the mind consulted at transitions) · **TASK-0022** (a full cycle observed) |
+| **Persistent memory** | **TASK-0010** (event-sourced log, provenance-stamped map, admission gate) · **TASK-0018** (nightly consolidation) · **TASK-0021** (mind-restart independence proves persistence is real) |
+| The player posts a blueprint on the **job-board book** (the diegetic order interface) | **TASK-0020** (the book, `text` percepts, visible claims) · **TASK-0016** (E3: read, weigh, claim or decline with a reason) |
+| One villager **builds it while the player builds alongside** | **TASK-0020** (block placement, interruption, resumption) · **TASK-0016** (taking the job; decision points) · **TASK-0022** (observed) |
+| At dusk the villagers **talk to each other** — about the day, the work, the player | **TASK-0017** (E4 turns under the < 3 s ceiling; E5 ambient pool) · **TASK-0014** (pair formation + the ~10 s-ahead signal) · **TASK-0012** (`speak` → `speech` in earshot) · **TASK-0022** (measured latency) |
+| **Vanilla night danger** — the player's walls and torches protect their *friends* | **TASK-0019** (admitted causes, siege suppression, grave, belongings, grief period, token discipline) · **TASK-0012** (`nearest_hostile`, witness `sighting`, absent-survivor `change_report`) · **TASK-0016** (the urgency interrupt) · **TASK-0018** (the dead stay conversationally alive, then fade) |
+| Spell-breakers the demo **must not exhibit**: tedium, micromanagement, offense-taking | Attached as named design checks on **TASK-0013**, **TASK-0014**, **TASK-0016**, **TASK-0017**, **TASK-0019**, **TASK-0020**, and walked as a checklist at **TASK-0022** |
+| The demo as **sizing anchor** (3–6 NPCs at 1x is trivial load) | **TASK-0011** (per-class accounting) · **TASK-0022** (the A-n assumptions replaced by measurement) |
+
+Infrastructure that no beat names but every beat rides: **TASK-0007** (the wire),
+**TASK-0008** (the daemon skeleton and boundary decode), **TASK-0009** (the mod skeleton and
+token registry), **TASK-0015** (the fake-vendor harness — how mind work proceeds before the
+mod exists). §4's second table gives the reason each is not optional.
+
+**Nothing in the note is uncovered, and nothing created is beatless.** The one asymmetry is
+deliberate and already recorded: `[[v1-demo]]`'s "TASK-0001..0006 exist to reach it" framing
+described the *decision* phase; TASK-0007…0022 are the *build* phase those decisions bought.
+
+### 8.2 Suggested lanes for the next sweep, with ids
+
+§6 in labels; the same lanes in board ids, for the runbook author:
+
+- **Lane 0 — the wire (alone, blocks everything):** TASK-0007.
+- **Lane 1 — skeletons (2 parallel):** TASK-0008 · TASK-0009.
+- **Lane 2 — core surfaces (3 parallel):** TASK-0010 · TASK-0011 · TASK-0012.
+- **Lane 3 — cast, persona, proofs (3 parallel):** TASK-0013 · TASK-0014 · TASK-0015.
+- **Lane 4 — the beats:** TASK-0016 · TASK-0017 · TASK-0018 · TASK-0019 parallel; then
+  **TASK-0020**, the graph's one cross-lane dependency, after TASK-0016 merges.
+- **Lane 5 — integration (serial):** TASK-0021, then TASK-0022.
+
+Merge-order notes, escalation checkpoints (TASK-0007 → `opus` proposed; TASK-0019's named
+trigger), and the critical-path argument are unchanged — see §6.
