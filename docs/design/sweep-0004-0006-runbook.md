@@ -225,3 +225,5 @@ harness/transcript, so future runbook authoring budgets against real numbers.
 
 | date | task | PR | merge | tokens/cost (best-effort) | notes |
 |------|------|----|-------|---------------------------|-------|
+| 2026-08-21 | TASK-0004 | — | — | — | in flight: claimed (35f2175), spec cycle committed (41268d6), phase ACs seeded (793d251), tier note (07d8a85). phases: 1 dispatching (opus). |
+| 2026-08-21 | TASK-0005 | — | — | — | in flight: claimed (30d7702), spec cycle committed (72e4683), phase ACs seeded (ae62b5b), tier note (e88d029). phases: 1 pending — dispatches after TASK-0004's served model is verified. |
