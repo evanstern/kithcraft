@@ -1,12 +1,13 @@
 # Entity implementation comparison — custom Fabric entity vs augmented vanilla villager
 
-**Spec:** 003-entity-implementation · **Phase:** 2 (comparison only — no recommendation;
-see Phase 3 for the decision record). Per [[mod-stack-decision]], both options sit on the
-same vanilla Fabric brain/Mixin substrate ([[villager-brain-api]]): "custom entity" means a
-Fabric entity class wired into `Brain<E>`, never a Citizens2-authored NPC. All citations
-below are carried from `specs/003-entity-implementation/research/engine-behavior.md`
-(Phase 1), checked live **2026-08-21** unless a source is version-pinned, in which case the
-mapping build is stated inline.
+**Spec:** 003-entity-implementation · **Phases:** 2 (comparison) + 3 (recommendation,
+proposed — pending operator ratification via `decision-0002`). Per [[mod-stack-decision]],
+both options sit on the same vanilla Fabric brain/Mixin substrate ([[villager-brain-api]]):
+"custom entity" means a Fabric entity class wired into `Brain<E>`, never a Citizens2-authored
+NPC. All citations below are carried from
+`specs/003-entity-implementation/research/engine-behavior.md` (Phase 1), checked live
+**2026-08-21** unless a source is version-pinned, in which case the mapping build is stated
+inline.
 
 ## R1.1 — Village fiction reuse (beds, workstations, schedules, POI)
 
@@ -231,3 +232,103 @@ engineering surface.
 3. Per-individual custom skins on an augmented vanilla `VillagerEntity` without any
    client-side asset changes (R1.6) were not confirmed possible or impossible by direct
    source — open question, not asserted either way.
+
+## Recommendation (Phase 3)
+
+**Recommend: augmented vanilla `VillagerEntity`.**
+
+### Rationale, mapped to the ratified constraints
+
+- **Village fiction reuse:** augmented inherits the entire mechanic — POI claim, sleep
+  pathing, `Schedule` — for free (R1.1); custom entity must reimplement or Mixin-copy all
+  of it, and only the memory/sensor *names* are shareable without also either extending
+  `VillagerEntity` or re-invoking its Mixin-exposed brain-init methods. This is the
+  constraint the brief states most literally ("villager-shaped... riding the village
+  fiction," [[design-brief]] #3) and augmented satisfies it by construction, not by effort.
+- **Real night danger:** the load-bearing finding is that hostile-mob targeting
+  (`NearestAttackableTargetGoal` equivalents in zombie/husk/drowned goal selectors) is a
+  **hardcoded Java class check against `VillagerEntity`/`AbstractVillagerEntity`, not a
+  registry or tag lookup** (R1.2, `engine-behavior.md` §1). A custom entity that doesn't
+  extend that hierarchy is invisible to attacker AI by default — the single mechanic that
+  makes walls-protect-friends real would have to be rebuilt with Mixins into every hostile's
+  goal selector, and would still need its own hostile-sensing wire-up (flagged thin).
+  Augmented gets both halves — being targeted and self-panic-sensing — free.
+- **Permadeath:** augmented owns exactly one targeted Mixin (cancel the zombie-villager
+  conversion fork in `onDeath`/damage dispatch, R1.3); custom entity never enters that code
+  path so needs none. This is the one constraint area where custom entity is cheaper, but
+  the cost differential (0 vs. 1 well-understood injection point) is the smallest in the
+  whole comparison.
+- **Drop-in multiplayer:** the single most one-sided finding in the evidence base (R1.4).
+  Augmented is `minecraft:villager` on the wire — zero client-side requirement, a vanilla
+  client renders it exactly as any other villager. A custom entity requires every
+  connecting client to run the matching mod jar or renderer registration; Fabric's own
+  registry-sync design intent is to **kick** clients that don't recognize the entity type,
+  and a historical bug report documents an outright **client-side crash** from mismatched
+  entity registry IDs. Read literally, "a friend can drop in" ([[design-brief]] #9,
+  [[v1-demo]]) is satisfied by exactly one of the two options.
+- **Behavior control:** a genuine trade-off, not one-sided (R1.5) — augmented must
+  actively suppress breeding/gossip/golem-summoning (each a Mixin task-list override) where
+  custom entity gets them moot by never wiring the tasks in. But the suppression surface is
+  small and enumerable: **augmented's total owned Mixin surface across every constraint area
+  is at most ~4 targeted injection points** (1 conversion-cancel + up to 3 task-list
+  overrides), all beyond a substrate-level surface already accepted as a stack-decision risk
+  in [[mod-stack-decision]]. Custom entity's corresponding surface — full POI/pathing/sleep
+  reconstruction, a Mixin into every hostile's goal selector, hostile-sensing rewiring — is
+  larger and, per the two flagged-thin findings (`VillagerHostilesSensor` and
+  `GossipManager` reusability), not even fully known in size.
+- **Rendering/skin flexibility:** the one constraint where evidence for augmented is thin
+  rather than clean — no confirmed server-only way to give a vanilla-rendered villager an
+  arbitrary custom skin (R1.6); distinctiveness is bounded by 7 biome variants × profession.
+  Custom entity has full rendering control in principle, but only for clients running the
+  mod — for the "no client mod" framing this constraint is actually decided by R1.4, not by
+  R1.6 itself, since a custom entity's rendering flexibility is inaccessible to exactly the
+  vanilla clients the multiplayer constraint cares about.
+
+### What this gives up
+
+Recommending augmented vanilla is not a clean sweep — two things stay named rather than
+rounded off:
+
+1. **No confirmed server-only path to per-individual custom skins** (R1.6). If the cast
+   needs to read as visually distinct individuals beyond profession/biome variation, the
+   only lever found is a resource pack, which is client-side and re-opens exactly the "no
+   client mod" trade this recommendation is otherwise winning on.
+2. **`VillagerHostilesSensor` and `GossipManager` genericity is unverified** (flagged thin
+   in both R1.2 and R1.5) — this doesn't change the recommendation (it only makes the
+   custom-entity alternative's true cost *larger or equal*, never smaller, since these are
+   findings about what custom entity would additionally need to reimplement if the sensors
+   turn out to be `VillagerEntity`-internal), but it means the size of the road not taken is
+   understated here, not overstated.
+
+**Mitigation posture:** neither give-up blocks the demo (TASK-0006, 3–6 named villagers,
+one evening). (1) is accepted as-is for v1 — the brief's cast-distinctiveness need can be
+met with profession/biome-variant assignment plus names/dialogue rather than skins; if
+true per-individual skins become load-bearing later, the next step is a scoped spike into
+resource-pack-based skin assignment (client-side, separately scoped, not blocking server
+logic) rather than a bare re-litigation of this decision. (2) is accepted because it only
+matters if a future task revisits the custom-entity path; it costs nothing on the augmented
+path chosen here, so no mitigation action is needed unless that reversal is proposed.
+
+### Narrowing effects on TASK-0006 (demo build plan)
+
+- **Entity work is `VillagerEntity` augmentation, not a new entity class** — TASK-0006 can
+  plan Mixin/accessor work directly against the existing brain substrate
+  ([[villager-brain-api]]) rather than budgeting for ground-up brain/POI/schedule
+  reconstruction.
+- **The Mixin surface for the demo's 3–6 villagers is now committed and small:** at most one
+  conversion-cancel injection (permadeath, R1.3) plus up to three task-list-override
+  injections (breeding/gossip/golem-summoning, R1.5) — the demo build plan can size this as
+  a bounded, enumerable slice of work, not an open-ended one.
+- **No client-side mod work is needed for the demo at all** — the "friend can drop in"
+  texture ([[v1-demo]]) is satisfied by the entity choice alone; TASK-0006 does not need to
+  plan, build, or distribute a client jar.
+- **The cast's appearance without a client mod is bounded to profession × 7 biome variants**
+  — TASK-0006 should plan named/distinguishable villagers through profession assignment,
+  biome-variant selection, and in-fiction means (names, dialogue, job-board role) rather than
+  assuming free custom skins; a resource-pack skin path stays a later, separately-scoped
+  option if needed, not a demo dependency.
+- **The `nearest_hostile` memory (R1.2) is confirmed available as a free, already-computed
+  percept** on the augmented path — TASK-0006 (and TASK-0002's protocol shape) can treat
+  "danger nearby" as a cheap signal to expose to the mind daemon without additional engine
+  work, with no open sensor-reuse question to resolve first (that question only existed on
+  the custom-entity path, which is not the chosen one).

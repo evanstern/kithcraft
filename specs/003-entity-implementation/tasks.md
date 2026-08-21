@@ -17,6 +17,6 @@
 
 ## Phase 3 — Recommendation & decision record
 
-- [ ] Recommendation written into the comparison doc: one option, rationale mapped to the ratified constraints
-- [ ] Backlog decision record created (proposed — pending operator ratification)
-- [ ] Narrowing effects on TASK-0006 (demo build plan) stated explicitly
+- [x] Recommendation written into the comparison doc: one option, rationale mapped to the ratified constraints
+- [x] Backlog decision record created (proposed — pending operator ratification)
+- [x] Narrowing effects on TASK-0006 (demo build plan) stated explicitly
