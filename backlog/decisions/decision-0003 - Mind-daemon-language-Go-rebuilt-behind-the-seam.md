@@ -2,7 +2,7 @@
 id: decision-0003
 title: 'Mind daemon language: Go, rebuilt behind the seam'
 date: '2026-08-21 22:09'
-status: proposed
+status: accepted
 ---
 ## Context
 
