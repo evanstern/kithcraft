@@ -4,7 +4,7 @@ title: Draft the body protocol v0 (perceive / act / remember)
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:36'
-updated_date: '2026-08-21 19:48'
+updated_date: '2026-08-21 19:49'
 labels:
   - design-decision
   - architecture
@@ -38,7 +38,11 @@ Spec: specs/002-body-protocol-v0
 - [ ] #7 Spec phase: Phase 3 — Prove the seam
 <!-- AC:END -->
 
+## Implementation Notes
 
+<!-- SECTION:NOTES:BEGIN -->
+Dispatch tier: opus (cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]) — ESCALATED by operator at runbook sign-off 2026-08-21: protocol drafting is design work on the seam (the project's one-way door), a judgment call the spec does not settle. Served model to be verified from Phase 1 transcript.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
