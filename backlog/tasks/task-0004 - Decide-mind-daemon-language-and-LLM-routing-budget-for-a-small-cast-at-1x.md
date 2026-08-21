@@ -4,7 +4,7 @@ title: Decide mind daemon language and LLM routing/budget for a small cast at 1x
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:21'
+updated_date: '2026-08-21 21:34'
 labels:
   - design-decision
   - architecture
@@ -42,6 +42,8 @@ Spec: specs/004-mind-daemon-routing
 
 <!-- SECTION:NOTES:BEGIN -->
 Tier: opus (operator-escalated at runbook sign-off 2026-08-21 — coupled architecture decisions the spec cannot pre-settle). Model ID: cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]. Served model to be verified from first dispatch transcript.
+
+Phase 1 dispatch served model VERIFIED: cc/claude-opus-5[1m] (from implementer report, 2026-08-21).
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
