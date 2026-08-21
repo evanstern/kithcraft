@@ -4,7 +4,7 @@ title: Decide mind daemon language and LLM routing/budget for a small cast at 1x
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:39'
+updated_date: '2026-08-21 22:03'
 labels:
   - design-decision
   - architecture
@@ -30,15 +30,13 @@ Spec: specs/004-mind-daemon-routing
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 A decision on mind daemon language / reuse-vs-rebuild is recorded as a Backlog decision record with rationale
-- [ ] #2 An LLM routing sketch exists: which villager cognition events call an LLM, at what tier, at what expected cadence for a 3-villager evening
-- [ ] #3 A cost envelope estimate for the one-real-evening demo is written down with its assumptions
+- [x] #2 An LLM routing sketch exists: which villager cognition events call an LLM, at what tier, at what expected cadence for a 3-villager evening
+- [x] #3 A cost envelope estimate for the one-real-evening demo is written down with its assumptions
 - [ ] #4 Operator has ratified the decisions
 - [x] #5 Spec phase: Phase 1 — Daemon assessment
-- [ ] #6 Spec phase: Phase 2 — Routing sketch & cost envelope
+- [x] #6 Spec phase: Phase 2 — Routing sketch & cost envelope
 - [ ] #7 Spec phase: Phase 3 — Recommendation & decision record
 <!-- AC:END -->
-
-
 
 ## Implementation Notes
 
@@ -46,6 +44,8 @@ Spec: specs/004-mind-daemon-routing
 Tier: opus (operator-escalated at runbook sign-off 2026-08-21 — coupled architecture decisions the spec cannot pre-settle). Model ID: cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]. Served model to be verified from first dispatch transcript.
 
 Phase 1 dispatch served model VERIFIED: cc/claude-opus-5[1m] (from implementer report, 2026-08-21).
+
+Phase 2 done (46cb88d, opus verified): docs/design/llm-routing-and-budget.md — demo evening ≈ $5.17 (≈ $3.99 cached), 435 calls / ~1.63M tokens; 6 LLM event classes across 3 tiers (Opus: persona genesis + consolidation; Sonnet: deliberation/job-board/conversation; Haiku: ambient pool); reflexes and deterministic mind-side machinery explicitly non-LLM; 9 day/night cycles per 3h evening → consolidation ×27; sensitivity: 6 villagers ≈ $10.1, chattier ≈ $8.6.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
