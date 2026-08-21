@@ -9,6 +9,6 @@
 
 ## Phase 2 — Board landing & sign-off prep
 
-- [ ] Deliverable tasks created on the board via backlog CLI (ids collision-checked, milestone m-0, user-story descriptions, dependencies recorded), committed on this branch
-- [ ] Coverage cross-check: every beat in [[v1-demo]] traces to a created task; suggested lanes for the next sweep stated in the plan doc
-- [ ] [[v1-demo]] re-verified (its Operational notes' open questions are now all resolved); CAPSULES regenerated if any description changed
+- [x] Deliverable tasks created on the board via backlog CLI (ids collision-checked, milestone m-0, user-story descriptions, dependencies recorded), committed on this branch
+- [x] Coverage cross-check: every beat in [[v1-demo]] traces to a created task; suggested lanes for the next sweep stated in the plan doc
+- [x] [[v1-demo]] re-verified (its Operational notes' open questions are now all resolved); CAPSULES regenerated if any description changed
