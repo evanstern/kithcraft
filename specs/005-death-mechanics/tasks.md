@@ -2,10 +2,10 @@
 
 ## Phase 1 — Death surface evidence
 
-- [ ] Villager damage sources and immunities in vanilla (mobs, environment, hunger, falls, fire, drowning) verified (dated, cited)
-- [ ] Night-danger mechanics vs villagers (targeting, panic/flee, door mechanics, raid participation) verified for the augmented villager (dated, cited; build on specs/003 research)
-- [ ] Vanilla death aftermath (drops, XP, despawn of items, bed/POI release) verified (dated, cited)
-- [ ] Evidence file specs/005-death-mechanics/research/death-surface.md committed
+- [x] Villager damage sources and immunities in vanilla (mobs, environment, hunger, falls, fire, drowning) verified (dated, cited)
+- [x] Night-danger mechanics vs villagers (targeting, panic/flee, door mechanics, raid participation) verified for the augmented villager (dated, cited; build on specs/003 research)
+- [x] Vanilla death aftermath (drops, XP, despawn of items, bed/POI release) verified (dated, cited)
+- [x] Evidence file specs/005-death-mechanics/research/death-surface.md committed
 
 ## Phase 2 — Design document
 
