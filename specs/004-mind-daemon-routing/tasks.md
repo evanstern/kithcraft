@@ -9,10 +9,10 @@
 
 ## Phase 2 — Routing sketch & cost envelope
 
-- [ ] docs/design/llm-routing-and-budget.md: event → tier mapping (LLM events vs scripted reflexes), respecting the reflex/planner split and decision-0002's engine-side brain
-- [ ] Cadence per event class for a 3-villager evening (calls/hour, tokens/call, context shape) with assumptions stated
-- [ ] Latency posture per event class (mulling-tolerant vs conversation-flow vs offline consolidation)
-- [ ] Cost envelope for the demo evening: pricing cited (URL + accessed date), math shown, sensitivity note (6 villagers, chattier evening)
+- [x] docs/design/llm-routing-and-budget.md: event → tier mapping (LLM events vs scripted reflexes), respecting the reflex/planner split and decision-0002's engine-side brain
+- [x] Cadence per event class for a 3-villager evening (calls/hour, tokens/call, context shape) with assumptions stated
+- [x] Latency posture per event class (mulling-tolerant vs conversation-flow vs offline consolidation)
+- [x] Cost envelope for the demo evening: pricing cited (URL + accessed date), math shown, sensitivity note (6 villagers, chattier evening)
 
 ## Phase 3 — Recommendation & decision record
 
