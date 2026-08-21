@@ -4,7 +4,7 @@ title: Decide mind daemon language and LLM routing/budget for a small cast at 1x
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:18'
+updated_date: '2026-08-21 21:20'
 labels:
   - design-decision
   - architecture
@@ -33,7 +33,12 @@ Spec: specs/004-mind-daemon-routing
 - [ ] #2 An LLM routing sketch exists: which villager cognition events call an LLM, at what tier, at what expected cadence for a 3-villager evening
 - [ ] #3 A cost envelope estimate for the one-real-evening demo is written down with its assumptions
 - [ ] #4 Operator has ratified the decisions
+- [ ] #5 Spec phase: Phase 1 — Daemon assessment
+- [ ] #6 Spec phase: Phase 2 — Routing sketch & cost envelope
+- [ ] #7 Spec phase: Phase 3 — Recommendation & decision record
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
