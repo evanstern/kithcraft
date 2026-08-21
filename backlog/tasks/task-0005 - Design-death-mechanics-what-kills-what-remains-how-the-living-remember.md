@@ -4,7 +4,7 @@ title: 'Design death mechanics: what kills, what remains, how the living remembe
 status: To Do
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:21'
+updated_date: '2026-08-19 18:47'
 labels:
   - design-decision
   - gameplay
@@ -31,12 +31,6 @@ Context: ratified posture — permadeath is real; graves, persisting memories of
 - [ ] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
 - [ ] #4 Operator has ratified the design
 <!-- AC:END -->
-
-## Implementation Notes
-
-<!-- SECTION:NOTES:BEGIN -->
-Tier: sonnet (default tier — design fleshes out ratified posture, judgment gate is operator ratification at AC #4). Model ID: cc/claude-sonnet-5[1m]. Served model to be verified from first dispatch transcript.
-<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
