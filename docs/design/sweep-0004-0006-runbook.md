@@ -9,7 +9,12 @@ conflicts as routine. Direction is decided; do not re-litigate it:
 (augmented vanilla villager, accepted 2026-08-21) win. Plan-of-record is the board; this
 file carries only ordering, doctrine, and the log.
 
-**Status:** draft · operator sign-off on lanes: pending
+**Status:** signed-off · operator sign-off on lanes: 2026-08-21
+<!-- Sign-off ruling (2026-08-21): lanes approved as authored; BOTH proposed opus
+     escalations TAKEN by the operator — TASK-0004 and TASK-0006 run opus
+     (cc/claude-opus-5[1m]); TASK-0005 stays sonnet. The escalation checkpoints the
+     tier rubric requires are this ruling. Ratification gates (checkpoints 2–4)
+     remain the operator's at each PR. -->
 <!-- Only the OPERATOR flips draft → signed-off (the author never pre-fills it). An
      executing session must refuse a runbook whose status it cannot verify. -->
 <!-- This draft rides the TASK-0004 branch per the operator's 2026-08-21 no-runbook-PR
@@ -48,7 +53,7 @@ lane-2 task and also the sweep's tail: its output is the NEXT sweep's input.
 **Lane 1 — start immediately, in parallel:**
 
 - **TASK-0004 (opus · model `cc/claude-opus-5[1m]`, fallback `cc/claude-opus-4-8[1m]` —
-  PROPOSED escalation, requires operator ruling at sign-off: mind-daemon language
+  ESCALATED by operator at sign-off 2026-08-21: mind-daemon language
   reuse-vs-rebuild and LLM routing/budget are coupled architecture decisions the spec
   cannot pre-settle — design work per the rubric, directly analogous to TASK-0002's
   escalation. The final human gate — ratifying the decisions (card AC #4) — remains the
@@ -67,7 +72,7 @@ lane-2 task and also the sweep's tail: its output is the NEXT sweep's input.
 **Lane 2 — after both lane-1 PRs are merged and their decisions ratified:**
 
 - **TASK-0006 (opus · model `cc/claude-opus-5[1m]`, fallback `cc/claude-opus-4-8[1m]` —
-  PROPOSED escalation, requires operator ruling at sign-off: decomposing the demo into
+  ESCALATED by operator at sign-off 2026-08-21: decomposing the demo into
   a dependency-ordered set of one-PR deliverable tasks is planning judgment the spec
   does not settle — "thinking is Opus-tier" is the posture's own line; a wrong
   decomposition taxes every task of the next sweep. The plan itself is
@@ -78,10 +83,9 @@ lane-2 task and also the sweep's tail: its output is the NEXT sweep's input.
 
 Tiers and their model IDs come from **`.claude/model-tiers.json`** — `tiers.mjs --root .
 --check` exited 0 on 2026-08-21 before these lanes were authored (all three agent
-definitions `unchanged`; no regeneration, so no session restart required). Opus
-escalations above are PROPOSED; the operator's sign-off ruling on this file records
-whether each is taken or declined (declined → the task runs `sonnet`,
-`cc/claude-sonnet-5[1m]`).
+definitions `unchanged`; no regeneration, so no session restart required). Both opus
+escalations were offered and TAKEN at sign-off — ruling recorded at the status line;
+dispatches name `opus-implementer` (0004, 0006) and `sonnet-implementer` (0005).
 
 Record the model tier + explicit model ID + rubric justification on each board task at
 dispatch, including which model actually served (**verify from the first dispatch's
