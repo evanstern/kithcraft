@@ -16,7 +16,7 @@
 
 ## Phase 3 — Prove the seam
 
-- [ ] Second-vendor sketch: how a non-Minecraft vendor implements the same surface
-- [ ] Fake/test body vendor specified: minimal in-memory vendor exercising a mind end-to-end
-- [ ] Leak sweep: doc audited for Minecraft types/identifiers/conventions crossing the seam
-- [ ] docs/wiki/body-protocol-seam.md sources grown with the protocol doc; note re-verified and re-pinned
+- [x] Second-vendor sketch: how a non-Minecraft vendor implements the same surface
+- [x] Fake/test body vendor specified: minimal in-memory vendor exercising a mind end-to-end
+- [x] Leak sweep: doc audited for Minecraft types/identifiers/conventions crossing the seam
+- [x] docs/wiki/body-protocol-seam.md sources grown with the protocol doc; note re-verified and re-pinned

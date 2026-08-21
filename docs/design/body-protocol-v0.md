@@ -96,7 +96,7 @@ Time crosses as **integers in a unit the vendor declares once**, at `session_ope
 | Token | Refers to | Stability requirement |
 |---|---|---|
 | `body` | A minded body (a villager, the player is not one) | Stable for the lifetime of that body, **across sessions**. |
-| `thing_id` | A specific thing in the world — a bed, a chest, a mob, a player | Stable while the vendor can track that instance. |
+| `thing_id` | A specific thing in the world — a bed, a container, a creature, a person | Stable while the vendor can track that instance. |
 | `place` | A location, opaquely | Stable across sessions for the same location. |
 | `kind` | A *class* of thing (§3) | Stable for the vendor's lifetime. |
 
@@ -321,12 +321,17 @@ mind to ask a follow-up question; there is no channel for one.
   "content": {
     "thing": { "thing_id": "th-401", "kind": "k:person", "roles": [], "descriptor": "Tam", "body": "b-tam" },
     "distance": "near",
-    "activity": "drawing water"
+    "doing": "drawing water"
   }
 }
 ```
 
-`activity` is an optional vendor-composed human-readable phrase (prose only, AR-3).
+`doing` is an optional vendor-composed human-readable phrase (prose only, AR-3): what the thing
+appeared to be doing. It MUST NOT be parsed or branched on. It is deliberately **not** named
+`activity`, because the first vendor's engine has a type of that name whose values an
+implementer would then be tempted to serialize straight into this field — an AR-1/AR-2
+violation that a leak sweep would have to catch every time. Naming the field away from the
+collision is cheaper than policing it (§12, L-2).
 
 **A sighting is a bounded claim about one thing.** It says nothing about what else was or was
 not there. That is §4.3's job, and the distinction is load-bearing.
@@ -404,7 +409,7 @@ Normative:
 
 - The content MUST NOT name the thing that made the sound. Not as `thing_id`, not as `kind` of
   the source, not in the descriptor. **A heard thing is direct perception of a *sound*, not of
-  its cause** — hearing a mob is not seeing which mob. If the body also saw the causer, that is
+  its cause** — hearing a creature is not seeing which creature. If the body also saw the causer, that is
   a separate `sighting` percept, and joining them is the mind's inference to make and own.
 - `heard` is a distinct origin from `saw` precisely so a mind **cannot launder an inference
   from a noise into a witnessed fact**. Collapsing the two origins would silently defeat the
@@ -630,6 +635,14 @@ distinguish "still walking" from "message lost".
 `reason_code` on refusal ∈ `unknown_verb` | `unknown_target` | `malformed` | `unsupported_version`
 | `busy`.
 
+**`unknown_target` MUST NOT become an existence oracle.** It means *this vendor never issued
+that token, or does not recognize it* — a protocol error about the token, not a fact about the
+world. A token the vendor **did** issue, whose referent no longer exists, MUST be accepted here
+and fail at §5.4 with `target_gone`. A vendor that refuses such an intent with `unknown_target`
+has turned the ack into a cheap, synchronous "does X still exist?" probe, which is a world query
+in refusal form (SI-1) and breaks §5.6's monopoly on non-existence discovery. The fake vendor
+(§10) tests exactly this pair. (§12, L-6.)
+
 ### 5.4 `act_result` (a percept, §4.8)
 
 ```json
@@ -647,6 +660,11 @@ distinguish "still walking" from "message lost".
   }
 }
 ```
+
+`detail` is a vendor-composed human-readable phrase, **prose only** (AR-3): it MUST NOT be
+parsed or branched on, and a vendor MUST NOT use it to convey world state that has no
+structured percept of its own. An unconstrained free-text field on the result of every act is
+the easiest place in the protocol to smuggle a query response back to a mind (§12, L-3).
 
 `outcome` ∈ `completed` | `failed` | `interrupted` | `superseded` | `expired`.
 `reason_code` (on non-completion) ∈ `unreachable` | `target_gone` | `not_capable` | `blocked` |
@@ -776,6 +794,28 @@ benefit while making the epistemic layer non-portable to a second vendor.
 The manifest is how AR-2's opacity stays workable: a mind learns the vendor's vocabulary at
 session start, in role-annotated form, and never has to know what a token spells.
 
+**The manifest describes the vendor, never the world.** `salient_kinds` is the closed vocabulary
+this vendor can *ever* report — not what happens to be near this body now. It MUST be identical
+for every body in a session and MUST NOT vary with world state. A vendor that populated it from
+the body's surroundings would have made `session_open` a "what is around me" query, which is
+SI-1 defeated at the handshake, before a single percept crossed. (§12, L-7.)
+
+**Core percept types — the perceive-side floor.** §5.5 gives a mind a fixed floor of verbs; a
+mind portable across vendors needs the same on the perceive side, or a vendor can silently omit
+the channel a mind's epistemics rest on. Every vendor MUST declare and support:
+
+| Percept type | Why it is floor, not option |
+|---|---|
+| `act_result` | §5.4 already requires exactly one per accepted intent. Without it a mind blocks forever. |
+| `observation` | The **only** channel carrying an absence claim (§4.3). A vendor that omits it leaves every place-belief unfalsifiable — the precise bug PM-2 was written to fix — and nothing in the manifest would have told the mind that the property was gone. |
+| `sighting` | Without it a mind never learns a token for anything, so it can never name a target (§5.2). |
+| `speech` | The seam's product reason for existing (the brief's thesis is company). A vendor with no speech gives a mind nothing to be a mind about. |
+
+`sound`, `told_fact`, `text`, `self_state`, and `change_report` are **optional**: a vendor
+declares them or does not, and a mind MUST run correctly against a vendor that declares none of
+them. This split is what the second-vendor sketch (§9) exposed and is why it is stated here
+rather than assumed.
+
 ### 6.3 Session continuity — the gap is a gap
 
 `continuity` reports **that** the body was unattended and for how long. It MUST NOT report what
@@ -890,7 +930,245 @@ Constraints any candidate must satisfy:
 
 ---
 
-## 9. Open questions carried forward
+## 9. Second vendor — a sketch (R3)
+
+The claim "world-agnostic" is worth nothing unstated. This section spends one page implementing
+the whole surface for a vendor with no engine at all: **Hearth**, a trivial text world — rooms
+joined by exits, things lying in rooms, people walking between them. It is deliberately the
+*weakest* possible vendor, because a surface a text MUD can serve is a surface the V2 owned
+engine can serve with room to spare.
+
+### 9.1 The mapping, in full
+
+| Protocol concept | Hearth's implementation | Notes |
+|---|---|---|
+| `body` | A row in `people` with `minded = true`. | Stable across sessions because it is a database key. |
+| `place` | A room's primary key, prefixed: `pl-<room_id>`. | The registry obligation (§2.3) is free: rooms are rows, keys are never reused. |
+| `descriptor` (place) | The room's `short_name` column — "the well", "the north clearing". | Authored, not derived. Hearth's descriptors are *better* than the first vendor's, which must compose them from features. |
+| `thing_id` | `th-<item_id>`. | |
+| `kind` | A small authored table of ~15 kinds. Hearth spells them `k:bed`, `k:hearth`, `k:chest`. | AR-2 holds: the mind never parses them. |
+| `roles`, `salient_kinds` | Columns on the same table, authored once. | The whole manifest is a `SELECT`. |
+| `distance` / `extent` | `here` if same room; `near` if one exit away; `middling` if two; `far` beyond. | Bands, from a graph hop count. No arithmetic crosses. |
+| `bearing` | The exit's compass label, or `null`. | Declared in the manifest as Hearth's own small set. |
+| `world_time` | A monotonic integer counter, `time_unit: "second"`, ticked by a wall clock. | |
+| `condition` / `level` | Two integer columns bucketed into `none`/`mild`/`severe`/`critical` at emission. | AR-6 holds; the raw integers stay inside. |
+
+### 9.2 The three surfaces
+
+**Perceive.** Hearth pushes on three triggers, and only three: something changes in the room a
+body occupies; a body enters a room; a person speaks in earshot.
+
+- `sighting` — emitted when a thing or person becomes co-located with a body.
+- `observation` — emitted on entering a room, and on `attend`. `extent: "here"`, `vocabulary`
+  = the manifest's `salient_kinds` (all of them; Hearth's world is small enough that its
+  vocabulary and its scan scope coincide), `present` = the room's contents joined to that
+  vocabulary and sorted by `thing_id`. **Absence falls out of a `LEFT JOIN`.** This is the
+  moment the design pays for itself: the perception fix PM-2 spent a whole spec on in
+  promptworld I is, for a vendor built after the rule exists, a query that returns fewer rows.
+- `speech` — when a person speaks in the room. Player-analogues (unminded `people` rows) emit
+  `source.kind: "person"`; other minded bodies emit `source.kind: "body"`.
+- `act_result` — always.
+- **Not implemented:** `sound`, `told_fact`, `text`, `self_state`, `change_report`. Hearth
+  declares none of them in its manifest, and per §6.2 that is a conforming vendor. A mind that
+  breaks against Hearth was assuming an optional channel and has a bug.
+
+**Act.** All four core verbs, and nothing else:
+
+- `go_to` — resolve the token to a room, walk the exit graph one hop per beat. Unreachable →
+  `failed`/`unreachable`. Target person absent → `failed`/`target_gone` (§5.6).
+- `speak` — append the utterance to the room; emit `speech` percepts to every other body there.
+- `attend` — emit an `observation` of the current room.
+- `wait` — sleep, then `completed`; a `cancel` or `supersedes` ends it early as `superseded`.
+
+Extended verbs: Hearth declares `take` and `drop`. Neither is core, so a mind that never learned
+them simply never uses them — which is §5.5 working as designed.
+
+**Remember.** Hearth stores nothing of the mind's. Its persistence duty is exactly the token
+registry (§6.1) — rooms, items, people, kinds — and that is a database it already has for
+non-protocol reasons.
+
+### 9.3 What the sketch actually proved
+
+The sketch is not decoration; it changed the document. Three findings, each fixed above:
+
+1. **Optional channels were assumed, not declared.** Writing a vendor with no hearing, no
+   artifacts, and no interoception made it obvious that `capabilities.percept_types` was
+   listing the *first* vendor's channels as though they were the protocol's. §6.2 now names a
+   four-type floor and marks the rest optional. Without this, "Hearth is a conforming vendor"
+   was an opinion.
+2. **`activity` was a Minecraft-shaped field name** hiding in a world-agnostic shape. Hearth
+   would have populated it from a `doing` column and nothing would have gone wrong; the first
+   vendor would have populated it from an engine type of the same name. Renamed to `doing`
+   (§4.2, L-2).
+3. **`observation`'s `vocabulary` is vendor-scoped, not world-scoped.** Hearth's vocabulary and
+   its scan scope coincide; the first vendor's cannot (F-6 — a 3-D volume forces a smaller
+   scanned set than the vendor's full kind list). The field was already required, but its
+   meaning — *the kinds scanned for this observation*, which MAY be a subset of the manifest —
+   is only unambiguous once two vendors disagree about it. §4.3's wording holds; this is why.
+
+The V2 owned engine is the easier case and needs no separate sketch: it is Hearth with real
+space, and every mapping above holds with `distance` computed from actual geometry instead of
+hop counts. The load-bearing observation is that **neither vendor had to implement cognition**
+— PM-3's division of labour (SI-4) is what keeps a second vendor a week of work instead of a
+port of the mind.
+
+---
+
+## 10. The fake body vendor — testing without a world (R4)
+
+The seam's third promise from the brief, after "minds don't couple to Minecraft" and "V2 is a
+vendor, not a rewrite": **minds are testable without booting Minecraft.** This section specifies
+the vendor that cashes it.
+
+**What it is.** `FakeVendor` — an in-memory implementation of the full protocol surface, driven
+by a script rather than by a world. No engine, no network required (T-7 permits it in-process),
+no clock: `world_time` advances only when the script says so, which makes every test
+deterministic without any determinism machinery in the protocol.
+
+**What it is for.** Two jobs, and it must not grow a third:
+
+1. **Exercising a mind end-to-end** — scripted percepts in, asserted acts out.
+2. **Proving the protocol's own unprovable rules.** V-5 and V-6, the change_report restriction,
+   and SI-1's edges are rules no compiler can check across a process seam (EH-2's whole
+   adaptation). The fake vendor is where they become tests.
+
+It is a **test double, not a game.** It has no pathfinding, no simulation, no autonomous
+behaviour. If a `go_to` should succeed, the script says so.
+
+### 10.1 Shape
+
+```
+FakeVendor
+  .manifest(...)                  → the session_open payload (§6.2)
+  .open() / .close(reason)        → session lifecycle
+  .emit(percept)                  → push one percept to the mind
+  .advance(n)                     → world_time += n; nothing else happens
+  .acts                           → every intent received, in order (the assertion surface)
+  .resolve(intent_id, outcome, reason_code=None, detail=None)
+                                  → emit the act_result for a pending intent
+  .strict = True                  → V-5 posture: reject malformed rather than coerce
+```
+
+The mind under test sees only the protocol; it cannot tell `FakeVendor` from a world. That is
+the point — a test double that a mind can detect is testing the wrong thing.
+
+**Default behaviour on receiving an intent:** ack `accepted: true`, record it in `.acts`, and
+**do nothing else**. The act stays pending until the script resolves it. A fake vendor that
+auto-completed acts would quietly hide the state a mind occupies most of the time — waiting.
+
+### 10.2 The canonical end-to-end test
+
+Enough to prove the mind is a mind, using only the four core verbs:
+
+```
+v = FakeVendor(manifest: core verbs, core percept types + told_fact)
+v.open()
+
+# 1. The mind learns a place and a person exist.
+v.emit(sighting(thing=Tam@th-401/b-tam, place=pl-3a91 "the well",
+                distance="near", origin="saw"))
+v.emit(observation(place=pl-3a91, extent="near",
+                   vocabulary=["k:sleeping-place","k:water-source","k:person"],
+                   present=[water-source@th-9]))
+#    → absence claim: no sleeping-place at the well. Falsifiable, per §4.3.
+
+# 2. Tam tells the mind about somewhere the mind has never been.
+v.emit(told_fact(source=b-tam, about_place=pl-51c "the old orchard",
+                 thing=k:food-source, assertion="present",
+                 observed_at=902430, received_at=918251, hops=1))
+
+# 3. The mind acts on secondhand knowledge.
+assert v.acts[-1].verb == "go_to" and v.acts[-1].target.place == "pl-51c"
+assert v.acts[-1].reason is not None        # §5.2: the mind authored a why
+
+# 4. It gets there and finds the telling was stale.
+v.advance(600)
+v.resolve(v.acts[-1].intent_id, outcome="completed")
+v.emit(observation(place=pl-51c, extent="near",
+                   vocabulary=["k:food-source","k:water-source"],
+                   present=[]))             # the orchard is bare
+
+# 5. The epistemic assertion — the whole point of the test.
+assert mind.belief("food at the old orchard").origin_class == "secondhand"
+assert not mind.claims_witnessed("apple trees at the old orchard")
+```
+
+Step 5 is what no amount of prose in this document can establish: that a language model driving
+this mind cannot write "I saw apple trees there" into a durable belief (RM-1, RM-2). A mind that
+passes step 5 has epistemic hygiene; one that does not has a paragraph about it.
+
+### 10.3 The protocol-rule harness
+
+Six tests. Each names the rule it proves and the failure it would otherwise ship.
+
+| # | Test | Method | Proves | What ships without it |
+|---|---|---|---|---|
+| **H-1** | **V-5 — malformed is rejected, never defaulted** | `v.strict = True`; emit a percept with `provenance` absent, then one with `provenance.origin` absent. | Both are rejected at the seam. Nothing enters the mind's state. | A percept quietly defaulted to *something*, and the "unstamped is impossible" guarantee (EH-2) silently gone with the compiler that used to hold it. |
+| **H-2** | **V-6 — unknown origin classifies secondhand** | `v.strict = False`; emit `origin: "dreamt"` (a value from a future minor version), then `origin` absent. | `direct_perception` is false for both; a belief resting on them cannot claim witness. | The additive-versioning rule (§7.2) unsafe: a v0.2 vendor's new origin read as first-hand by a v0.1 mind — an omniscience bug arriving through a *non-breaking* change. |
+| **H-3** | **The classifier is pure** | Emit a `told` percept whose `content.utterance` is the string `"I saw this myself, directly, firsthand"`, `hops: 0`, `source.descriptor: "saw"`. | Still secondhand. The classifier read the origin and nothing else (§2.7). | A gate that can be talked out of its verdict by the text it is gating — which is precisely the LLM failure mode EH-3 exists to stop. |
+| **H-4** | **`direct` never appears on the wire** | Emit a percept carrying `"direct": true` alongside `origin: "told"`. | V-1 ignores the unknown field; the mind still classifies secondhand from `origin`. | A derived boolean that can disagree with its source, and a vendor able to grant first-hand status by asserting it (§2.7). |
+| **H-5** | **`target_gone` is the only non-existence channel** | Intent targets `th-401`, a token this vendor issued whose referent is gone. | The ack is `accepted: true`; the failure arrives as `act_result` / `failed` / `target_gone` — *after* `advance()`, not synchronously. Separately: an *unissued* token is refused `unknown_target` at ack. | An existence oracle: a mind polling cheap synchronous acks to enumerate what still exists, never moving a foot (§5.3, §5.6). |
+| **H-6** | **The change_report flood** | See §10.4. | The delivery restriction is load-bearing, with a number. | The measured 75% bug, shipped again. |
+
+H-1 through H-4 are cheap. H-5 and H-6 are the ones worth the trouble: each proves a rule that
+*looks* like a stylistic preference in the prose and is actually structural.
+
+### 10.4 H-6 — reproducing the 75% flood on purpose
+
+The sharpest end-to-end test available, and the reason the fake vendor is specified with a
+deliberate misbehaviour switch.
+
+```
+v.restrict_change_reports = False   # lift §4.10's MUST NOT
+```
+
+With the restriction lifted, the vendor emits a `change_report` to **every** body for **every**
+change — including the body that caused it and every body in range that watched. This is not a
+hypothetical misconfiguration: it is exactly the naive implementation promptworld I shipped
+first (PM-6), reconstructed so its cost is measurable rather than remembered.
+
+**The test:** script a modest scenario — three bodies in a shared place, one of them acting
+repeatedly (a harvest loop, or Hearth's `take`), the others watching. Run it twice, identical
+script, restriction off then on. Count percepts that would become durable memories, per body.
+
+**The assertion:**
+
+```
+assert flooded.memory_count > 3 * restricted.memory_count
+assert restricted.change_reports_to_actor == 0
+assert restricted.change_reports_to_witnesses == 0
+```
+
+**What it demonstrates.** With the restriction off, the actor is told about its own act twice —
+once honestly as `act_result` (`origin: "acted"`, first person, situated by its own `reason`)
+and once as a third-person `change_report` about a change it made. The witnesses are told twice
+as well: once as the `sighting` they actually saw, once as a report of it. The bookkeeping
+channel drowns the experiential one. The 75% figure (§4.10) is what that ratio measured live in
+promptworld I; this harness is how a future implementer confirms the restriction still earns its
+place rather than deleting it as an unexplained prohibition.
+
+That is the real deliverable of H-6: **the restriction is a rule with a reproduction, not a
+warning.** A rule whose violation can be demonstrated on demand is a rule that survives the next
+refactor.
+
+### 10.5 Scope discipline
+
+The fake vendor MUST NOT acquire:
+
+- **Autonomous behaviour.** No physics, no NPC schedules, no "realistic" percept generation. The
+  moment it decides what to emit, tests stop asserting the mind's behaviour and start asserting
+  the fake's.
+- **A read API for the mind.** It is the single most convenient place in the codebase to add
+  `vendor.things_near(body)` for a test's benefit, and doing so builds an SI-1 violation into
+  the test harness — where it will be copied into a real vendor by someone reasonably assuming
+  the test double models the contract. Assertions read `.acts`; they never hand the mind a
+  handle.
+- **Protocol features the real vendors lack.** It is a conformance reference. If the fake is
+  more capable than the contract, it certifies minds that no world can host.
+
+---
+
+## 11. Open questions carried forward
 
 | # | Question | Notes |
 |---|---|---|
@@ -903,6 +1181,55 @@ Constraints any candidate must satisfy:
 
 ---
 
-**Next (Phase 3, not this document):** the second-vendor sketch (R3), the fake/test body vendor
-spec (R4), a leak sweep against §3, and re-verifying [[body-protocol-seam]] with this file as a
-source.
+## 12. Appendix — leak sweep
+
+**Performed:** Phase 3, over the whole document. **Two things were hunted:** vendor-native
+concepts crossing the seam (AR-1…AR-6), and **query-shaped affordances** — anything by which a
+mind could pull world state rather than receive it (SI-1). The second matters more: a Minecraft
+string is caught by grep and by any reviewer, while a convenience lookup arrives looking like a
+kindness to implementers and defeats the invariant the whole protocol is built to hold.
+
+### 12.1 Method
+
+| Pass | What was checked |
+|---|---|
+| **P-1** | Every engine-native term — type names, registry identifiers, class names, coordinate conventions, native units and scales — in every normative field, example, and enum. |
+| **P-2** | Every field the mind branches on, against AR-1/AR-2: is its value opaque, or does it invite parsing? |
+| **P-3** | Every free-text field (`descriptor`, `detail`, `doing`, `utterance`, `text`, `activity`-shaped phrases), against AR-3: is it marked prose-only and forbidden from branching? Free text is where structured leaks hide from grep. |
+| **P-4** | Every message the mind **sends** or that returns to it synchronously, against SI-1: can a mind learn world state from it faster or more cheaply than by acting? Explicitly including `intent_ack` and its refusal codes. |
+| **P-5** | The `session_open` manifest, against SI-1: does any field describe the *world* rather than the *vendor*? |
+| **P-6** | Every field a mind could accumulate across percepts to reconstruct geometry (AR-4) — distances, bearings, extents — checked for arithmetic affordance. |
+
+### 12.2 Findings
+
+| # | Finding | Pass | Verdict |
+|---|---|---|---|
+| **L-1** | `minecraft:red_bed` with `pos: {x,y,z}` and `health: 14` (§3). | P-1 | **Kept, deliberately.** The only engine-native identifier in the document, and it appears as the labelled *violation* half of a worked pair showing what does not cross. Removing it would remove the rule's only concrete demonstration. Flagged here so a future automated grep has a known allowlisted line. |
+| **L-2** | `sighting.activity` (§4.2) — a field named identically to a first-vendor engine type whose values an implementer would be tempted to pass straight through. | P-1, P-3 | **Fixed.** Renamed `doing`, with the collision documented at the field and the prose-only constraint made explicit. Not a leak yet; a leak with an invitation. |
+| **L-3** | `act_result.detail` (§5.4) — free text on the result of every act, previously unconstrained. | P-3, P-4 | **Fixed.** Now marked prose-only, MUST NOT be parsed, and MUST NOT convey world state lacking a structured percept. This was the widest smuggling channel in the document: an unconstrained string returned from every act is a query response with extra steps. |
+| **L-4** | `thing_id` gloss "a bed, a chest, a **mob**, a player" (§2.3); "hearing a **mob**" (§4.4). | P-1 | **Fixed.** `mob` is engine vernacular; now "a container, a creature, a person" and "hearing a creature". Prose only, never on the wire — but the seam's own vocabulary teaching an implementer to think in engine nouns is how the next field gets named wrong. |
+| **L-5** | `intent.target` accepting a description to search for ("the nearest bed"). | P-4 | **Already closed** by §5.2's existing MUST NOT. Re-verified: this is the textbook query-in-intent-form and the prohibition is normative and correctly placed. |
+| **L-6** | `intent_ack` refusing with `unknown_target` for a token whose referent no longer exists. | P-4 | **Fixed.** This was the sharpest find of the sweep and the only one that was a live SI-1 hole rather than a temptation. A vendor answering "gone?" synchronously at ack time gives a mind a cheap existence oracle: name every remembered token, read the refusals, learn what still exists — omniscience by polling, without moving. §5.3 now restricts `unknown_target` to *unissued* tokens; a known-but-gone referent MUST be accepted and fail with `target_gone` (§5.6), which costs a walk. H-5 tests the pair. |
+| **L-7** | `session_open.capabilities.salient_kinds` — nothing previously said it described the vendor rather than the body's surroundings. | P-5 | **Fixed.** A vendor populating it from what is nearby would have made the handshake a "what is around me" query — SI-1 defeated before the first percept. §6.2 now requires it invariant across bodies and world state. |
+| **L-8** | Distance/extent/bearing bands accumulating into a reconstructable map. | P-6 | **No change needed.** Bands are unordered labels with no vendor-declared metric; `bearing` is a vendor-declared relative set with no composition rule. Triangulation is not available, and AR-4's "no arithmetic" already forbids attempting it. Recorded because "coarse bands are safe" is an assumption worth having checked once rather than assumed forever. |
+| **L-9** | `world_time` integers (§2.2). | P-1, P-6 | **No change needed.** Unit is vendor-declared, never a tick or frame count (AR-5), and time arithmetic is legitimate: RM-6's read-time freshness requires it. This is the one arithmetic the mind is *supposed* to do. |
+| **L-10** | Prose mentions of Minecraft, Fabric, Mixin, the vanilla brain, POI, and `[[villager-brain-api]]`. | P-1 | **No change needed.** All appear in rationale, feasibility citations, and open questions — never in a message shape, an enum, or a normative field. The protocol is entitled to explain *why* a rule exists by naming the vendor that motivated it; it is not entitled to let that vendor's vocabulary into a payload. |
+
+### 12.3 Result
+
+Ten findings: **five fixed** (L-2, L-3, L-4, L-6, L-7), **one deliberate retention** (L-1),
+**four verified clean** (L-5, L-8, L-9, L-10). No engine-native type, identifier, or coordinate
+convention appears in any message shape or normative field.
+
+**The pattern worth carrying.** Every genuine leak was query-shaped, not Minecraft-shaped: an
+error code that answered a question (L-6), a manifest that described surroundings (L-7), a free
+text field that could carry anything (L-3). The Minecraft-shaped findings were vocabulary
+hygiene — real, worth fixing, and not where the invariant was actually at risk. **A future
+sweep that greps for `minecraft:` and stops has checked the easy half.** Re-run all six passes,
+in order, whenever a field is added.
+
+---
+
+**Phase 3 complete.** R3 is served by §9 and §12; R4 by §10. [[body-protocol-seam]] carries this
+file as a source and is re-verified in the same commit range — the seam has moved from posture
+to contract.
