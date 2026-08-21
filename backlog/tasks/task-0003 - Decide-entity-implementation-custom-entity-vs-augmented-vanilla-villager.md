@@ -35,7 +35,11 @@ Spec: specs/003-entity-implementation
 - [ ] #5 Spec phase: Phase 3 — Recommendation & decision record
 <!-- AC:END -->
 
+## Implementation Notes
 
+<!-- SECTION:NOTES:BEGIN -->
+Dispatch tier: sonnet (cc/claude-sonnet-5[1m], no fallback declared) — default tier: trade-off analysis against ratified constraints, same shape as TASK-0001's comparison which sonnet served (verified 2026-08-20). Served model to be re-verified from Phase 1 transcript.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
