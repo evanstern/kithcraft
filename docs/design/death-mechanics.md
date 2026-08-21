@@ -186,3 +186,118 @@ scoped — with the mitigation living elsewhere, not here.**
   the correct lever is **demo-config danger tuning at TASK-0006** (fewer hostile spawns,
   daytime-only staging, whatever knob the build plan names) — not a change to the permadeath
   rules themselves, and not a reopening of the replenishment punt.
+
+## 6. Design checks (Phase 3 — ratification prep)
+
+### 6.1 Cross-check against the brief's spell-breakers and [[v1-demo]]
+
+| Spell-breaker / definition | Check | Result |
+|---|---|---|
+| **Tedious interactions** | Does any death mechanic add a required player action? | **PASS.** The grave marker is mod-placed unconditionally (§2); the belongings bundle is captured automatically; the only player-facing addition is an *optional* job-board entry a survivor may or may not pick up — the player is never required to do anything to get the memorial beat. |
+| **Micromanagement** | Does keeping a villager alive require feeding/escort/vigilance? | **PASS**, argued in full in §4: no starvation loop, autonomous panic/flee/door-use/shelter-seeking all inherited free. The one addition (suppressing zombie sieges) *removes* an arbitrary-death vector rather than adding a management surface. |
+| **Politeness-policing** | Does any death rule make a villager gate or judge the player's conduct? | **PASS.** §1's ruling on player direct/indirect kills is explicit: no engine guardrail, no reputation gate added by this design — the embodied player's capacity for real harm is left alone, and its social weight rides the existing memory/gossip channels, not a new judgment layer. |
+| **[[v1-demo]] definition** ("one real evening," walls protect friends, dusk conversation) | Does the design serve or contradict the demo's required texture? | **Serves it.** §1's admitted-causes table is built around exactly the demo's stated mechanic ("vanilla night danger means the player's walls and torches protect their friends"); §3's memory carry is what makes the dead surface in the demo's dusk conversation. Nothing in this design asks for anything outside the demo's three-villager, one-evening frame. |
+
+### 6.2 What TASK-0006 inherits
+
+**Settled here — TASK-0006 implements as-is, no further design call needed:**
+
+- Admitted causes: hostile-mob night targeting, zombie-villager conversion (ruled equivalent
+  to death), falls, drowning, fire/lava, player direct and indirect kills — all admitted per §1,
+  no suppression beyond sieges.
+- Suppressed cause: zombie sieges (recommend Mixin-suppress the trigger) — §1.
+- Grave: mod-placed baseline marker at the death location (or nearest safe surface) +
+  optional job-board "tend the grave" entry — §2.
+- Belongings: capture the dying villager's hidden inventory before vanilla destroys it;
+  place as a named, `roles: ["storage"]` bundle at the grave — §2.
+- World markers: bed/job-site release via `releaseAllPois()` is free; hold them unclaimed
+  for a grief period before reassignment — §2.
+- Memory/conversation carry: witness sighting, absent-survivor `change_report`, dusk
+  retelling as `speech`/`told_fact` — all existing percept shapes, no new plumbing — §3.
+- Fragility posture: rely entirely on existing autonomous villager competence (no feeding
+  UI, no escort quest) — §4.
+- Shrinking cast: accepted as on-thesis dramatic material, not mitigated by default — §5.
+- **Token discipline:** when a villager dies or converts, the vendor MUST issue a new body
+  token for the grave/converted-mob identity and MUST NOT reissue or reuse the dead
+  villager's retired `body` token (body-protocol-v0 §2.3) — an implementation obligation the
+  design relies on but does not itself enforce.
+
+**Open — TASK-0006 must resolve or verify before relying on it:**
+
+1. Verify the Mixin-suppression approach for zombie sieges, and whether a 3-villager cast
+   would ever satisfy the (unverified, version-dependent) village-eligibility thresholds
+   that trigger one at all (§1).
+2. Decide whether raid content (Bad Omen, illager patrols) is in v1-demo scope at all (§1)
+   — flagged here, not ruled on.
+3. Set the grief-period duration before bed/job-site reassignment — a tuning knob this doc
+   deliberately leaves unnumbered (§2).
+4. Verify whether POI re-claim has any natural lag after `releaseAllPois()`, before relying
+   on "instant" being the actual default this design overrides (§2).
+5. If a specific scripted/recorded demo run needs to guarantee no cast loss mid-take, apply
+   demo-config danger tuning (fewer spawns, daytime-only staging) rather than touching the
+   permadeath rules (§5).
+
+### 6.3 Seam-tension audit — the "no protocol extension" claim
+
+§3 above claims every memory/conversation shape this design needs already exists in
+body-protocol-v0 and none is extended. Audited against `docs/design/body-protocol-v0.md`
+directly (percept types, the `change_report` delivery restriction, and the remember
+surface), mechanic by mechanic:
+
+- **Witness sighting** (a friend attacked/dying) → ordinary `sighting` (§4.2 of the
+  protocol): `thing` + `doing` + `origin: "saw"`. No new percept type; `doing` is already
+  prose-only per AR-3. Fits.
+- **Absent survivor learning of a death** → `change_report` with `change: "gone"` (§4.10).
+  The protocol's delivery restriction (never to the actor or a witness) is exactly what this
+  design leans on to *not* double-report a death to the people who already lived through it
+  — confirmed compatible, not merely unblocked by it.
+- **The new grave-thing a returning survivor perceives** → an ordinary `sighting`/
+  `observation` of a `thing` with an as-yet-unseeded role (something like `"memorial"` or
+  `"grave"`). `roles` is an explicitly **open** vocabulary (AR-3: "minds MUST tolerate
+  unknown roles") — introducing a new role value is vendor content, not a protocol change.
+  No extension.
+- **Belongings bundle** → `roles: ["storage"]` is an already-seeded role (AR-3). No new
+  vocabulary needed at all.
+- **Dusk retelling** → `speech`/`told_fact`, `origin: "told"` (§4.5–4.6) — the ordinary
+  secondhand path, unmodified.
+- **Zombie-villager conversion ruled equivalent to death** → uses `body_continuous: false`
+  at `session_open` continuity exactly as specified in §6.3 of the protocol ("this is a
+  different body"). A clean, intended use of an existing field, not a repurposing.
+- **Dead villager's own mind-process lifecycle** and **dusk-surfacing decay/consolidation**
+  are both explicitly left to the mind side (SI-5, remember surface) — this design states a
+  posture and defers the mechanism to TASK-0004, which is exactly where SI-5 puts that
+  decision. No protocol involvement to audit.
+- **`target_gone` as the sanctioned non-existence channel** (§5.6 of the protocol) is not in
+  tension with the richer death-reporting channels above: `target_gone` is the fallback for
+  a mind that still acts on stale knowledge of someone now dead; `sighting`/`change_report`
+  are the primary, richer channels for learning the death happened as an event. The two
+  are complementary, not competing.
+
+**Result: audit found no tension.** Every mechanic in §§1–3 maps onto an existing percept
+type, an existing open-vocabulary field (`roles`), or an existing continuity field, with no
+new percept type, no new envelope field, and no narrowing of an existing one. This is a
+genuine re-check, not a restatement of §3's own claim — flagged here for the protocol owner
+to spot-check independently rather than accepted on this document's say-so.
+
+### 6.4 Wiki re-verification
+
+Checked this branch's design against the two wiki notes the brief's death posture touches,
+even though neither currently lists `docs/design/death-mechanics.md` as a source:
+
+- **[[v1-demo]]** — its prose states the demo's required texture and spell-breakers but
+  only *references* death mechanics as an open question feeding the demo ("death mechanics
+  (TASK-0005)"). This design resolves that open question without contradicting anything
+  the note asserts — night danger's role in the demo ("the player's walls and torches
+  protect their friends") is reinforced, not changed. **Verdict: extended, not
+  contradicted.** No re-pin; `death-mechanics.md` is not added to its `sources` because
+  the note's own claims remain accurate as written.
+- **[[design-brief]]** — its prose compresses ratified decision #4 ("permadeath is real and
+  should sting... mechanics deferred") and decision #6 (no direct control, spell-breakers).
+  This design is precisely that deferred mechanics work, landing inside both ratified
+  constraints (permadeath stays real; the micromanagement spell-breaker is explicitly
+  answered in §4). **Verdict: extended, not contradicted.** No re-pin.
+
+Neither note's `description:` frontmatter field was changed, so no `CAPSULES.md`
+regeneration is needed from this check. If a future pass decides either note should cite
+this design doc directly (e.g. because TASK-0006 wants `[[v1-demo]]` to name the death
+posture explicitly), that is a normal wiki-update, not implied by this finding.

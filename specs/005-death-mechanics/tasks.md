@@ -17,6 +17,6 @@
 
 ## Phase 3 — Ratification prep
 
-- [ ] Design cross-checked against spell-breakers and [[v1-demo]]; demo-scope vs later mechanics stated for TASK-0006
-- [ ] Seam-tension flags (if any) recorded for the protocol owner rather than decided here
-- [ ] Wiki notes touched by the design ([[design-brief]], [[v1-demo]]) re-verified if contradicted or extended
+- [x] Design cross-checked against spell-breakers and [[v1-demo]]; demo-scope vs later mechanics stated for TASK-0006
+- [x] Seam-tension flags (if any) recorded for the protocol owner rather than decided here
+- [x] Wiki notes touched by the design ([[design-brief]], [[v1-demo]]) re-verified if contradicted or extended
