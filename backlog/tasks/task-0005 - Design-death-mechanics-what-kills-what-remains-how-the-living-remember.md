@@ -4,7 +4,7 @@ title: 'Design death mechanics: what kills, what remains, how the living remembe
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:38'
+updated_date: '2026-08-21 21:43'
 labels:
   - design-decision
   - gameplay
@@ -33,11 +33,9 @@ Spec: specs/005-death-mechanics
 - [ ] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
 - [ ] #4 Operator has ratified the design
 - [x] #5 Spec phase: Phase 1 — Death surface evidence
-- [ ] #6 Spec phase: Phase 2 — Design document
+- [x] #6 Spec phase: Phase 2 — Design document
 - [ ] #7 Spec phase: Phase 3 — Ratification prep
 <!-- AC:END -->
-
-
 
 ## Implementation Notes
 
@@ -45,6 +43,8 @@ Spec: specs/005-death-mechanics
 Tier: sonnet (default tier — design fleshes out ratified posture, judgment gate is operator ratification at AC #4). Model ID: cc/claude-sonnet-5[1m]. Served model to be verified from first dispatch transcript.
 
 Phase 1 done (dda2a19): death-surface evidence committed. Served model VERIFIED: cc/claude-sonnet-5[1m] (from implementer report, 2026-08-21). Key facts: no villager hunger death; zombie kill usually converts (50%/100%) rather than kills; death drops nothing (inventory lost), POIs released, murder gossip broadcast.
+
+Phase 2 done (4fe6f9d): docs/design/death-mechanics.md committed. Key rulings: night danger admitted; zombie conversion = true death in v1 (no curing); sieges suppressed via Mixin; guaranteed mod-placed grave + belongings bundle + POI grief-period; memory carry uses existing percepts (no protocol extension); micromanagement answered by vanilla competence + siege suppression; shrinking cast accepted, tuning pushed to TASK-0006.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
