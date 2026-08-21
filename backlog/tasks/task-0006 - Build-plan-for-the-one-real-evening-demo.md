@@ -4,7 +4,7 @@ title: Build plan for the "one real evening" demo
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:38'
-updated_date: '2026-08-21 23:21'
+updated_date: '2026-08-21 23:22'
 labels:
   - planning
 milestone: m-0
@@ -35,7 +35,15 @@ Spec: specs/006-evening-demo-build-plan
 - [ ] #2 The plan covers all demo beats: personas/desires generation, schedules, persistent memory, job-board book, blueprint build, dusk conversation, night danger
 - [ ] #3 The plan honors the two load-bearing constraints (loneliness-cure thesis, minds-are-others) and names the spell-breakers as design checks
 - [ ] #4 Operator has signed off on the plan
+- [ ] #5 Spec phase: Phase 1 — Decomposition
+- [ ] #6 Spec phase: Phase 2 — Board landing & sign-off prep
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Tier: opus (operator-escalated at runbook sign-off 2026-08-21 — demo decomposition is planning judgment the spec does not settle). Model ID: cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]. Opus tier already verified serving in this sweep (TASK-0004 all phases).
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
