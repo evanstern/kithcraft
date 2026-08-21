@@ -2,7 +2,7 @@
 id: decision-0002
 title: 'Entity implementation: augmented vanilla VillagerEntity'
 date: '2026-08-21 20:05'
-status: proposed
+status: accepted
 ---
 ## Context
 
