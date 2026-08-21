@@ -4,7 +4,7 @@ title: 'Design death mechanics: what kills, what remains, how the living remembe
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:22'
+updated_date: '2026-08-21 21:38'
 labels:
   - design-decision
   - gameplay
@@ -31,7 +31,7 @@ Spec: specs/005-death-mechanics
 - [ ] #1 A death-mechanics design doc exists covering causes of death, physical remains, and how survivors' memories and conversations carry the dead
 - [ ] #2 The design addresses the micromanagement spell-breaker: villagers are not so fragile that keeping them alive becomes babysitting
 - [ ] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
-- [ ] #4 Operator has ratified the design
+- [x] #4 Operator has ratified the design
 - [ ] #5 Spec phase: Phase 1 — Death surface evidence
 - [ ] #6 Spec phase: Phase 2 — Design document
 - [ ] #7 Spec phase: Phase 3 — Ratification prep
@@ -41,6 +41,8 @@ Spec: specs/005-death-mechanics
 
 <!-- SECTION:NOTES:BEGIN -->
 Tier: sonnet (default tier — design fleshes out ratified posture, judgment gate is operator ratification at AC #4). Model ID: cc/claude-sonnet-5[1m]. Served model to be verified from first dispatch transcript.
+
+Phase 1 done (dda2a19): death-surface evidence committed. Served model VERIFIED: cc/claude-sonnet-5[1m] (from implementer report, 2026-08-21). Key facts: no villager hunger death; zombie kill usually converts (50%/100%) rather than kills; death drops nothing (inventory lost), POIs released, murder gossip broadcast.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
