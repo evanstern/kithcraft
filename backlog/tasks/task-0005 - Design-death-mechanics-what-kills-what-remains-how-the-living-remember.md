@@ -4,7 +4,7 @@ title: 'Design death mechanics: what kills, what remains, how the living remembe
 status: In Progress
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:21'
+updated_date: '2026-08-21 21:22'
 labels:
   - design-decision
   - gameplay
@@ -37,7 +37,11 @@ Spec: specs/005-death-mechanics
 - [ ] #7 Spec phase: Phase 3 — Ratification prep
 <!-- AC:END -->
 
+## Implementation Notes
 
+<!-- SECTION:NOTES:BEGIN -->
+Tier: sonnet (default tier — design fleshes out ratified posture, judgment gate is operator ratification at AC #4). Model ID: cc/claude-sonnet-5[1m]. Served model to be verified from first dispatch transcript.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
