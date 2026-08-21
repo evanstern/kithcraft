@@ -1,10 +1,10 @@
 ---
 id: TASK-0005
 title: 'Design death mechanics: what kills, what remains, how the living remember'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-19 18:37'
-updated_date: '2026-08-21 21:46'
+updated_date: '2026-08-21 22:03'
 labels:
   - design-decision
   - gameplay
@@ -31,7 +31,7 @@ Spec: specs/005-death-mechanics
 - [x] #1 A death-mechanics design doc exists covering causes of death, physical remains, and how survivors' memories and conversations carry the dead
 - [x] #2 The design addresses the micromanagement spell-breaker: villagers are not so fragile that keeping them alive becomes babysitting
 - [x] #3 The design states what a permanently shrinking cast means for the v1 demo and accepts or scopes it
-- [ ] #4 Operator has ratified the design
+- [x] #4 Operator has ratified the design
 - [x] #5 Spec phase: Phase 1 — Death surface evidence
 - [x] #6 Spec phase: Phase 2 — Design document
 - [x] #7 Spec phase: Phase 3 — Ratification prep
@@ -48,6 +48,12 @@ Phase 2 done (4fe6f9d): docs/design/death-mechanics.md committed. Key rulings: n
 
 Phase 3 done (36bdae9): design checks pass all three spell-breakers; seam audit confirms zero protocol extension; wiki notes extended-but-consistent (no re-pin). Card ACs 1-3 satisfied; AC 4 (operator ratification) pending at PR review.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+Death-mechanics design ratified (operator merged PR #8, merge ab4ce43, 2026-08-21). Deliverables: docs/design/death-mechanics.md + specs/005-death-mechanics/ (spec/plan/tasks + death-surface evidence). Rulings: night danger admitted, zombie conversion = true death (no curing), sieges suppressed via Mixin, guaranteed grave + belongings bundle + POI grief-period, memory carry via existing percepts (zero protocol extension), micromanagement answered by vanilla competence + siege suppression, shrinking cast accepted with tuning knobs inherited by TASK-0006. All 12 spec boxes ticked; spell-breaker checks pass; wiki notes extended-but-consistent (no re-pin needed).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
