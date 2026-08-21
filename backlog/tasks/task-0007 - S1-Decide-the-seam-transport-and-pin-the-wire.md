@@ -1,0 +1,52 @@
+---
+id: TASK-0007
+title: S1 - Decide the seam transport and pin the wire
+status: To Do
+assignee: []
+created_date: '2026-08-21 23:35'
+labels:
+  - seam
+  - m-0-build
+milestone: m-0
+dependencies: []
+documentation:
+  - docs/design/demo-build-plan.md
+  - docs/design/body-protocol-v0.md
+  - docs/design/llm-routing-and-budget.md
+priority: high
+ordinal: 7000
+---
+
+## Description
+
+<!-- SECTION:DESCRIPTION:BEGIN -->
+As a future implementer, I want the mind<->vendor wire chosen and its framing pinned by fixtures, so that the Go and Java sides can be built independently without discovering they disagree at first contact.
+
+**Scope boundary.** Choose among **real wires only** — UDS, TCP, stdio — per decision-0003's one-way narrowing (a Go daemon against a JVM mod forecloses in-process deliberately, because it makes an SI-1 breach structurally impossible rather than merely forbidden). Weigh against T-1..T-7: push not pull; ordered-or-reorderable per body; long-lived sessions; mind restart independent of vendor restart; message-oriented with a schema the fake vendor can produce without an engine; backpressure that sheds `background` only and never splits an `observation`; process-separable but not process-required. Deliverable: a decision record, a framing/serialization spec as the spec-002 successor, and **golden message vectors** — one fixture per percept type, per intent shape, and the `session_open` handshake — that both implementations run against.
+
+**Done proves.** The wire is decided with T-1..T-7 answered one by one; the golden vectors exist and are language-neutral; a trivial Go encoder and a trivial Java decoder each round-trip every vector. Nothing else is built.
+
+**Depends on.** Nothing — this is the contract-shaped head of the graph.
+
+**References.** docs/design/demo-build-plan.md section 3.1 (S1) is the plan of record. Ratified surfaces consumed: docs/design/body-protocol-v0.md (Q-1, T-1..T-7, the seam invariants), decision-0003 + docs/design/llm-routing-and-budget.md (transport narrowed to real wires; the decomposition splits at the seam), decision-0001 (Fabric server-side mod).
+
+**Suggested tier: `opus` — proposed escalation (next sweep's runbook decides.** A decision the spec constrains but does not settle, analogous to the TASK-0002/TASK-0004 escalations. Taking it is the operator's checkpoint at sign-off; ratifying the resulting decision is an operator checkpoint regardless of tier.
+EOF
+)
+<!-- SECTION:DESCRIPTION:END -->
+
+## Acceptance Criteria
+<!-- AC:BEGIN -->
+- [ ] #1 The transport is decided among real wires only (UDS/TCP/stdio) and T-1..T-7 are each answered explicitly in a decision record
+- [ ] #2 A framing/serialization spec exists as the spec-002 successor
+- [ ] #3 Golden message vectors exist and are language-neutral: one per percept type, one per intent shape, and the session_open handshake
+- [ ] #4 A trivial Go encoder and a trivial Java decoder each round-trip every golden vector
+- [ ] #5 Nothing beyond the decision record, framing spec and vectors is built
+<!-- AC:END -->
+
+## Definition of Done
+<!-- DOD:BEGIN -->
+- [ ] #1 Tests pass
+- [ ] #2 Docs and wiki are updated and pass freshness tests
+- [ ] #3 Spec and Backlog are in sync
+<!-- DOD:END -->
