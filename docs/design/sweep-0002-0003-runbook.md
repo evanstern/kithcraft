@@ -191,3 +191,5 @@ harness/transcript, so future runbook authoring budgets against real numbers.
 
 | date | task | PR | merge | tokens/cost (best-effort) | notes |
 |------|------|----|-------|---------------------------|-------|
+| 2026-08-21 | TASK-0002 | — | — | — | in flight: claimed (340c3a2), spec cycle committed (34cb2df), phase ACs seeded (494f823). phases: 1 dispatching (opus-implementer, cc/claude-opus-5[1m] — operator-escalated at sign-off; served model to be verified from first transcript). |
+| 2026-08-21 | TASK-0003 | — | — | — | in flight: claimed (2fe6f9c), spec cycle committed (b1b1439), phase ACs seeded (92f8c49). phases: 1 dispatching (sonnet-implementer, cc/claude-sonnet-5[1m]; sonnet pin field-verified on this host in TASK-0001 sweep — still re-verify from first transcript). |
