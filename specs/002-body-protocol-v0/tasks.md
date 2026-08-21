@@ -2,9 +2,9 @@
 
 ## Phase 1 — Doctrine port & feasibility
 
-- [ ] promptworld I epistemic-hygiene doctrine pulled (INDEX-first, just-in-time notes) into specs/002-body-protocol-v0/research/doctrine-port.md with per-item source pointers
-- [ ] Perception doctrine (provenance classifier, situated memory, place-facts) distilled with real-time-only adaptations noted
-- [ ] Feasibility cross-check: every planned perception channel mapped to the Fabric brain substrate (sensors/memory modules/Mixin surface)
+- [x] promptworld I epistemic-hygiene doctrine pulled (INDEX-first, just-in-time notes) into specs/002-body-protocol-v0/research/doctrine-port.md with per-item source pointers
+- [x] Perception doctrine (provenance classifier, situated memory, place-facts) distilled with real-time-only adaptations noted
+- [x] Feasibility cross-check: every planned perception channel mapped to the Fabric brain substrate (sensors/memory modules/Mixin surface)
 
 ## Phase 2 — Protocol draft
 
