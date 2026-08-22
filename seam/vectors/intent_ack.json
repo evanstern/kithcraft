@@ -1,0 +1,19 @@
+{
+  "name": "intent_ack",
+  "direction": "vendor_to_mind",
+  "expect": "roundtrip",
+  "decoded": {
+    "protocol": "0.1",
+    "message": "intent_ack",
+    "session": "s-9d4c",
+    "seq": 7,
+    "body": "b-eda",
+    "world_time": 918261,
+    "payload": {
+      "intent_id": "i-4410",
+      "accepted": true,
+      "reason_code": null
+    }
+  },
+  "frame_hex": "000000ab7b22626f6479223a22622d656461222c226d657373616765223a22696e74656e745f61636b222c227061796c6f6164223a7b226163636570746564223a747275652c22696e74656e745f6964223a22692d34343130222c22726561736f6e5f636f6465223a6e756c6c7d2c2270726f746f636f6c223a22302e31222c22736571223a372c2273657373696f6e223a22732d39643463222c22776f726c645f74696d65223a3931383236317d"
+}

@@ -1,0 +1,32 @@
+{
+  "name": "err_missing_provenance",
+  "direction": "vendor_to_mind",
+  "expect": "refuse",
+  "refusal": "missing_required_field:payload.provenance",
+  "note": "A percept with no provenance at all. EH-2a/V-5: the message is malformed and MUST be refused at the seam — never defaulted, never given an assumed origin. A decoder that supplied a default would be minting first-hand-looking evidence out of a vendor bug, which is the one failure the classifier (§2.7) exists to make impossible. The frame itself is well-formed and canonical: the refusal is a message-validity ruling, not a framing error.",
+  "decoded": {
+    "protocol": "0.1",
+    "message": "percept",
+    "session": "s-0e11",
+    "seq": 2,
+    "body": "b-eda",
+    "world_time": 918290,
+    "payload": {
+      "percept_id": "p-9e41",
+      "percept_type": "sighting",
+      "urgency": "background",
+      "place": { "place": "pl-3a91", "descriptor": "the well" },
+      "content": {
+        "thing": {
+          "thing_id": "th-402",
+          "kind": "k:water-source",
+          "roles": ["water", "gathering_place"],
+          "descriptor": "the well",
+          "body": null
+        },
+        "distance": "here"
+      }
+    }
+  },
+  "frame_hex": "000001877b22626f6479223a22622d656461222c226d657373616765223a2270657263657074222c227061796c6f6164223a7b22636f6e74656e74223a7b2264697374616e6365223a2268657265222c227468696e67223a7b22626f6479223a6e756c6c2c2264657363726970746f72223a227468652077656c6c222c226b696e64223a226b3a77617465722d736f75726365222c22726f6c6573223a5b227761746572222c22676174686572696e675f706c616365225d2c227468696e675f6964223a2274682d343032227d7d2c22706572636570745f6964223a22702d39653431222c22706572636570745f74797065223a227369676874696e67222c22706c616365223a7b2264657363726970746f72223a227468652077656c6c222c22706c616365223a22706c2d33613931227d2c22757267656e6379223a226261636b67726f756e64227d2c2270726f746f636f6c223a22302e31222c22736571223a322c2273657373696f6e223a22732d30653131222c22776f726c645f74696d65223a3931383239307d"
+}

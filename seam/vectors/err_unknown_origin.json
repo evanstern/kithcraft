@@ -1,0 +1,37 @@
+{
+  "name": "err_unknown_origin",
+  "direction": "vendor_to_mind",
+  "expect": "decode_ok",
+  "note": "A percept whose origin is outside §2.7's v0 vocabulary. The decoder MUST accept it (V-2 fallback): an unrecognized origin is what a MINOR-newer sender looks like from here. Classifying it — EH-2b's 'unrecognized or absent origin is secondhand, never direct' — is the mind's job above the codec, so this vector pins decode-success and nothing more. A harness that refused this would have hard-coded the v0 origin set into the wire, making every additive change a breaking one.",
+  "decoded": {
+    "protocol": "0.1",
+    "message": "percept",
+    "session": "s-0e11",
+    "seq": 1,
+    "body": "b-eda",
+    "world_time": 918280,
+    "payload": {
+      "percept_id": "p-9e40",
+      "percept_type": "sighting",
+      "urgency": "background",
+      "provenance": {
+        "origin": "dreamt",
+        "source": null,
+        "observed_at": 918280,
+        "received_at": 918280
+      },
+      "place": { "place": "pl-3a91", "descriptor": "the well" },
+      "content": {
+        "thing": {
+          "thing_id": "th-401",
+          "kind": "k:person",
+          "roles": [],
+          "descriptor": "Tam",
+          "body": "b-tam"
+        },
+        "distance": "middling"
+      }
+    }
+  },
+  "frame_hex": "000001c37b22626f6479223a22622d656461222c226d657373616765223a2270657263657074222c227061796c6f6164223a7b22636f6e74656e74223a7b2264697374616e6365223a226d6964646c696e67222c227468696e67223a7b22626f6479223a22622d74616d222c2264657363726970746f72223a2254616d222c226b696e64223a226b3a706572736f6e222c22726f6c6573223a5b5d2c227468696e675f6964223a2274682d343031227d7d2c22706572636570745f6964223a22702d39653430222c22706572636570745f74797065223a227369676874696e67222c22706c616365223a7b2264657363726970746f72223a227468652077656c6c222c22706c616365223a22706c2d33613931227d2c2270726f76656e616e6365223a7b226f627365727665645f6174223a3931383238302c226f726967696e223a22647265616d74222c2272656365697665645f6174223a3931383238302c22736f75726365223a6e756c6c7d2c22757267656e6379223a226261636b67726f756e64227d2c2270726f746f636f6c223a22302e31222c22736571223a312c2273657373696f6e223a22732d30653131222c22776f726c645f74696d65223a3931383238307d"
+}

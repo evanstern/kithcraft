@@ -61,20 +61,20 @@ decoder each round-trip every vector.
 `java RoundTrip.java ../vectors` green; vector census matches contracts/vectors.md
 exactly.
 
-- [ ] T008 [US3] Author the nine percept-type vectors per contracts/vectors.md
+- [x] T008 [US3] Author the nine percept-type vectors per contracts/vectors.md
       (percept_sighting … percept_change_report) in seam/vectors/, each pinning
       decoded form + exact wire bytes per seam-wire-v0.md
-- [ ] T009 [P] [US3] Author the intent-shape vectors (intent, intent_ack, cancel), the
+- [x] T009 [P] [US3] Author the intent-shape vectors (intent, intent_ack, cancel), the
       session vectors (session_open with full manifest, session_close), and the three
       declared error/edge vectors (err_missing_provenance, err_unknown_origin,
       intent_ack_refused) in seam/vectors/
-- [ ] T010 [US3] Write the trivial Go round-trip harness in seam/go-roundtrip/ (own
+- [x] T010 [US3] Write the trivial Go round-trip harness in seam/go-roundtrip/ (own
       minimal go.mod + one test file): decode → re-encode → equality for every
       non-error vector; pinned refusal behavior for error vectors
-- [ ] T011 [P] [US3] Write the trivial Java round-trip harness in seam/java-roundtrip/
+- [x] T011 [P] [US3] Write the trivial Java round-trip harness in seam/java-roundtrip/
       (single file, plain `java`, no Gradle) with the same obligations and no shared
       code with the Go harness
-- [ ] T012 [US3] Run both harnesses over the full vector set; fix vectors or framing
+- [x] T012 [US3] Run both harnesses over the full vector set; fix vectors or framing
       spec until both are green with zero mismatches; record the run in
       specs/007-seam-transport/quickstart.md's expected-output terms
 
