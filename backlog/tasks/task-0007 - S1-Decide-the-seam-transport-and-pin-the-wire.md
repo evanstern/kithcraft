@@ -4,7 +4,7 @@ title: S1 - Decide the seam transport and pin the wire
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:35'
-updated_date: '2026-08-22 02:59'
+updated_date: '2026-08-22 03:13'
 labels:
   - seam
   - m-0-build
@@ -49,12 +49,12 @@ Spec: specs/007-seam-transport
 - [ ] #9 Spec phase: Phase 4 — Closure: leak audit, wiki, board
 <!-- AC:END -->
 
-
-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Claimed by sweep-0007-0022 orchestrator 2026-08-21 on branch task-0007-seam-transport (worktree .worktrees/task-0007). Tier: opus (operator-escalated at runbook sign-off 2026-08-21 — transport choice is design work the spec constrains but does not settle). Model ID: cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]. Served model recorded at dispatch.
+
+Phase 1 done (6003775, opus verified from transcript — claude-opus-5, ~139k subagent tokens): wire chosen — UDS (AF_UNIX SOCK_STREAM), mind listens / vendor dials; decision-0004 created (proposed, operator ratifies at PR); T-matrix filled in research.md with host-verified evidence (SOCK_SEQPACKET unavailable on macOS 26.5.1; JDK 26 UDS via SocketChannel; go1.26.4 present); stdio rejected on structural T-4 failure, TCP on reachability/permission grounds.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

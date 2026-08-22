@@ -332,4 +332,4 @@ tokens; the lane-boundary session-restart prescription above is the cost control
 
 | date | task | PR | merge | tokens/cost (best-effort) | notes |
 |------|------|----|-------|---------------------------|------|
-| 2026-08-21 | TASK-0007 | — | — | — | in flight: claimed (a9cd757), spec cycle committed (9b21361), phase ACs seeded (c03089d). phases: 1 dispatched (opus). |
+| 2026-08-21 | TASK-0007 | — | — | — | in flight: claimed (a9cd757), spec cycle committed (9b21361), phase ACs seeded (c03089d). phases: 1 done (6003775, opus VERIFIED serving claude-opus-5, ~139k; UDS chosen — AF_UNIX SOCK_STREAM, mind listens / vendor dials; decision-0004 proposed; SOCK_SEQPACKET host-verified unavailable), 2 dispatched (opus). |
