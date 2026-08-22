@@ -1,9 +1,10 @@
 ---
 id: TASK-0007
 title: S1 - Decide the seam transport and pin the wire
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:35'
+updated_date: '2026-08-22 02:54'
 labels:
   - seam
   - m-0-build
@@ -31,8 +32,8 @@ As a future implementer, I want the mind<->vendor wire chosen and its framing pi
 **References.** docs/design/demo-build-plan.md section 3.1 (S1) is the plan of record. Ratified surfaces consumed: docs/design/body-protocol-v0.md (Q-1, T-1..T-7, the seam invariants), decision-0003 + docs/design/llm-routing-and-budget.md (transport narrowed to real wires; the decomposition splits at the seam), decision-0001 (Fabric server-side mod).
 
 **Suggested tier: `opus` — proposed escalation (next sweep's runbook decides.** A decision the spec constrains but does not settle, analogous to the TASK-0002/TASK-0004 escalations. Taking it is the operator's checkpoint at sign-off; ratifying the resulting decision is an operator checkpoint regardless of tier.
-EOF
-)
+
+Spec: specs/007-seam-transport
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -43,6 +44,12 @@ EOF
 - [ ] #4 A trivial Go encoder and a trivial Java decoder each round-trip every golden vector
 - [ ] #5 Nothing beyond the decision record, framing spec and vectors is built
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Claimed by sweep-0007-0022 orchestrator 2026-08-21 on branch task-0007-seam-transport (worktree .worktrees/task-0007). Tier: opus (operator-escalated at runbook sign-off 2026-08-21 — transport choice is design work the spec constrains but does not settle). Model ID: cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]. Served model recorded at dispatch.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
