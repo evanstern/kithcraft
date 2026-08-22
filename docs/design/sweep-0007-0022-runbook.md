@@ -233,7 +233,13 @@ end.
     language-neutral fixture files both implementations can reach. Operator ratification
     of the decision follows PR review, before sync moves the card Done.
   - TASK-0009: the Yarn-mappings / target-version re-verification is recorded in the PR
-    (evidence rule applies to version claims).
+    (evidence rule applies to version claims). **Operator ruling 2026-08-22:** V1
+    introduces Gradle — in that same PR, replace `seam/java-roundtrip`'s hand-rolled
+    JSON *parsing* with a library-based harness (the hand-roll existed only to avoid
+    a build system this repo didn't have yet; once Gradle is native, the avoidance is
+    pointless). The canonical *writer* may remain custom only if the chosen library
+    provably cannot emit C-1..C-10 form — verified against the vectors and recorded
+    either way.
   - TASK-0012: R-8's hearing-hook verification is recorded with its outcome (declared
     or unsupported) — the card's AC #3.
   - TASK-0019: R-4/R-5 verification findings are recorded BEFORE implementation
