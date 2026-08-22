@@ -332,3 +332,4 @@ tokens; the lane-boundary session-restart prescription above is the cost control
 
 | date | task | PR | merge | tokens/cost (best-effort) | notes |
 |------|------|----|-------|---------------------------|------|
+| 2026-08-21 | TASK-0007 | — | — | — | in flight: claimed (a9cd757), spec cycle committed (9b21361), phase ACs seeded (c03089d). phases: 1 dispatched (opus). |
