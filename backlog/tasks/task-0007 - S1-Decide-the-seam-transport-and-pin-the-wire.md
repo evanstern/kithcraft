@@ -4,7 +4,7 @@ title: S1 - Decide the seam transport and pin the wire
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:35'
-updated_date: '2026-08-22 03:13'
+updated_date: '2026-08-22 03:27'
 labels:
   - seam
   - m-0-build
@@ -39,7 +39,7 @@ Spec: specs/007-seam-transport
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 The transport is decided among real wires only (UDS/TCP/stdio) and T-1..T-7 are each answered explicitly in a decision record
-- [ ] #2 A framing/serialization spec exists as the spec-002 successor
+- [x] #2 A framing/serialization spec exists as the spec-002 successor
 - [ ] #3 Golden message vectors exist and are language-neutral: one per percept type, one per intent shape, and the session_open handshake
 - [ ] #4 A trivial Go encoder and a trivial Java decoder each round-trip every golden vector
 - [ ] #5 Nothing beyond the decision record, framing spec and vectors is built
@@ -55,6 +55,8 @@ Spec: specs/007-seam-transport
 Claimed by sweep-0007-0022 orchestrator 2026-08-21 on branch task-0007-seam-transport (worktree .worktrees/task-0007). Tier: opus (operator-escalated at runbook sign-off 2026-08-21 — transport choice is design work the spec constrains but does not settle). Model ID: cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]. Served model recorded at dispatch.
 
 Phase 1 done (6003775, opus verified from transcript — claude-opus-5, ~139k subagent tokens): wire chosen — UDS (AF_UNIX SOCK_STREAM), mind listens / vendor dials; decision-0004 created (proposed, operator ratifies at PR); T-matrix filled in research.md with host-verified evidence (SOCK_SEQPACKET unavailable on macOS 26.5.1; JDK 26 UDS via SocketChannel; go1.26.4 present); stdio rejected on structural T-4 failure, TCP on reachability/permission grounds.
+
+Phase 2 done (b023927, opus verified — claude-opus-5, ~142k subagent tokens): docs/design/seam-wire-v0.md written as the spec-002 successor. Framing: one connection per vendor with per-body session_open/close multiplexed by envelope body; 4-byte big-endian length prefix + canonical UTF-8 JSON (C-1..C-10), 1 MiB cap; byte-exact round-trip equality (asymmetric: emit canonical, accept conforming); seq assigned at enqueue so gaps count shed background percepts; vectors append-only within a MAJOR. Two flagged judgment calls recorded in-doc: continuity matched by body token not previous_session (T-4), and the spec-side leak audit written complete with Phase 4 extending it over vectors.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
