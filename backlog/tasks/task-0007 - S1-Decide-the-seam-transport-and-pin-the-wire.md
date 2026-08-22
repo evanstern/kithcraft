@@ -4,7 +4,7 @@ title: S1 - Decide the seam transport and pin the wire
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:35'
-updated_date: '2026-08-22 02:54'
+updated_date: '2026-08-22 02:59'
 labels:
   - seam
   - m-0-build
@@ -43,7 +43,13 @@ Spec: specs/007-seam-transport
 - [ ] #3 Golden message vectors exist and are language-neutral: one per percept type, one per intent shape, and the session_open handshake
 - [ ] #4 A trivial Go encoder and a trivial Java decoder each round-trip every golden vector
 - [ ] #5 Nothing beyond the decision record, framing spec and vectors is built
+- [ ] #6 Spec phase: Phase 1 — The decision and the T-matrix (US1)
+- [ ] #7 Spec phase: Phase 2 — The framing/serialization spec (US2)
+- [ ] #8 Spec phase: Phase 3 — Golden vectors and both round-trips (US3)
+- [ ] #9 Spec phase: Phase 4 — Closure: leak audit, wiki, board
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
