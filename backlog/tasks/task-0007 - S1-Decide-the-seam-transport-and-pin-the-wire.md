@@ -4,7 +4,7 @@ title: S1 - Decide the seam transport and pin the wire
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:35'
-updated_date: '2026-08-22 03:27'
+updated_date: '2026-08-22 03:44'
 labels:
   - seam
   - m-0-build
@@ -40,8 +40,8 @@ Spec: specs/007-seam-transport
 <!-- AC:BEGIN -->
 - [ ] #1 The transport is decided among real wires only (UDS/TCP/stdio) and T-1..T-7 are each answered explicitly in a decision record
 - [x] #2 A framing/serialization spec exists as the spec-002 successor
-- [ ] #3 Golden message vectors exist and are language-neutral: one per percept type, one per intent shape, and the session_open handshake
-- [ ] #4 A trivial Go encoder and a trivial Java decoder each round-trip every golden vector
+- [x] #3 Golden message vectors exist and are language-neutral: one per percept type, one per intent shape, and the session_open handshake
+- [x] #4 A trivial Go encoder and a trivial Java decoder each round-trip every golden vector
 - [ ] #5 Nothing beyond the decision record, framing spec and vectors is built
 - [ ] #6 Spec phase: Phase 1 — The decision and the T-matrix (US1)
 - [ ] #7 Spec phase: Phase 2 — The framing/serialization spec (US2)
@@ -57,6 +57,8 @@ Claimed by sweep-0007-0022 orchestrator 2026-08-21 on branch task-0007-seam-tran
 Phase 1 done (6003775, opus verified from transcript — claude-opus-5, ~139k subagent tokens): wire chosen — UDS (AF_UNIX SOCK_STREAM), mind listens / vendor dials; decision-0004 created (proposed, operator ratifies at PR); T-matrix filled in research.md with host-verified evidence (SOCK_SEQPACKET unavailable on macOS 26.5.1; JDK 26 UDS via SocketChannel; go1.26.4 present); stdio rejected on structural T-4 failure, TCP on reachability/permission grounds.
 
 Phase 2 done (b023927, opus verified — claude-opus-5, ~142k subagent tokens): docs/design/seam-wire-v0.md written as the spec-002 successor. Framing: one connection per vendor with per-body session_open/close multiplexed by envelope body; 4-byte big-endian length prefix + canonical UTF-8 JSON (C-1..C-10), 1 MiB cap; byte-exact round-trip equality (asymmetric: emit canonical, accept conforming); seq assigned at enqueue so gaps count shed background percepts; vectors append-only within a MAJOR. Two flagged judgment calls recorded in-doc: continuity matched by body token not previous_session (T-4), and the spec-side leak audit written complete with Phase 4 extending it over vectors.
+
+Phase 3 done (d380acf, opus verified — claude-opus-5, ~162k subagent tokens): 17 vectors in seam/vectors/ (9 percept + 3 intent + 2 session + 3 error) matching contracts/vectors.md exactly, census enforced both directions. Go harness green (go1.26.4: ok kithcraft/seam/go-roundtrip) and Java harness green (OpenJDK 26.0.2: 91 passed, 0 failed, over 17 vectors) — both re-run independently by the orchestrator. Mutation-checked: corrupted byte and decoded-only drift both caught. No framing-spec fix needed; note: Go encoding/json cannot be the canonical encoder (C-7), both harnesses hand-roll the writer.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
