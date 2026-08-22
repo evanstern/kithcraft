@@ -9,7 +9,7 @@ prior art) and the development machinery (PDLC, board, tiers, hooks), not source
 
 - [[overview]] — the project's shape: what Kithcraft is, what exists so far, where truth lives.
 - [[design-brief]] — the ratified brief: thesis, ten ratified decisions, spell-breakers.
-- [[body-protocol-seam]] — the anti-corner move: world-agnostic perceive/act/remember; mod as first body vendor.
+- [[body-protocol-seam]] — the anti-corner move: world-agnostic perceive/act/remember; mod as first body vendor; and the wire beneath it (UDS, length-prefixed canonical JSON, golden vectors).
 - [[promptworld-lineage]] — what transfers from promptworld I (doctrine) and what died with it (code).
 - [[v1-demo]] — milestone m-0 "one real evening": the demo definition and its emotional load-bearing walls.
 

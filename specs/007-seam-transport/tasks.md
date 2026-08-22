@@ -84,17 +84,17 @@ exactly.
 
 **Goal**: Deliverables audited, grounding re-verified, card synced.
 
-- [ ] T013 Run the §12-method leak sweep over seam-wire-v0.md and every vector (no
+- [x] T013 Run the §12-method leak sweep over seam-wire-v0.md and every vector (no
       engine-native type/identifier/coordinate convention); record findings in
       docs/design/seam-wire-v0.md's audit section
-- [ ] T014 Verify FR-007 scope: `git diff origin/main...HEAD` contains nothing outside
+- [x] T014 Verify FR-007 scope: `git diff origin/main...HEAD` contains nothing outside
       the decision record, seam-wire-v0.md, seam/, and the specs/007 + board paper
       trail
-- [ ] T015 Re-verify wiki notes whose prose this PR touches — at minimum
+- [x] T015 Re-verify wiki notes whose prose this PR touches — at minimum
       docs/wiki/body-protocol-seam.md (Q-1 is now closed; sources grow by
       docs/design/seam-wire-v0.md) — amend prose, re-pin honestly, regenerate
       docs/wiki/CAPSULES.md if any description changed
-- [ ] T016 Tick this file's boxes as completed, check the card's ACs that are now
+- [x] T016 Tick this file's boxes as completed, check the card's ACs that are now
       true via `backlog task edit TASK-0007 --check-ac <n>`, and append a phase-done
       note to the board card
 

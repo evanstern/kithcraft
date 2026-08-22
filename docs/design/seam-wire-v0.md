@@ -115,7 +115,7 @@ behind a corpse the kernel has not yet reaped.
 - **Orderly shutdown** is the vendor sending `session_close` (`reason: "shutdown"`, §6.3) for
   each attached body, then closing the connection. After sending `session_close` for a body, a
   sender MUST NOT send further messages naming that body.
-- **The mind sends `session_close` only to refuse** — an unsupported version (§7.1) or a
+- **The mind sends `session_close` only to refuse** — an unsupported version (protocol §7.1) or a
   handshake it cannot accept — with `reason: "error"`. Routine session ending is the vendor's.
   A refusing side sends its frame, then closes after a bounded linger so the peer can read it
   rather than seeing a bare EOF.
@@ -443,17 +443,17 @@ slowness is.
 The frame format has no version field and gets none. It cannot: nothing in a frame can be read
 until the frame format is already assumed, so a header version would be unverifiable
 self-assertion. The frame layer is versioned by the protocol **MAJOR** carried inside the first
-frame — a change to the frame format is necessarily a MAJOR bump (§7.3), and a receiver MUST
+frame — a change to the frame format is necessarily a MAJOR bump (protocol §7.3), and a receiver MUST
 NOT attempt to sniff a frame format.
 
 ### 5.2 Negotiation is the handshake, and it fails closed
 
-§7.1 already specifies the posture; the wire pins the mechanics:
+Protocol §7.1 already specifies the posture; the wire pins the mechanics:
 
 - The vendor's first frame is `session_open`, carrying `protocol` (§1.4). The mind MUST read and
   check `protocol` **before acting on anything else in the message**.
 - On an unsupported version the mind replies `session_close` with `reason: "error"` and
-  `detail: "unsupported_version"` (§7.1's exact string), then closes after a bounded linger
+  `detail: "unsupported_version"` (protocol §7.1's exact string), then closes after a bounded linger
   (§1.4) so the vendor learns why rather than seeing a bare EOF.
 - **That reply's envelope**, which the protocol does not spell out because it had no wire to
   spell it out on: the mind **echoes** the `session` and `body` from the frame it refused, uses
@@ -468,7 +468,8 @@ NOT attempt to sniff a frame format.
 
 ### 5.3 Additive changes (MINOR) — and why existing vectors survive them
 
-A new optional field, percept type, origin, verb, or open-vocabulary token (§7.2) reaches the
+A new optional field, percept type, origin, verb, or open-vocabulary token (protocol §7.2)
+reaches the
 wire as a new member slotting into its canonical sorted position (C-3). Nothing is removed, so:
 
 > **Vectors are append-only within a MAJOR.**
@@ -526,13 +527,19 @@ Phase 3's.
 
 ## 7. Leak audit
 
-**Performed** over this document, applying §12's six passes unchanged. Two things were hunted:
-engine-native concepts reaching the wire (AR-1…AR-6), and **query-shaped affordances** — any way
-a mind could pull world state rather than receive it (SI-1). §12's closing lesson set the
-priority: every genuine leak in the protocol was query-shaped, not engine-shaped, so P-4 got the
-most attention here.
+**Performed twice**, applying `body-protocol-v0.md` §12's six passes unchanged: once over this
+document (§7.1, Phase 2) and once over the seventeen golden vectors in `seam/vectors/` (§7.2,
+Phase 4, after the harnesses were green). Two things were hunted in both: engine-native concepts
+reaching the wire (AR-1…AR-6), and **query-shaped affordances** — any way a mind could pull world
+state rather than receive it (SI-1). §12's closing lesson set the priority: every genuine leak in
+the protocol was query-shaped, not engine-shaped, so P-4 got the most attention.
 
-### 7.1 Findings
+The vectors got their own pass rather than riding this document's because they are a different
+kind of surface. This document is prose that *forbids*; the vectors are **content that ships** —
+whatever spelling they carry becomes the spelling two implementations copy, and a leak pinned in
+a byte column is inherited by every later implementation as fact rather than as prose.
+
+### 7.1 Findings — this document
 
 | # | Finding | Pass | Verdict |
 |---|---|---|---|
@@ -541,33 +548,91 @@ most attention here.
 | **W-3** | A wall-clock timestamp in the frame header. | P-6 | **Considered and refused** (§2.2). `world_time` is the protocol's only clock and is vendor-declared in a vendor-declared unit (AR-5). A real-time header stamp would give a mind a metric to difference against coarse bands, one step from the spatial arithmetic AR-4 forbids. Wall-clock *arrival* time is unavoidable on any transport — the in-process fake vendor has it too — but the wire declines to hand it over as data. |
 | **W-4** | A frame-level acknowledgement or flow-control credit message. | P-4 | **Considered and refused.** It would be a reply-shaped message beyond the protocol's own `intent_ack` — the obligation T-1 places on framing (research.md) — and would put a synchronous channel back to the vendor behind every percept, which is the shape L-6 was written about. Backpressure is a kernel buffer and a queue (§4), never a message. |
 | **W-5** | A "resume from `seq` N" or retransmission-request message. | P-4 | **Considered and refused.** This is verbatim T-1's forbidden "get percepts since seq N": a pull channel for percepts, and a mind able to demand history it did not receive. Recorded with its reason so a later implementer meets the argument rather than rediscovering the idea as an optimization. §3.4 gives the whole recovery story instead. |
-| **W-6** | A keepalive / ping-pong frame. | P-4 | **Not added — and out of this document's jurisdiction.** A dead peer EOFs immediately; a hung-but-alive peer surfaces through the write path (§4.1). A ping would be a **new message shape**, which is a protocol addition under §7.2 and not a framing decision. Recorded so the absence reads as a ruling rather than an oversight. |
+| **W-6** | A keepalive / ping-pong frame. | P-4 | **Not added — and out of this document's jurisdiction.** A dead peer EOFs immediately; a hung-but-alive peer surfaces through the write path (§4.1). A ping would be a **new message shape**, which is a protocol addition under protocol §7.2 and not a framing decision. Recorded so the absence reads as a ruling rather than an oversight. |
 | **W-7** | The listener's stale-path liveness probe (dial before unlink, decision-0004). | P-4 | **Verified clean.** It is the only place either side dials to learn something, and what it learns is whether *another daemon* holds the path — the mind's own liveness, never world state. It happens before any session exists. |
 | **W-8** | The `session_open` manifest under the multi-body session model (§1.3). | P-5 | **Strengthened, not weakened.** Requiring a byte-identical `capabilities` object across every `session_open` on a connection makes §12's L-7 — a manifest describing the body's surroundings rather than the vendor — mechanically checkable at the decoder, since two disagreeing manifests are exactly the symptom a world-derived manifest produces. |
-| **W-9** | Free-text fields added by this layer. | P-3 | **None.** The wire adds no field of any kind to any message. The one string literal it pins, `"unsupported_version"`, is quoted from §7.1. |
+| **W-9** | Free-text fields added by this layer. | P-3 | **None.** The wire adds no field of any kind to any message. The one string literal it pins, `"unsupported_version"`, is quoted from protocol §7.1. |
 | **W-10** | The 1 MiB frame cap as an inferable world quantity. | P-2, P-6 | **No change needed.** It is a constant of the transport, identical for every message and every body, and carries no information about the world. §2.5 states it is not a percept budget and MUST NOT be used as a shedding input, closing the one path by which it could have become one. |
 | **W-11** | `seq` gaps as a channel (§3.3). | P-2, P-4 | **Verified clean.** A gap conveys a count of shed `background` percepts and nothing else — no identity, no place, no kind. It is a diagnostic derived from an existing field, not a new one, and §3.3 forbids the receiver from acting on it beyond recording it. |
 
-### 7.2 Result
+### 7.2 Findings — the golden vectors
 
-Eleven findings: **four deliberate refusals** (W-3, W-4, W-5, W-6), **one strengthening** (W-8),
-**six verified clean** (W-1, W-2, W-7, W-9, W-10, W-11), and **no fixes required** — this
-document adds no message, no field, and no enum value, so there was nothing to repair.
+**Scope:** all seventeen files in `seam/vectors/`, both columns of each — the hand-authored
+`decoded` message *and* the `frame_hex` bytes, which were decoded and inspected as text rather
+than trusted to match. Their `README.md` was read as part of the same sweep, since a vector set's
+prose teaches the next author what a vector may contain.
 
-**No engine-native type, identifier, coordinate convention, unit, or scale appears anywhere in
-this document's normative text.** The frame carries a byte count and UTF-8; everything above it
-is the protocol's, unchanged.
+**Method, per pass.** Grep is the weaker half and was used only to open each pass; the pass
+itself is a census of what is actually there.
 
-**The pattern worth carrying.** Every refusal above was a *convenience*: an ack that would have
-made flow control legible, a resume that would have made a reconnect lossless, a ping that would
-have made liveness explicit. Each is the shape §12 warned about — an affordance that arrives
-looking like a kindness to implementers and leaves with SI-1 or T-1 in its pocket. The framing
-layer is the easiest place in the system to add one, because at this depth it does not look like
-a protocol change at all. **Re-run all six passes whenever a frame-layer field is proposed** —
-and treat "it is only framing" as the reason to look harder, not as a reason to skip.
+| Pass | What was done | Result |
+|---|---|---|
+| **P-1** — engine-native terms | Grepped every vector and this document for `minecraft`, `fabric`, `mixin`, `mojang`, `forge`, `paper`, `spigot`, `bukkit`, `mob`, `nbt`, `uuid`, `chunk`, `blockpos`, `entity`, `itemstack`, `villager`, `poi`, `tick`, `block`, `biome`, `redstone`, and the vanilla creature names. Then enumerated **every distinct string value across all seventeen vectors** (131 of them) and read the list, because a leak that avoided the grep list is exactly the one worth finding. | **Clean.** Zero hits in any vector. The two hits in this document are the English verb *block* — "MUST NOT block the world's main thread" (§1.5), "to block the world" (§4.3) — not the noun. Every `kind` token is `k:`-prefixed and world-flavored (`k:sleeping-place`, `k:water-source`, `k:person`); every descriptor is plain English a text-world vendor would write unchanged. |
+| **P-2** — opacity of branched-on fields | Enumerated all 66 distinct JSON keys across the set and checked each value a mind branches on for parse-invitation: `kind`, `roles`, `place`, `thing_id`, `body`, `origin`, `urgency`, enum-valued content fields. | **Clean.** Ids are opaque short tokens with a type-letter prefix and no embedded structure (`b-eda`, `pl-3a91`, `th-402`, `p-9c21`, `i-4410`, `s-9d4c`) — nothing spells a coordinate, a name, or a path. `roles` values are all from AR-3's seeded affordance vocabulary. No token invites a substring match, and none would *reward* one. |
+| **P-3** — free text | Read every free-text value in the set — `descriptor` (31 occurrences), `doing`, `utterance`, `text`, `detail`, `reason`, `attributed_to` — asking of each whether a receiver could parse structure out of it. | **Clean.** All are prose (`"drawing water"`, `"the big oak"`, `"walked to the old orchard"`, `"something snarling in the dark"`). None carries a token, an id, a coordinate, a count, or a delimiter a parser could key on. Two are worth naming as deliberate: `percept_text.content.text` embeds newlines and an escaped quote and `percept_speech` an apostrophe — those exist to exercise C-7 escaping, and their *content* is a note pinned to a board, not data. |
+| **P-4** — pull affordances | Checked the four `mind_to_vendor` vectors (`intent`, `cancel`, and the mind-side halves the ack/refusal pin) against SI-1: can a mind learn world state from what it sends or from what returns synchronously? | **Clean, and one deliberate pin.** `intent.target` is `{type: "place", place: "pl-51c"}` — a token the mind was previously given, never a description to search for, which is §5.2's prohibition demonstrated rather than merely obeyed. `intent_ack_refused` pins `unknown_target` on an **unissued** token, which is precisely L-6's fix made executable: the vector set's only refusal-shaped edge case is the one that proves the existence oracle stays shut. |
+| **P-5** — the manifest | Walked `session_open.capabilities` field by field asking of each whether it describes the **vendor** or the **world**. | **Clean, and mechanically so.** The manifest contains only type-level declarations — `percept_types`, `origins`, `verbs`+`targets`, `salient_kinds` as kind/roles/descriptor triples, `bearings`, `distance_bands`. It carries **no** `thing_id`, no `place`, no `count`, no `distance`, no `present` — that is, none of the fields by which an instance of the world could appear. A vendor copying this fixture as its starting manifest cannot accidentally ship L-7. |
+| **P-6** — accumulable geometry | Enumerated every numeric value in the set by key and every band value, and checked the bands against the manifest's declared sets. | **Clean.** Eight numeric keys exist and all are integers: `seq`, `world_time`, `observed_at`, `received_at`, `previous_close_world_time`, `not_after`, `hops`, `count`. `world_time` values are in the session's declared `"second"` unit (AR-5) and are ~918 000 — six digits, plainly not a tick count, which matters because a fixture that *looked* like ticks would teach the wrong unit by example. Every `distance`/`extent` is one of the four declared bands and the one `bearing` is one of the four declared directions; no vector carries a magnitude, a vector, or a coordinate of any kind. `level: "severe"` is AR-6's band, not a scale. |
+
+**Mechanical checks run alongside the six passes**, because a claim that can be executed should
+be: every `frame_hex` decodes to exactly a four-byte big-endian length plus that many bytes with
+nothing trailing; every body is one well-formed UTF-8 JSON object; no `\u` escape appears
+anywhere (the one non-ASCII character in the set, an em dash in `percept_text`, is literal UTF-8
+per C-7); no lone surrogate is representable in any of them.
+
+| # | Finding | Pass | Verdict |
+|---|---|---|---|
+| **V-1** | `sound.content.sound_kind: "k:snarl"` is the one `k:` token in the set that is **not** in the `session_open` manifest's `salient_kinds`. | P-1, P-2, P-5 | **Verified clean — and correctly so.** `salient_kinds` is the closed vocabulary of things a vendor can *report as present at a place* (§4.3/§6.2); sound kinds are a different vocabulary and the protocol declares no manifest field for them. Recorded because the mismatch looks like a census bug at a glance and is not one, and because the honest reading is that a future MINOR may want a `sound_kinds` manifest entry — which is a protocol question (protocol §7.2), not a wire one. Nothing here presumes an answer. |
+| **V-2** | `percept_text.content` — `"Signed \"the player\" — take it or leave it."`, and `attributed_to: "the player"`. | P-1, P-3 | **Verified clean.** "The player" is protocol vocabulary, not engine vocabulary: §4.5 defines the player as a `person` source rather than a `body`, and a text world with a human in it has a player too. It appears here in prose an artifact *claims*, which §4.7 already marks as unverified. |
+| **V-3** | Every id in the set is short, human-readable, and visibly patterned (`b-`, `pl-`, `th-`, `p-`, `i-`, `s-`). | P-2 | **Verified clean, and deliberately not real ids.** AR-2 lets a vendor spell tokens as it likes and *recommends against* native identifiers so an AR-2 violation breaks loudly. These are the readable-fixture form of that: nothing about them is parseable into meaning, and a real vendor's opaque ids substitute into the same slots without changing a rule. |
+| **V-4** | The manifest declares `carry` in `verbs` — a verb outside §5.5's four-verb floor. | P-4, P-5 | **Verified clean.** It is quoted from §6.2's own worked example and demonstrates the declared-verb mechanism working for a vendor extension. It grants no read affordance: `carry` targets a `thing` token the mind already holds, and its result returns as an `act_result` percept like every other act. |
+| **V-5** | No vector exercises a `null` `place`, a `null` optional, or an empty array — *at first glance*. | P-3, P-6 | **Verified clean; the coverage is there.** `percept_sound` carries `place: null`, `percept_text` carries `observed_at: null`, several carry `source: null` and `reason_code: null`, and `roles: []` appears twice. This matters to the audit rather than to coverage: C-9's required-and-nullable versus omitted-optional distinction is what keeps "a missing required field is malformed" decidable, and `err_missing_provenance` pins the failing half. |
+
+### 7.3 Result
+
+**No fixes were required in either sweep, and no vector was changed.** Both harnesses were green
+before this audit and are green after it: `seam/go-roundtrip` (`go test ./...`) and
+`seam/java-roundtrip` (`java RoundTrip.java ../vectors`, 91 assertions over 17 vectors).
+
+- **This document (§7.1):** eleven findings — four deliberate refusals (W-3, W-4, W-5, W-6), one
+  strengthening (W-8), six verified clean (W-1, W-2, W-7, W-9, W-10, W-11). No fix was required
+  because this document adds no message, no field, and no enum value.
+- **The vectors (§7.2):** all six passes clean, five findings recorded as verified-clean
+  (V-1…V-5), none of them a leak. No vector was edited, so every `frame_hex` in the set is the
+  same byte string both harnesses have been passing since Phase 3.
+
+**No engine-native type name, registry identifier, coordinate convention, native unit, or native
+scale appears anywhere in this document's normative text or in any of the seventeen vectors.**
+The frame carries a byte count and UTF-8; everything above it is the protocol's, unchanged.
+
+**The pattern worth carrying, from §7.1.** Every refusal there was a *convenience*: an ack that
+would have made flow control legible, a resume that would have made a reconnect lossless, a ping
+that would have made liveness explicit. Each is the shape §12 warned about — an affordance that
+arrives looking like a kindness to implementers and leaves with SI-1 or T-1 in its pocket. The
+framing layer is the easiest place in the system to add one, because at this depth it does not
+look like a protocol change at all. **Re-run all six passes whenever a frame-layer field is
+proposed** — and treat "it is only framing" as the reason to look harder, not as a reason to skip.
+
+**The pattern worth carrying, from §7.2, and it is a different one.** The vector sweep found
+nothing, and the reason is worth stating so the next sweep does not read a clean result as
+evidence that sweeping vectors is unnecessary. These vectors were authored *after* both audits
+that constrain them — protocol §12 and §7.1 above — by an author who had read them. A vector set
+authored under those conditions is clean the way a compiled program is type-correct: not by luck,
+and not permanently. **The moment vectors are added is the moment the guarantee lapses** — a
+MINOR bump appends files (§5.3) and its author may not have read either audit. `seam/vectors/`
+therefore inherits the same standing obligation this document has: **any commit that adds a
+vector re-runs all six passes over the added file**, and the cheap half — the string-value census
+and the numeric census — is mechanical enough that no one has an excuse to skip it.
+
+**And the sharpest thing the sweep confirmed:** a vector is not documentation of the wire, it
+*is* the wire. Two implementations will be written against these bytes by people who never read
+this prose. A leak in §7.1 would have been an error a reviewer could catch; a leak in §7.2 would
+have been an error two codebases would have implemented correctly.
 
 ---
 
-**Phase 2 complete.** Q-1 is closed by decision-0004 plus this document; every shape in
+**Complete.** Q-1 is closed by decision-0004 plus this document; every shape in
 `docs/design/body-protocol-v0.md` now has exactly one wire representation. The golden vectors
-(`seam/vectors/`) pin it in bytes.
+(`seam/vectors/`) pin it in bytes, both harnesses agree on those bytes, and §7 has swept the
+document and the vectors alike. [[body-protocol-seam]] carries this file as a source and is
+re-verified in the same commit range.
