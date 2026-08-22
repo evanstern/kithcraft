@@ -8,7 +8,7 @@ sources:
   - docs/design/body-protocol-v0.md
   - docs/design/seam-wire-v0.md
   - backlog/decisions/decision-0004 - Seam-transport-UDS-AF_UNIX-SOCK_STREAM-mind-listens-and-vendor-dials.md
-verified_against: d380acf7d0f37f3f52d3e7f6d4c26bd6b6a2fd08
+verified_against: 10c6e02972b62b6f00dca67bce1f7b42f879e58a
 ---
 
 # Body-protocol seam
