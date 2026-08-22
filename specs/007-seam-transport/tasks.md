@@ -16,17 +16,17 @@ proposed Backlog decision.
 **Independent test**: Read the decision record — every cell of the 7×3 matrix filled,
 each rejected wire reasoned, status proposed.
 
-- [ ] T001 [US1] Fill the T-matrix: answer T-1..T-7 (body-protocol-v0 §8, verbatim
+- [x] T001 [US1] Fill the T-matrix: answer T-1..T-7 (body-protocol-v0 §8, verbatim
       criteria) for each of UDS, TCP (loopback), stdio, attributing each property to
       the wire or to the framing layer, in specs/007-seam-transport/research.md
       (replace the `?` skeleton)
-- [ ] T002 [US1] Choose the wire and write the rationale + per-rejected-wire reasons
+- [x] T002 [US1] Choose the wire and write the rationale + per-rejected-wire reasons
       into the T-matrix analysis in specs/007-seam-transport/research.md
-- [ ] T003 [US1] Create the Backlog decision record via
+- [x] T003 [US1] Create the Backlog decision record via
       `backlog decision create` (status proposed, operator ratifies at PR) carrying
       the choice, the filled matrix, and the rationale — file lands under
       backlog/decisions/
-- [ ] T004 [US1] Record the decision's narrowing effects for M1 (TASK-0008) and V1
+- [x] T004 [US1] Record the decision's narrowing effects for M1 (TASK-0008) and V1
       (TASK-0009) — connection story each side must implement — as a section of the
       decision record
 
