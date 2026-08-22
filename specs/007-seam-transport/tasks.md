@@ -40,13 +40,13 @@ sections per data-model.md.
 **Independent test**: Every protocol message shape has exactly one wire representation;
 T-2/T-5/T-6 mechanics are specified; leak audit statement present.
 
-- [ ] T005 [US2] Write docs/design/seam-wire-v0.md sections 1–2: connection story
+- [x] T005 [US2] Write docs/design/seam-wire-v0.md sections 1–2: connection story
       (listen/dial, T-3 sessions, T-4 restart/reconnect) and message
       delimiting/encoding (T-5) for the chosen wire
-- [ ] T006 [US2] Write docs/design/seam-wire-v0.md sections 3–4: ordering/`seq` on
+- [x] T006 [US2] Write docs/design/seam-wire-v0.md sections 3–4: ordering/`seq` on
       this wire (T-2, dedup interaction) and backpressure (T-6 `background` shedding;
       never-split-an-`observation` at the framing layer)
-- [ ] T007 [US2] Write docs/design/seam-wire-v0.md sections 5–7: wire form of the
+- [x] T007 [US2] Write docs/design/seam-wire-v0.md sections 5–7: wire form of the
       protocol §7 versioning story, the round-trip equality rule (byte-exact or a
       justified canonical equivalence), and the §12-style leak audit statement
 
