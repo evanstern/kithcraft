@@ -13,7 +13,12 @@ decision-0003 + `llm-routing-and-budget.md` (Go daemon, six classes / three tier
 wires only). Plan-of-record is the board; this file carries only ordering, doctrine, and
 the log.
 
-**Status:** draft · operator sign-off on lanes: pending
+**Status:** signed-off · operator sign-off on lanes: 2026-08-21
+<!-- Sign-off ruling (2026-08-21): lanes approved as authored; the proposed opus
+     escalation for TASK-0007/S1 TAKEN by the operator — it runs opus
+     (cc/claude-opus-5[1m], fallback cc/claude-opus-4-8[1m]). TASK-0019's trigger
+     stays conditional. The escalation checkpoint the tier rubric requires is this
+     ruling; transport ratification (checkpoint 2) remains the operator's at PR. -->
 <!-- Only the OPERATOR flips draft → signed-off (the author never pre-fills it). An
      executing session must refuse a runbook whose status it cannot verify. -->
 <!-- This draft rides the TASK-0007 branch per the operator's 2026-08-21 no-runbook-PR
