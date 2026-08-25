@@ -56,17 +56,17 @@ kill-and-reconnect continuity test.
 
 **Independent test**: card AC #5's end-to-end named test passes.
 
-- [ ] T009 Implement mind/seam/ingest.go: validate → mutate ordering with V-4 (refuse
+- [x] T009 Implement mind/seam/ingest.go: validate → mutate ordering with V-4 (refuse
       unknown verb at the intent boundary), V-6 (unrecognized/absent origin →
       secondhand classification hook), percept_id dedup (reconnect scope), seq-gap
       shed accounting; named tests prove zero mutation on malformed input (AC #3)
       and future-origin secondhand classification (AC #4)
-- [ ] T010 Implement mind/seam/intents.go: pending set, supersedes replacement,
+- [x] T010 Implement mind/seam/intents.go: pending set, supersedes replacement,
       act_result matching by intent_id, cancel; named tests for each
-- [ ] T011 Implement mind/seamtest/double.go: dials the daemon over UDS (or in-process
+- [x] T011 Implement mind/seamtest/double.go: dials the daemon over UDS (or in-process
       net.Pipe behind the same port — T-7), scripts a percept stream with duplicates
       and a seq gap, records emitted intents
-- [ ] T012 End-to-end named test (AC #5): daemon starts, session opens against the
+- [x] T012 End-to-end named test (AC #5): daemon starts, session opens against the
       double, scripted stream ingested (dupes dropped, gap accounted), intents
       emitted and acked; plus the AC #6 restart variant
 

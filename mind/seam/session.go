@@ -42,10 +42,12 @@ type manifest struct {
 // succeeds. Durable percept/body memory across restarts is M2's job, not
 // this package's.
 //
-// Percept and intent handling (T009/T010) are Phase 3 scope: any message
-// kind other than session_open/session_close is accepted and left
-// unprocessed here.
-func HandleConnection(conn Conn) error {
+// ing is the daemon process's shared percept-ingest state (T009/T010):
+// every message naming a body participates in that body's seq-gap
+// accounting (Ingester.Observe), percepts additionally run dedup and, if
+// admitted, ing.OnPercept — the skeleton's only hook for emitting an
+// intent, since no real deliberation (M5) exists yet.
+func HandleConnection(conn Conn, ing *Ingester) error {
 	defer conn.Close()
 
 	first, err := conn.ReadMessage()
@@ -74,6 +76,9 @@ func HandleConnection(conn Conn) error {
 	}
 	m := manifest{session: str(first["session"]), timeUnit: pl["time_unit"], capsBytes: capsBytes}
 	attached := map[string]bool{str(first["body"]): true}
+	if seq, ok := first["seq"].(int64); ok {
+		ing.Attach(str(first["body"]), seq)
+	}
 
 	for {
 		msg, err := conn.ReadMessage()
@@ -84,15 +89,33 @@ func HandleConnection(conn Conn) error {
 			return err // connection-fatal: framing or presence-validation failed
 		}
 
+		body := str(msg["body"])
+		seq, _ := msg["seq"].(int64)
+
 		switch str(msg["message"]) {
 		case "session_open":
 			if mismatch := m.diff(msg); mismatch != "" {
 				refuse(conn, msg, mismatch)
 				return fmt.Errorf("seam: %s", mismatch)
 			}
-			attached[str(msg["body"])] = true
+			attached[body] = true
+			ing.Attach(body, seq)
 		case "session_close":
-			delete(attached, str(msg["body"]))
+			ing.Observe(body, seq)
+			delete(attached, body)
+		case "percept":
+			ing.Observe(body, seq)
+			payload := payloadOf(msg)
+			id := str(payload["percept_id"])
+			if !ing.Dedup(body, id) && ing.OnPercept != nil {
+				ing.OnPercept(conn, body, msg)
+			}
+		default:
+			// Every vendor→mind message for a body shares one seq
+			// counter (seam-wire-v0.md §3.2), so an unhandled kind
+			// (intent_ack, …) still has to be observed — otherwise it
+			// would be misread as a gap in the next percept's seq.
+			ing.Observe(body, seq)
 		}
 	}
 }

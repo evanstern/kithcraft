@@ -35,15 +35,18 @@ func listen(path string) (net.Listener, error) {
 
 // serve accepts connections for the daemon's whole life (seam-wire-v0.md
 // §1.2): a vendor disconnect is normal, never terminal, and the loop only
-// ends when ln itself closes (graceful shutdown).
-func serve(ln net.Listener) {
+// ends when ln itself closes (graceful shutdown). ing is shared across
+// every accepted connection so percept_id dedup can span a reconnect
+// (seam-wire-v0.md §3.4) — and is exactly what a real restart loses,
+// since the caller hands serve a fresh one each process start.
+func serve(ln net.Listener, ing *seam.Ingester) {
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			return
 		}
 		go func() {
-			if err := seam.HandleConnection(seam.NewWireConn(conn)); err != nil {
+			if err := seam.HandleConnection(seam.NewWireConn(conn), ing); err != nil {
 				fmt.Fprintf(os.Stderr, "minddaemon: connection ended: %v\n", err)
 			}
 		}()

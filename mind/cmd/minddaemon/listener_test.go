@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"kithcraft/mind/seam"
 	"kithcraft/mind/wire"
 )
 
@@ -77,7 +78,7 @@ func TestServe_AcceptsAndNegotiates(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer ln.Close()
-	go serve(ln)
+	go serve(ln, seam.NewIngester())
 
 	conn, err := net.Dial("unix", path)
 	if err != nil {

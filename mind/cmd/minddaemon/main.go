@@ -9,6 +9,8 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	"kithcraft/mind/seam"
 )
 
 func main() {
@@ -35,5 +37,5 @@ func main() {
 	}()
 
 	fmt.Printf("minddaemon: listening on %s\n", *socket)
-	serve(ln)
+	serve(ln, seam.NewIngester())
 }

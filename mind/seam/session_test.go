@@ -65,9 +65,16 @@ func (f *fakeConn) out() []map[string]any {
 	}
 }
 
+// run drives HandleConnection with a throwaway Ingester — every Phase 2
+// test here is about session negotiation, not ingest bookkeeping, so each
+// gets its own fresh, unshared one.
 func run(conn Conn) <-chan error {
+	return runWithIngester(conn, NewIngester())
+}
+
+func runWithIngester(conn Conn, ing *Ingester) <-chan error {
 	done := make(chan error, 1)
-	go func() { done <- HandleConnection(conn) }()
+	go func() { done <- HandleConnection(conn, ing) }()
 	return done
 }
 
