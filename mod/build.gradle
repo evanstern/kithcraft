@@ -22,6 +22,17 @@ test {
 	systemProperty 'kithcraft.seamVectorsDir', file('../seam/vectors').absolutePath
 }
 
+tasks.register('seamRoundTrip', Exec) {
+	group = 'verification'
+	description = 'Runs seam/java-roundtrip/RoundTrip.java (JEP 330 source-launch) against ' +
+		'seam/vectors, with Gson supplied from this mod\'s runtime classpath (T010).'
+	doFirst {
+		commandLine = ['java', '--class-path', sourceSets.main.runtimeClasspath.asPath,
+			file('../seam/java-roundtrip/RoundTrip.java').absolutePath,
+			file('../seam/vectors').absolutePath]
+	}
+}
+
 processResources {
 	inputs.property "version", project.version
 	filesMatching("fabric.mod.json") {

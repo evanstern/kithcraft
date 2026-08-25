@@ -79,18 +79,18 @@ invariant (L-7) are both tested.
 
 **Goal**: The operator's ruling executed; gates green; grounding honest.
 
-- [ ] T010 Replace seam/java-roundtrip's hand-rolled parsing per the ruling: rebuild
+- [x] T010 Replace seam/java-roundtrip's hand-rolled parsing per the ruling: rebuild
       the harness on the chosen library (keep the census + 4-checks-per-vector + 6
       framing/asymmetry obligations and the mutation-check power; shape — Gradle
       test module vs single-file-over-library — recorded with rationale); delete the
       hand-rolled parser code; harness green over all 17 vectors
-- [ ] T011 Run all gates: ./gradlew build + test green; scope check (diff touches
+- [x] T011 Run all gates: ./gradlew build + test green; scope check (diff touches
       only mod/, seam/java-roundtrip/, specs/009-*, board, runbook row)
-- [ ] T012 Wiki: re-verify villager-brain-api.md against T001's version findings
+- [x] T012 Wiki: re-verify villager-brain-api.md against T001's version findings
       (amend if symbols moved), body-protocol-seam.md (first real vendor exists),
       overview.md ("no code" claims); honest re-pins; regenerate CAPSULES.md if
       descriptions changed
-- [ ] T013 Tick this file, check card ACs now true (--check-ac), append phase-done
+- [x] T013 Tick this file, check card ACs now true (--check-ac), append phase-done
       note
 
 ## Dependencies

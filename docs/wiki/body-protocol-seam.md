@@ -10,7 +10,9 @@ sources:
   - backlog/decisions/decision-0004 - Seam-transport-UDS-AF_UNIX-SOCK_STREAM-mind-listens-and-vendor-dials.md
   - mind/wire/canonical.go
   - mind/seam/session.go
-verified_against: f51b9337a9283bc54231396584ea5903f0df98f9
+  - mod/src/main/java/dev/kithcraft/mod/wire/CanonicalJson.java
+  - mod/src/main/java/dev/kithcraft/mod/session/Handshake.java
+verified_against: cb5003531192512f992688cbf5a08d7b15799545
 ---
 
 # Body-protocol seam
@@ -123,8 +125,32 @@ listener, handshake, byte-identical-capabilities check, and continuity-on-restar
 this note's "what the wire binds" section are implemented in `mind/seam/session.go`. All
 seventeen `seam/vectors/` golden vectors round-trip through this codec (a third proof,
 alongside the Go and Java throwaway harnesses this note already described). Scope stays
-bounded: no memory store, LLM client, or deliberation live here — those are M2/M4/M5. The
-Fabric-mod (vendor) side is still open, tracked as TASK-0009 (V1).
+bounded: no memory store, LLM client, or deliberation live here — those are M2/M4/M5.
+
+TASK-0009 (V1) then landed the **first real vendor**: the Fabric mod in `mod/`. Its wire
+client mirrors the mind's split — Gson's `JsonReader` for decode, a hand-written canonical
+writer for encode, in `mod/src/main/java/dev/kithcraft/mod/wire/CanonicalJson.java`, for
+the identical reason `mind/wire/canonical.go` hand-rolls its writer: no library on either
+side can be coaxed into emitting C-1..C-10 form. `mod/.../wire/FrameCodec.java` implements
+the 4-byte length-prefix framing; `mod/.../wire/WireClient.java` dials the UDS path
+(`StandardProtocolFamily.UNIX`, the vendor side of decision-0004's "mind listens, vendor
+dials"); `mod/.../session/Handshake.java` builds `session_open` — the static capability
+manifest (four-type floor, six origins, four core verbs, world-independent
+`salient_kinds`, bearings, distance bands, `time_unit: "second"`) proven byte-identical
+across bodies and world states (L-7), which is the vendor half of this note's "what v0
+binds" epistemic-hygiene mechanism actually existing in code. `mod/.../tokens/
+TokenRegistry.java` persists the body/place/thing_id/kind token registry across server
+restarts (SavedData-backed; tokens never reused). All seventeen `seam/vectors/` golden
+vectors round-trip through the mod's own codec too — the fourth independent proof, and the
+first from the vendor side rather than a throwaway harness. Scope stays bounded here as
+well: no percept emission beyond the handshake, no intent execution, no brain/schedule
+work — those are V2/V3 (TASK-0014 and beyond).
+
+Both harnesses this note described (`seam/go-roundtrip`, `seam/java-roundtrip`) still
+exist as throwaway, spec-facing proof, independent of either real implementation; the Java
+one was rebuilt on the same Gson-decode/custom-encode split once TASK-0009 introduced
+Gradle (the only reason it had stayed hand-rolled), per the operator's 2026-08-22 ruling —
+see `seam/java-roundtrip/README.md`.
 
 ## Connections
 
@@ -135,7 +161,7 @@ and the promptworld I machinery it deliberately does not inherit, are in
 is `specs/002-body-protocol-v0/research/doctrine-port.md`; the transport analysis behind
 decision-0004 — the filled T-matrix and the verified platform facts — is
 `specs/007-seam-transport/research.md`. The wire's Go-daemon side is TASK-0008 (M1) and its
-Fabric-mod side TASK-0009 (V1); both were blocked on this note's Q-1 and are now unblocked
+Fabric-mod side TASK-0009 (V1); both were blocked on this note's Q-1 and have now landed
 ([[v1-demo]]).
 
 ## Operational notes

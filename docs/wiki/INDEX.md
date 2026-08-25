@@ -2,8 +2,8 @@
 
 Load this file first; load notes just-in-time. Whole-corpus orientation: `CAPSULES.md`.
 
-The Fabric mod (vendor side) is still **pre-code**; the mind daemon (`mind/`, TASK-0008)
-is the first source the corpus grounds, alongside the design surface (brief, decisions,
+Two real code surfaces ground the corpus: the mind daemon (`mind/`, TASK-0008) and, as of
+TASK-0009, the Fabric mod vendor (`mod/`) — alongside the design surface (brief, decisions,
 prior art) and the development machinery (PDLC, board, tiers, hooks).
 
 ## Design

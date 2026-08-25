@@ -1,12 +1,12 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, and the first mind-daemon code), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon, and now the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: f51b9337a9283bc54231396584ea5903f0df98f9
+verified_against: cb5003531192512f992688cbf5a08d7b15799545
 ---
 
 # Overview
@@ -14,11 +14,12 @@ verified_against: f51b9337a9283bc54231396584ea5903f0df98f9
 Kithcraft (working lineage label: promptworld II) is a Minecraft server mod that gives an
 embodied player LLM villagers as company. The thesis: survival-crafting games are already
 fun; what they have never had is company — the AI layer is load-bearing for the *feeling*
-of an alive world, not for the game loop. The Minecraft mod itself is still **pre-code**:
-no Fabric mod source exists yet. What exists is a ratified design brief, one ratified
-architecture decision (Fabric server-side mod), verified prior-art research, the
-development machinery that produced them, and — as of TASK-0008 (M1) — the first real
-code: the mind daemon skeleton in `mind/` ([[body-protocol-seam]]).
+of an alive world, not for the game loop. What exists is a ratified design brief, one
+ratified architecture decision (Fabric server-side mod), verified prior-art research, the
+development machinery that produced them, the mind daemon skeleton in `mind/` (TASK-0008,
+M1), and — as of TASK-0009 (V1) — the **first vendor-side code**: a real Fabric mod in
+`mod/` implementing the wire client, `session_open` handshake, capability manifest, and
+token registry ([[body-protocol-seam]]).
 
 ## How it works
 
@@ -49,8 +50,10 @@ decisions ([[mod-stack-decision]]), machinery ([[pdlc-process]], [[model-tiers]]
 
 ## Operational notes
 
-Most of the wiki's sources remain docs and config, not `src/` — the Fabric mod (vendor
-side) is still pre-code. The mind daemon (`mind/`) is the exception: TASK-0008 landed it,
-[[body-protocol-seam]] now cites its files as sources, and this note's own claims were
-re-verified against it in the same pass. The vendor-side implementation PR (TASK-0009)
-will obligate a further wiki-update pass and new component notes.
+Two real code surfaces now exist alongside the docs/config majority of the wiki's
+sources: the mind daemon (`mind/`, TASK-0008/M1) and the Fabric mod vendor
+(`mod/`, TASK-0009/V1) — [[body-protocol-seam]] cites both. This note's claims were
+re-verified against `mod/`'s existence in this pass (2026-08-25). The mod's
+Yarn-mapped brain-API surface ([[villager-brain-api]]) is flagged, not yet
+re-derived, against MC 26.2's official mappings — that re-derivation is V3's
+(TASK-0014) scoped work.

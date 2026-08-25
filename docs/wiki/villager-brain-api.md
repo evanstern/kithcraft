@@ -5,7 +5,7 @@ kind: component
 sources:
   - specs/001-mod-stack-decision/research/prior-art.md
   - docs/design/mod-stack-comparison.md
-verified_against: 50c3def435dd9326d38e51118f08944815cbe80c
+verified_against: cb5003531192512f992688cbf5a08d7b15799545
 ---
 
 # Villager brain API (Fabric substrate)
@@ -17,8 +17,20 @@ substrate both of TASK-0003's entity sub-options sit on.
 
 ## How it works
 
-**Plain API access — no Mixin needed to *use* an existing brain** (verified against
-Yarn-mapped docs, `net.minecraft.entity.ai.brain.Brain`):
+**UNVERIFIED as of 2026-08-25 — re-derivation needed before use.** Every symbol below was
+checked at `yarn-1.21.3+build.1`. TASK-0009's version re-verification
+(`specs/009-fabric-mod-skeleton/research/versions.md`) found Yarn **discontinued**: MC
+26.1+ ships unobfuscated with Mojang's official names directly, and Fabric confirms names
+moved (not just mapping style) in that transition, e.g. `ItemGroupEvents` →
+`CreativeModeTabEvents`. The target here (MC 26.2) is two major lines past Yarn's last
+release. No symbol below has been checked against Mojang's 26.2 official names — this
+section's claims are carried forward as a *shape* (what's plain API vs what needs Mixin),
+not as verified-current symbol names. **Re-deriving the exact 26.2 names is V3's scoped
+work** (TASK-0014); nothing here should be typed into Mixin/brain code before that pass.
+
+**Plain API access — no Mixin needed to *use* an existing brain** (originally verified
+against Yarn-mapped docs, `net.minecraft.entity.ai.brain.Brain`; names below are Yarn's,
+not yet re-checked against MC 26.2's official mappings):
 
 - `Schedule` get/set (`getSchedule()` / `setSchedule()`) — the activity timetable.
 - `Activity` queries (`hasActivity()`) and per-activity task-list assignment
@@ -48,7 +60,10 @@ only through [[body-protocol-seam]]; health/citations in [[prior-art]].
 
 ## Operational notes
 
-API names above are Yarn mappings (checked at yarn-1.21.3+build.1); exact symbol names
-can shift across MC versions — re-verify mappings against the target MC version when
-implementation starts. Citations with URLs and dates:
+API names above are Yarn mappings (checked at yarn-1.21.3+build.1) and are now stale:
+Yarn does not exist for the target MC 26.2 at all (mappings regime changed, not just
+version drift — see `specs/009-fabric-mod-skeleton/research/versions.md`'s
+"villager-brain-api.md re-check" section, 2026-08-25). Re-verify every symbol against
+Mojang's official 26.2 mappings before any brain/schedule/Mixin code is written; this is
+flagged for V3 (TASK-0014), not resolved here. Citations with URLs and dates:
 `specs/001-mod-stack-decision/research/prior-art.md` §6.
