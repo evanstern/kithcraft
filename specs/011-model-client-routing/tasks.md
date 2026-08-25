@@ -14,14 +14,14 @@ before any SDK code.
 **Independent test**: `go test ./prompt/... ./llm/...` — assembly and registry
 tests green (no SDK yet in the loop).
 
-- [ ] T001 Implement mind/llm/classes.go: E1..E6 registry as data — model ID,
+- [x] T001 Implement mind/llm/classes.go: E1..E6 registry as data — model ID,
       latency posture flags (streaming/effort/thinking), max_tokens (E6: 4096 vs
       1200 expected), cache policy (E2/E3/E4 cached, E1/E5/E6 not), structured
       output on/off — mirroring routing §1.3/§5
-- [ ] T002 Implement mind/prompt/shapes.go + assemble.go: typed stable-prefix
+- [x] T002 Implement mind/prompt/shapes.go + assemble.go: typed stable-prefix
       inputs per class (no time-shaped field exists on the stable side), variable
       context builder, composed assembly per §2.3
-- [ ] T003 Named tests: AC #1 class→tier mapping; AC #3 byte-identity of the stable
+- [x] T003 Named tests: AC #1 class→tier mapping; AC #3 byte-identity of the stable
       prefix across two assemblies at different world times (plus a deliberate red
       variant proving the test catches a rendered timestamp); AC #6 E6 ceiling
 
