@@ -1,10 +1,10 @@
 ---
 id: TASK-0007
 title: S1 - Decide the seam transport and pin the wire
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:35'
-updated_date: '2026-08-22 04:01'
+updated_date: '2026-08-25 17:02'
 labels:
   - seam
   - m-0-build
@@ -43,10 +43,10 @@ Spec: specs/007-seam-transport
 - [x] #3 Golden message vectors exist and are language-neutral: one per percept type, one per intent shape, and the session_open handshake
 - [x] #4 A trivial Go encoder and a trivial Java decoder each round-trip every golden vector
 - [x] #5 Nothing beyond the decision record, framing spec and vectors is built
-- [ ] #6 Spec phase: Phase 1 — The decision and the T-matrix (US1)
-- [ ] #7 Spec phase: Phase 2 — The framing/serialization spec (US2)
-- [ ] #8 Spec phase: Phase 3 — Golden vectors and both round-trips (US3)
-- [ ] #9 Spec phase: Phase 4 — Closure: leak audit, wiki, board
+- [x] #6 Spec phase: Phase 1 — The decision and the T-matrix (US1)
+- [x] #7 Spec phase: Phase 2 — The framing/serialization spec (US2)
+- [x] #8 Spec phase: Phase 3 — Golden vectors and both round-trips (US3)
+- [x] #9 Spec phase: Phase 4 — Closure: leak audit, wiki, board
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -69,7 +69,15 @@ T014 FR-007 scope — CLEAN. 38 files in git diff origin/main...HEAD, none outsi
 T015 wiki — docs/wiki/body-protocol-seam.md re-verified claim by claim against its sources, then amended: the two stale spots removed ('transport is deliberately undecided'; 'transport remains an open question'), new 'What the wire binds' section added (UDS + listen/dial + why T-4/T-3 decided it, length-prefixed canonical JSON, bare header, session=connection, no resume/ack, 17 vectors + two agreeing harnesses), operational notes now carry the vectors-append-only rule and the standing obligation to re-run the six passes on any added vector, and Q-1 restated as closed-but-proposed (operator ratifies at PR). Sources grew by docs/design/seam-wire-v0.md and decision-0004's file; description changed, so docs/wiki/CAPSULES.md regenerated; INDEX.md one-liner updated. Re-pinned verified_against to d380acf (the last CONTENT commit — Phase 3's vectors; the Phase 4 audit edit lands in the same commit as this pin). Grepped every other note for transport/wire/Q-1 staleness: none found (v1-demo's only mention is the tier-escalation note, still accurate).
 
 T016 tasks.md T013-T016 ticked. Not touched: Definition of Done items, status (both the orchestrator's).
+
+spec-bridge sync: Phase 1 — The decision and the T-matrix (US1): 4/4 · Phase 2 — The framing/serialization spec (US2): 3/3 · Phase 3 — Golden vectors and both round-trips (US3): 5/5 · Phase 4 — Closure: leak audit, wiki, board: 4/4 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — The decision and the T-matrix (US1): 4/4 · Phase 2 — The framing/serialization spec (US2): 3/3 · Phase 3 — Golden vectors and both round-trips (US3): 5/5 · Phase 4 — Closure: leak audit, wiki, board: 4/4). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
