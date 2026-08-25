@@ -63,12 +63,12 @@ produces the session-end report.
 
 ## Phase 4 — Closure: gates, wiki, board
 
-- [ ] T009 go vet ./... + go test ./... green across the module; scope check: diff
+- [x] T009 go vet ./... + go test ./... green across the module; scope check: diff
       touches only mind/, specs/011-*, board files, runbook log row
-- [ ] T010 Wiki: re-verify notes whose sources this PR touches (body-protocol-seam's
+- [x] T010 Wiki: re-verify notes whose sources this PR touches (body-protocol-seam's
       mind/ sources; overview; promptworld-lineage's llm-shape claims if amended) —
       amend honestly, re-pin, regenerate CAPSULES.md if descriptions changed
-- [ ] T011 Tick this file, check card ACs now true (backlog CLI in-worktree), append
+- [x] T011 Tick this file, check card ACs now true (backlog CLI in-worktree), append
       phase-done note
 
 ## Dependencies
