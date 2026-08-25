@@ -2,8 +2,9 @@
 
 Load this file first; load notes just-in-time. Whole-corpus orientation: `CAPSULES.md`.
 
-Kithcraft is **pre-code**: the corpus grounds the design surface (brief, decisions,
-prior art) and the development machinery (PDLC, board, tiers, hooks), not source code yet.
+The Fabric mod (vendor side) is still **pre-code**; the mind daemon (`mind/`, TASK-0008)
+is the first source the corpus grounds, alongside the design surface (brief, decisions,
+prior art) and the development machinery (PDLC, board, tiers, hooks).
 
 ## Design
 
