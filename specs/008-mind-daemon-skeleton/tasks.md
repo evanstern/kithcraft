@@ -37,14 +37,14 @@ honest continuity.
 **Independent test**: `go test ./seam/...` session tests green, including the
 kill-and-reconnect continuity test.
 
-- [ ] T006 Declare the vendor port interface in mind/seam/port.go (at the consumer)
+- [x] T006 Declare the vendor port interface in mind/seam/port.go (at the consumer)
       and implement the UDS listener in cmd/minddaemon: unlink stale path before bind
       (with the decision-0004 liveness probe), accept loop, per-connection framing
-- [ ] T007 Implement mind/seam/session.go: fail-closed version negotiation
+- [x] T007 Implement mind/seam/session.go: fail-closed version negotiation
       (unsupported_version close), manifest ingest, per-body session multiplexing on
       one connection, byte-identical capabilities check across session_opens,
       session_close semantics
-- [ ] T008 Implement continuity per protocol §6.3: reconnect with body-token matching
+- [x] T008 Implement continuity per protocol §6.3: reconnect with body-token matching
       (seam-wire-v0.md §1.5), gap reported as gap — a named test restarts the daemon
       mid-session against the double and asserts no backfill
 

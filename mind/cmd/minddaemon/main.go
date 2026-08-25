@@ -1,12 +1,14 @@
-// Command minddaemon is the mind daemon's process entrypoint. This is the M1
-// skeleton stub: it parses the socket-path flag and exits cleanly. The UDS
-// listener and session lifecycle are Phase 2 (T006-T008).
+// Command minddaemon is the mind daemon's process entrypoint: it listens on
+// a UDS path (decision-0004) and runs the session lifecycle in mind/seam
+// over each accepted connection.
 package main
 
 import (
 	"flag"
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
@@ -18,5 +20,20 @@ func main() {
 		os.Exit(2)
 	}
 
-	fmt.Printf("minddaemon: stub build, socket=%s (listener not yet implemented)\n", *socket)
+	ln, err := listen(*socket)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	defer ln.Close()
+
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-sig
+		ln.Close() // graceful shutdown: Close removes the socket file it created
+	}()
+
+	fmt.Printf("minddaemon: listening on %s\n", *socket)
+	serve(ln)
 }
