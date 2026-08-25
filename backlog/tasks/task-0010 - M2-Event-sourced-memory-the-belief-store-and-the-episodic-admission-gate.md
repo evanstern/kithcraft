@@ -1,10 +1,10 @@
 ---
 id: TASK-0010
 title: 'M2 - Event-sourced memory, the belief store, and the episodic admission gate'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:37'
-updated_date: '2026-08-25 20:49'
+updated_date: '2026-08-25 20:55'
 labels:
   - mind
   - m-0-build
@@ -48,10 +48,10 @@ Spec: specs/010-event-sourced-memory
 - [ ] #5 The canonical end-to-end (protocol section 10.2) passes against the fake vendor, including step 5: a mind told about the orchard cannot durably claim it saw apple trees there
 - [x] #6 The E6-input-tokens-per-villager instrument reports admitted buffer size per villager-day
 - [x] #7 Design check (minds-are-others): the belief store has no external write path from the vendor, the player or a debug command
-- [ ] #8 Spec phase: Phase 1 — The log and the reducer (US1)
-- [ ] #9 Spec phase: Phase 2 — Beliefs, provenance, the RM rules (US2)
-- [ ] #10 Spec phase: Phase 3 — Admission gate, instrument, end-to-end (US3)
-- [ ] #11 Spec phase: Phase 4 — Closure: gates, wiki, board
+- [x] #8 Spec phase: Phase 1 — The log and the reducer (US1)
+- [x] #9 Spec phase: Phase 2 — Beliefs, provenance, the RM rules (US2)
+- [x] #10 Spec phase: Phase 3 — Admission gate, instrument, end-to-end (US3)
+- [x] #11 Spec phase: Phase 4 — Closure: gates, wiki, board
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -62,6 +62,8 @@ Phase 4 (T011-T013) closure. AC evidence, each a named test in mind/memory/: AC#
 AC#5 left unticked deliberately: its wording is 'against the fake vendor'. e2e_test.go's TestEndToEnd_ProtocolSection10_2_ToldCannotBecomeWitnessed proves step 5's epistemic assertion (told-about-orchard cannot durably become witnessed) mechanically, driven directly against this package's own API per FR-007/FR-006 scope, not against a scripted double session through a fake vendor - there is no memory wiring into the seam yet (that lands in M5), and the fake vendor proper is S2/TASK-0015's deliverable. Honesty over completion: the epistemic core is proven, the AC's literal wording is not yet true, so it stays open until S2/TASK-0015 and M5 land the missing pieces.
 
 Phases 1-4 summary: P1 (T001-T003) append-only JSONL event log, unexported Event fields, (world_time,hash) identity, replay-verifies-hash-on-read. P2 (T004-T006) provenance.go's direct_perception classifier + RM-2/RM-3 coerce-never-reject citation gate; beliefs.go's private PM-1 store, RM-4 upsert rule, RM-5/RM-6 read-time confidence/freshness arithmetic, RM-7 closed-vocabulary retraction. P3 (T007-T010) admission.go's routing-section-6.3 gate (5 admit rules + drop rule, deterministic, no model call), instrument.go's per-villager-day buffer-size instrument, e2e_test.go's protocol-10.2 walkthrough proving step 5. P4 (T011-T013): go vet + go test green (kithcraft/mind/... all packages), diff scope confirmed clean (mind/, specs/010-*, backlog/, docs/design/sweep-0007-0022-runbook.md only), body-protocol-seam.md and overview.md amended and re-pinned to reflect M2's landing, CAPSULES.md regenerated for overview's changed description, 6 of 7 card ACs ticked on cited tests, AC#5 left honestly open pending S2/TASK-0015's fake vendor.
+
+spec-bridge sync: Phase 1 — The log and the reducer (US1): 3/3 · Phase 2 — Beliefs, provenance, the RM rules (US2): 3/3 · Phase 3 — Admission gate, instrument, end-to-end (US3): 4/4 · Phase 4 — Closure: gates, wiki, board: 3/3 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
@@ -79,3 +81,9 @@ created: 2026-08-25 20:14
 Sweep runbook tier: sonnet · model cc/claude-sonnet-5[1m] (default tier — reimplementation to a written contract: RM-1..RM-7, admission gate per routing §6.3; judgment calls settled by decision-0003). Served model recorded at dispatch.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — The log and the reducer (US1): 3/3 · Phase 2 — Beliefs, provenance, the RM rules (US2): 3/3 · Phase 3 — Admission gate, instrument, end-to-end (US3): 4/4 · Phase 4 — Closure: gates, wiki, board: 3/3). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
