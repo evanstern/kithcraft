@@ -35,15 +35,15 @@ transport.
 **Independent test**: `go test ./llm/...` — cancellation, retry, and breakpoint
 tests green with no network.
 
-- [ ] T004 Add anthropic-sdk-go to mind/go.mod (record version + URL + accessed
+- [x] T004 Add anthropic-sdk-go to mind/go.mod (record version + URL + accessed
       date in the PR per the evidence rule); implement mind/llm/client.go: request
       construction from class config, explicit cache-control breakpoint after the
       stable prefix, streaming, retry with backoff, per-call model selection
-- [ ] T005 Mock the transport at the wrapper's seam; named tests: AC #5 prompt
+- [x] T005 Mock the transport at the wrapper's seam; named tests: AC #5 prompt
       cancellation of an in-flight call (context cancel → prompt clean
       termination), retry-on-transient, stream delivery, breakpoint present for
       cached classes and absent for E6
-- [ ] T006 Implement mind/llm/structured.go: E2/E3/E6 structured-output shapes and
+- [x] T006 Implement mind/llm/structured.go: E2/E3/E6 structured-output shapes and
       parsing with a bounded failure mode (AC #4's structured-outputs half)
 
 **Checkpoint**: RT-1..RT-7 each demonstrated by a named mocked test.
