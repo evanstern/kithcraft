@@ -4,7 +4,7 @@ title: 'V1 - Fabric mod skeleton, vendor session, capability manifest, token reg
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:19'
+updated_date: '2026-08-25 17:29'
 labels:
   - vendor
   - m-0-build
@@ -60,6 +60,8 @@ Operator ruling 2026-08-22 (recorded in sweep-0007-0022 runbook, per-task artifa
 Claimed by sweep-0007-0022 orchestrator 2026-08-22 on branch task-0009-fabric-mod-skeleton (worktree .worktrees/task-0009). Tier: sonnet (default tier per runbook — mod skeleton to the written handshake contract; Yarn-mapping re-verification is verification, not design). Model ID: cc/claude-sonnet-5[1m]. Served model recorded at dispatch. Wire inputs ratified: decision-0004 (UDS, vendor dials), seam-wire-v0.md, seam/vectors/. Carries the 2026-08-22 operator ruling: this task's Gradle PR replaces the hand-rolled java-roundtrip parser.
 
 Phase 1 done (fa30968, sonnet verified — claude-sonnet-5, ~150k subagent tokens): versions re-verified with citations (MC 26.2 stable, Loader 0.19.3, Fabric API 0.158.0+26.2, Loom 1.17.19, Gradle 9.5.1 wrapper); mod/ scaffold builds green, runServer load observed (kithcraft 0.1.0, entrypoint log fired), single server jar — no client jar. FINDING for V3/TASK-0014: Yarn is discontinued (MC 26.1+ unobfuscated) — villager-brain-api.md's yarn-1.21.3 symbols must be re-checked against Mojang official names before brain/Mixin work; routing A-2 daylight flag carried forward. Orchestrator re-ran gradle build green.
+
+Phase 2 done (fb48d1c, sonnet verified — claude-sonnet-5, ~209k subagent tokens): Gson chosen (already on classpath via Minecraft; no new dep) — C-1..C-10 emit check FAILED for Gson output (no sorted keys, no integer-only numerics), so CanonicalJson.java pairs Gson JsonReader parsing with a custom canonical writer, recorded per the operator ruling's carve-out. FrameCodec + WireClient (UDS via StandardProtocolFamily.UNIX) + Handshake/Continuity built; 26/26 Gradle tests green incl. the 17-vector suite and a stub-mind handshake round-trip. Orchestrator re-ran gradle test green.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
