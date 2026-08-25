@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:08'
+updated_date: '2026-08-25 17:14'
 labels:
   - mind
   - m-0-build
@@ -53,12 +53,12 @@ Spec: specs/008-mind-daemon-skeleton
 - [ ] #10 Spec phase: Phase 4 — Closure: gates, wiki, board
 <!-- AC:END -->
 
-
-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Claimed by sweep-0007-0022 orchestrator 2026-08-22 on branch task-0008-mind-daemon-skeleton (worktree .worktrees/task-0008). Tier: sonnet (default tier per runbook — greenfield against the written contract; boundary decode, V-1..V-6, session lifecycle all specified). Model ID: cc/claude-sonnet-5[1m]. Served model recorded at dispatch. Wire inputs now ratified: decision-0004 (UDS, mind listens / vendor dials), docs/design/seam-wire-v0.md, seam/vectors/ (17).
+
+Phase 1 done (72b3c09, sonnet verified — claude-sonnet-5, ~138k subagent tokens): mind/ module exists (kithcraft/mind, go1.26.4); wire codec (frame.go 1MiB cap, canonical.go C-1..C-10 hand-rolled writer, decode.go tolerant V-1/V-2/V-3/V-5 half) proven against all 17 vectors — census + roundtrip + framing refusals + non-canonical acceptance, orchestrator re-ran go vet + go test green. C-4 dup-key detection deliberately skipped (no vector pins it; ponytail comment names the trigger).
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
