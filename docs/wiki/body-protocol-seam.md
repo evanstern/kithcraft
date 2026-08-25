@@ -12,7 +12,11 @@ sources:
   - mind/seam/session.go
   - mod/src/main/java/dev/kithcraft/mod/wire/CanonicalJson.java
   - mod/src/main/java/dev/kithcraft/mod/session/Handshake.java
-verified_against: cb5003531192512f992688cbf5a08d7b15799545
+  - mind/memory/log.go
+  - mind/memory/beliefs.go
+  - mind/memory/provenance.go
+  - mind/memory/admission.go
+verified_against: 4ee4efe074a060e59122106ee839a3590262bce6
 ---
 
 # Body-protocol seam
@@ -151,6 +155,22 @@ exist as throwaway, spec-facing proof, independent of either real implementation
 one was rebuilt on the same Gson-decode/custom-encode split once TASK-0009 introduced
 Gradle (the only reason it had stayed hand-rolled), per the operator's 2026-08-22 ruling —
 see `seam/java-roundtrip/README.md`.
+
+TASK-0010 (M2) then landed the mind's own durable memory in `mind/memory/`, the concrete
+code behind this note's "durable memory belongs to the mind" invariant and its PM-1
+epistemic-hygiene mechanism. `log.go` is the append-only event log: type-level
+immutability (`Event`'s fields are unexported, `Log.Append` the only writer) and state as
+a reducer replaying the log reproduces. `beliefs.go` is the private, provenance-stamped
+belief store (PM-1) — distinct from any vendor resolution index, no external write path —
+implementing RM-4..RM-7 as read-time arithmetic on `world_time`: confidence and freshness
+are computed at read time and never stored, and only a correction, a death, or a witnessed
+removal deletes a belief. `provenance.go` implements this note's `direct_perception`
+classifier (§2.7, pure over `origin` alone) and the RM-2/RM-3 citation-resolution gate,
+which coerces a model-authored claim down to what its cited percepts support and never
+rejects it. `admission.go` implements routing §6.3's deterministic episodic admission
+gate between the percept inbox and the log. Scope stays bounded once more: no model call
+anywhere in this package (routing §1.2) — a model authoring belief claims is M4/M5's work,
+not this one's.
 
 ## Connections
 

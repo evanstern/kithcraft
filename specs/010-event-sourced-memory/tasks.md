@@ -61,12 +61,12 @@ llm-routing-and-budget.md §6.3
 
 ## Phase 4 — Closure: gates, wiki, board
 
-- [ ] T011 go vet ./... + go test ./... green across the module; scope check: diff
+- [x] T011 go vet ./... + go test ./... green across the module; scope check: diff
       touches only mind/, specs/010-*, board files, runbook log row
-- [ ] T012 Wiki: re-verify notes whose sources this PR touches (body-protocol-seam
+- [x] T012 Wiki: re-verify notes whose sources this PR touches (body-protocol-seam
       lists mind/ sources; overview's daemon description) — amend honestly, re-pin,
       regenerate CAPSULES.md if descriptions changed
-- [ ] T013 Tick this file, check card ACs now true (backlog CLI in-worktree), append
+- [x] T013 Tick this file, check card ACs now true (backlog CLI in-worktree), append
       phase-done note
 
 ## Dependencies

@@ -1,12 +1,12 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon, and now the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, and the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: cb5003531192512f992688cbf5a08d7b15799545
+verified_against: 4ee4efe074a060e59122106ee839a3590262bce6
 ---
 
 # Overview
@@ -17,9 +17,11 @@ fun; what they have never had is company — the AI layer is load-bearing for th
 of an alive world, not for the game loop. What exists is a ratified design brief, one
 ratified architecture decision (Fabric server-side mod), verified prior-art research, the
 development machinery that produced them, the mind daemon skeleton in `mind/` (TASK-0008,
-M1), and — as of TASK-0009 (V1) — the **first vendor-side code**: a real Fabric mod in
-`mod/` implementing the wire client, `session_open` handshake, capability manifest, and
-token registry ([[body-protocol-seam]]).
+M1) — since TASK-0010 (M2) carrying its own event-sourced memory: an append-only log, a
+private provenance-stamped belief store, and the deterministic episodic admission gate
+([[body-protocol-seam]]) — and, as of TASK-0009 (V1), the **first vendor-side code**: a
+real Fabric mod in `mod/` implementing the wire client, `session_open` handshake,
+capability manifest, and token registry ([[body-protocol-seam]]).
 
 ## How it works
 
@@ -51,9 +53,11 @@ decisions ([[mod-stack-decision]]), machinery ([[pdlc-process]], [[model-tiers]]
 ## Operational notes
 
 Two real code surfaces now exist alongside the docs/config majority of the wiki's
-sources: the mind daemon (`mind/`, TASK-0008/M1) and the Fabric mod vendor
-(`mod/`, TASK-0009/V1) — [[body-protocol-seam]] cites both. This note's claims were
-re-verified against `mod/`'s existence in this pass (2026-08-25). The mod's
+sources: the mind daemon (`mind/`, TASK-0008/M1, now carrying TASK-0010/M2's
+event-sourced memory in `mind/memory/`) and the Fabric mod vendor (`mod/`,
+TASK-0009/V1) — [[body-protocol-seam]] cites both. This note's claims were
+re-verified against `mod/`'s and `mind/memory/`'s existence in this pass
+(2026-08-25). The mod's
 Yarn-mapped brain-API surface ([[villager-brain-api]]) is flagged, not yet
 re-derived, against MC 26.2's official mappings — that re-derivation is V3's
 (TASK-0014) scoped work.
