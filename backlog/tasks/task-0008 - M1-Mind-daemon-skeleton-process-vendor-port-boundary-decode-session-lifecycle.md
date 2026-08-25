@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:06'
+updated_date: '2026-08-25 17:08'
 labels:
   - mind
   - m-0-build
@@ -47,7 +47,13 @@ Spec: specs/008-mind-daemon-skeleton
 - [ ] #4 An unrecognized or absent origin value classifies the percept as secondhand
 - [ ] #5 The daemon opens a session against a test double, ingests a scripted percept stream with duplicates and a seq gap, and emits intents
 - [ ] #6 Restarting the daemon mid-session re-opens with continuity and reports the gap as a gap rather than backfilling it
+- [ ] #7 Spec phase: Phase 1 — Module, wire codec, vector proof (US1 groundwork)
+- [ ] #8 Spec phase: Phase 2 — Vendor port, listener, session lifecycle (US2)
+- [ ] #9 Spec phase: Phase 3 — Ingest, intents, the double, end-to-end (US3)
+- [ ] #10 Spec phase: Phase 4 — Closure: gates, wiki, board
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
