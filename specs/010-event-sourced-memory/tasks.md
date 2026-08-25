@@ -12,12 +12,12 @@ llm-routing-and-budget.md §6.3
 
 **Independent test**: `go test ./memory/...` — immutability and replay tests green.
 
-- [ ] T001 Create mind/memory/log.go: memory-event shape (unexported fields, no
+- [x] T001 Create mind/memory/log.go: memory-event shape (unexported fields, no
       setters), append-only writer over the canonical JSON encoder, JSONL file per
       villager, replay reader
-- [ ] T002 Named test proving mutation is impossible at the type level (card AC #1)
+- [x] T002 Named test proving mutation is impossible at the type level (card AC #1)
       and that replaying the log reproduces reduced state byte-for-byte
-- [ ] T003 Wire durable identity as `(world_time, hash)` pairs (the inherited E6
+- [x] T003 Wire durable identity as `(world_time, hash)` pairs (the inherited E6
       identity convention M7 will address memories by)
 
 **Checkpoint**: the log cannot lie and cannot be edited.
