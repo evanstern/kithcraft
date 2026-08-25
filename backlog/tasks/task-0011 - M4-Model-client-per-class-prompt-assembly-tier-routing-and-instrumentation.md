@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:37'
-updated_date: '2026-08-25 20:14'
+updated_date: '2026-08-25 20:19'
 labels:
   - mind
   - m-0-build
@@ -47,7 +47,13 @@ Spec: specs/011-model-client-routing
 - [ ] #5 Cancelling an in-flight call terminates it promptly and cleanly
 - [ ] #6 E6 carries a truncation-aware max_tokens ceiling (4096 against an expected 1200), never set near its expected output
 - [ ] #7 Per-class call and token counters report at session end
+- [ ] #8 Spec phase: Phase 1 — Class registry and prompt assembly (US2 groundwork + US1 data)
+- [ ] #9 Spec phase: Phase 2 — SDK client: streaming, cancel, retry, breakpoints (US3)
+- [ ] #10 Spec phase: Phase 3 — Accounting and session report (US2 close)
+- [ ] #11 Spec phase: Phase 4 — Closure: gates, wiki, board
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
