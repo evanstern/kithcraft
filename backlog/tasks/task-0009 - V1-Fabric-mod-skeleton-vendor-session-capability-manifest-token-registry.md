@@ -1,10 +1,10 @@
 ---
 id: TASK-0009
 title: 'V1 - Fabric mod skeleton, vendor session, capability manifest, token registry'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 19:23'
+updated_date: '2026-08-25 19:24'
 labels:
   - vendor
   - m-0-build
@@ -46,9 +46,9 @@ Spec: specs/009-fabric-mod-skeleton
 - [x] #5 The token registry persists across sessions: tokens issued before a server restart resolve to the same referents after it, and tokens are never reused
 - [x] #6 Yarn mappings and version-dependent facts are re-verified against the target Minecraft version
 - [x] #7 No client jar is produced
-- [ ] #8 Spec phase: Phase 1 — Version re-verification and toolchain (US1 groundwork)
-- [ ] #9 Spec phase: Phase 2 — Wire client and vector proof (US1)
-- [ ] #10 Spec phase: Phase 3 — Manifest (L-7) and token registry (US2 + US3)
+- [x] #8 Spec phase: Phase 1 — Version re-verification and toolchain (US1 groundwork)
+- [x] #9 Spec phase: Phase 2 — Wire client and vector proof (US1)
+- [x] #10 Spec phase: Phase 3 — Manifest (L-7) and token registry (US2 + US3)
 - [x] #11 Spec phase: Phase 4 — Harness replacement, gates, wiki, board
 <!-- AC:END -->
 
@@ -74,7 +74,15 @@ T012 wiki: villager-brain-api.md marked UNVERIFIED against MC 26.2 (Yarn discont
 Card AC #11 (Phase 4) checked; AC #1 (orchestrator's full-handshake-against-daemon judgment) left unchecked, DoD and status untouched per dispatch scope.
 
 AC #1 checked by orchestrator on composite evidence: mod loads on a dev server (Phase 1 runServer observation, kithcraft 0.1.0 + entrypoint log), a session opens against a stub mind over real UDS with byte-identical decode both directions (HandshakeWireClientTest), and S1's golden vectors round-trip 17/17 through the mod's codec (VectorSuiteTest). Live pairing against the real daemon binary is TASK-0021/I1's acceptance check (T-4 restart independence), per the demo build plan.
+
+spec-bridge sync: Phase 1 — Version re-verification and toolchain (US1 groundwork): 3/3 · Phase 2 — Wire client and vector proof (US1): 3/3 · Phase 3 — Manifest (L-7) and token registry (US2 + US3): 3/3 · Phase 4 — Harness replacement, gates, wiki, board: 4/4 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — Version re-verification and toolchain (US1 groundwork): 3/3 · Phase 2 — Wire client and vector proof (US1): 3/3 · Phase 3 — Manifest (L-7) and token registry (US2 + US3): 3/3 · Phase 4 — Harness replacement, gates, wiki, board: 4/4). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
