@@ -60,15 +60,15 @@ as the mind side.
 **Independent test**: L-7 byte-identity test green; token persistence proven across a
 real `runServer` restart (observation recorded).
 
-- [ ] T007 [US2] Implement the static capability manifest: four-type floor plus
+- [x] T007 [US2] Implement the static capability manifest: four-type floor plus
       declared extras, origins, verbs with target shapes, role-annotated
       salient_kinds, bearings, distance bands, time_unit "second" (never ticks);
       named test byte-compares manifests across two bodies in different world states
       (L-7, card AC #3)
-- [ ] T008 [US3] Implement mod/tokens/TokenRegistry.java: issue/resolve/retire for
+- [x] T008 [US3] Implement mod/tokens/TokenRegistry.java: issue/resolve/retire for
       body/place/thing_id/kind, backed by the world save's persistent mod data;
       tokens never reused (monotonic issuance survives restart)
-- [ ] T009 [US3] Prove persistence: unit tests for issue/resolve/retire + a recorded
+- [x] T009 [US3] Prove persistence: unit tests for issue/resolve/retire + a recorded
       dev-server restart observation — tokens issued pre-restart resolve to the same
       referents post-restart (card AC #5)
 
