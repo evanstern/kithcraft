@@ -21,7 +21,7 @@ sources:
   - mind/memory/beliefs.go
   - mind/memory/provenance.go
   - mind/memory/admission.go
-verified_against: MERGE_PENDING
+verified_against: 3aa4a2aaceb1dbea2cd24df749032d48e7caa11e
 ---
 
 # Body-protocol seam
