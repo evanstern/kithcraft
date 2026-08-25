@@ -3,9 +3,10 @@ id: TASK-0008
 title: >-
   M1 - Mind daemon skeleton: process, vendor port, boundary decode, session
   lifecycle
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
+updated_date: '2026-08-25 17:06'
 labels:
   - mind
   - m-0-build
@@ -34,6 +35,8 @@ As a future implementer, I want a daemon that can hold a session and refuse a ma
 **References.** docs/design/demo-build-plan.md section 3.2 (M1) is the plan of record. Ratified surfaces consumed: docs/design/body-protocol-v0.md (SI-1..SI-5, V-1..V-6, session lifecycle, intent/ack split), decision-0003 + docs/design/llm-routing-and-budget.md (Go daemon rebuilt behind the seam; boundary decode scheduled explicitly; the decomposition splits at the seam).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/008-mind-daemon-skeleton
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -45,6 +48,12 @@ As a future implementer, I want a daemon that can hold a session and refuse a ma
 - [ ] #5 The daemon opens a session against a test double, ingests a scripted percept stream with duplicates and a seq gap, and emits intents
 - [ ] #6 Restarting the daemon mid-session re-opens with continuity and reports the gap as a gap rather than backfilling it
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Claimed by sweep-0007-0022 orchestrator 2026-08-22 on branch task-0008-mind-daemon-skeleton (worktree .worktrees/task-0008). Tier: sonnet (default tier per runbook — greenfield against the written contract; boundary decode, V-1..V-6, session lifecycle all specified). Model ID: cc/claude-sonnet-5[1m]. Served model recorded at dispatch. Wire inputs now ratified: decision-0004 (UDS, mind listens / vendor dials), docs/design/seam-wire-v0.md, seam/vectors/ (17).
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
