@@ -1,0 +1,50 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.version
+group = project.group
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	testImplementation platform('org.junit:junit-bom:5.11.4')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+	useJUnitPlatform()
+	// seam/vectors lives one level above mod/ at the repo root; passed explicitly so the
+	// vector suite does not have to guess the test task's working directory.
+	systemProperty 'kithcraft.seamVectorsDir', file('../seam/vectors').absolutePath
+}
+
+tasks.register('seamRoundTrip', Exec) {
+	group = 'verification'
+	description = 'Runs seam/java-roundtrip/RoundTrip.java (JEP 330 source-launch) against ' +
+		'seam/vectors, with Gson supplied from this mod\'s runtime classpath (T010).'
+	doFirst {
+		commandLine = ['java', '--class-path', sourceSets.main.runtimeClasspath.asPath,
+			file('../seam/java-roundtrip/RoundTrip.java').absolutePath,
+			file('../seam/vectors').absolutePath]
+	}
+}
+
+processResources {
+	inputs.property "version", project.version
+	filesMatching("fabric.mod.json") {
+		expand "version": project.version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}

@@ -1,6 +1,7 @@
 // RoundTrip — the JVM half of the seam wire's executable pinning.
 //
-// Run:  java RoundTrip.java ../vectors
+// Run:  cd mod && ./gradlew seamRoundTrip
+// (or:  java --class-path <gson-jar> seam/java-roundtrip/RoundTrip.java seam/vectors)
 //
 // This is a throwaway-grade proof of docs/design/seam-wire-v0.md, not the transport:
 // V1 (TASK-0009) builds that. Its value is entirely in being a SECOND, INDEPENDENT
@@ -8,12 +9,21 @@
 // implementations agreeing is the only evidence that the spec, rather than one
 // codebase's habits, is what the vectors pin.
 //
-// JDK stdlib only. The JSON handling below is hand-rolled because the canonical form
-// (§2.4) is a small closed subset — objects, arrays, strings, integers, the three
-// literals — and pulling a JSON library in would mean a build system, which this task
-// must not introduce.
+// Per the operator's 2026-08-22 ruling (once TASK-0009 introduced Gradle, the
+// no-build-system reason for hand-rolling JSON was void): parsing uses Gson's
+// JsonReader, same as mod/wire/CanonicalJson.java and the same emit-check verdict
+// (recorded in specs/009-fabric-mod-skeleton/research/versions.md) — Gson cannot be
+// made to emit canonical form (no sorted-key mode for C-3, no integer-only numeric
+// mode for C-6) — so the canonical *writer* stays hand-written.
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
 
 import java.io.IOException;
+import java.io.StringReader;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -54,9 +64,8 @@ public final class RoundTrip {
         Map<String, Map<String, Object>> vectors = new TreeMap<>();
         try (DirectoryStream<Path> files = Files.newDirectoryStream(dir, "*.json")) {
             for (Path p : files) {
-                Object parsed = Json.parse(Files.readString(p, StandardCharsets.UTF_8));
                 @SuppressWarnings("unchecked")
-                Map<String, Object> v = (Map<String, Object>) parsed;
+                Map<String, Object> v = (Map<String, Object>) Json.decode(Files.readAllBytes(p));
                 String stem = p.getFileName().toString().replaceFirst("\\.json$", "");
                 if (!stem.equals(v.get("name"))) {
                     fail(stem, "declares name " + v.get("name") + "; file and vector name must agree");
@@ -196,7 +205,7 @@ public final class RoundTrip {
 
     /** §2.4's asymmetry: senders emit canonical, receivers accept any conforming JSON. */
     private static void checkReceiverAcceptsNonCanonical() {
-        Object v = Json.parse("{ \"b\" : 2,\n  \"a\" : 1 }");
+        Object v = Json.decode("{ \"b\" : 2,\n  \"a\" : 1 }".getBytes(StandardCharsets.UTF_8));
         String canon = Json.canonical(v);
         if (canon.equals("{\"a\":1,\"b\":2}")) {
             pass("receiver/accepts-non-canonical");
@@ -238,21 +247,7 @@ public final class RoundTrip {
         }
         int start = offset + 4, end = (int) (start + n);
         byte[] body = java.util.Arrays.copyOfRange(buf, start, end);
-        if (body.length >= 3 && (body[0] & 0xFF) == 0xEF && (body[1] & 0xFF) == 0xBB && (body[2] & 0xFF) == 0xBF) {
-            throw new IllegalArgumentException("body carries a BOM (C-1)");
-        }
-        // Decoding strictly, so invalid UTF-8 raises rather than becoming U+FFFD.
-        String text;
-        try {
-            text = StandardCharsets.UTF_8.newDecoder()
-                .onMalformedInput(java.nio.charset.CodingErrorAction.REPORT)
-                .onUnmappableCharacter(java.nio.charset.CodingErrorAction.REPORT)
-                .decode(java.nio.ByteBuffer.wrap(body))
-                .toString();
-        } catch (java.nio.charset.CharacterCodingException e) {
-            throw new IllegalArgumentException("body is not valid UTF-8: " + e.getMessage());
-        }
-        return new Frame(Json.parse(text), end);
+        return new Frame(Json.decode(body), end);
     }
 
     private static byte[] encodeFrame(Object value) {
@@ -385,151 +380,93 @@ public final class RoundTrip {
     // ===================================================================== JSON
 
     /**
-     * A minimal RFC 8259 reader and a canonical-form writer (§2.4, C-1..C-10).
-     * Numbers become {@code Long} because C-6 makes every v0 number an integer and
-     * requires a receiver to refuse one outside signed-64-bit range rather than lose
-     * it to a double.
+     * Canonical JSON for the seam wire (docs/design/seam-wire-v0.md §2.4, C-1..C-10) —
+     * the same split as mod/wire/CanonicalJson.java, verified against the same 17
+     * vectors: decode via Gson's {@link JsonReader}, with the wire's stricter rules
+     * layered on top (no duplicate keys C-4, integers only in signed-64-bit range C-6,
+     * no lone surrogate C-8, no BOM and strict UTF-8 C-1); encode hand-written, because
+     * Gson has no sorted-key mode (C-3) and no integer-only numeric mode (C-6).
      */
     static final class Json {
 
-        private final String s;
-        private int i;
+        private Json() {}
 
-        private Json(String s) {
-            this.s = s;
+        // ------------------------------------------------------------ decode
+
+        static Object decode(byte[] utf8) {
+            if (utf8.length >= 3 && (utf8[0] & 0xFF) == 0xEF && (utf8[1] & 0xFF) == 0xBB && (utf8[2] & 0xFF) == 0xBF) {
+                throw new IllegalArgumentException("body carries a BOM (C-1)");
+            }
+            String text;
+            try {
+                text = StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .decode(ByteBuffer.wrap(utf8))
+                    .toString();
+            } catch (CharacterCodingException e) {
+                throw new IllegalArgumentException("body is not valid UTF-8 (C-1): " + e.getMessage());
+            }
+
+            JsonReader reader = new JsonReader(new StringReader(text));
+            Object value;
+            try {
+                value = readValue(reader);
+                if (reader.peek() != JsonToken.END_DOCUMENT) {
+                    throw new IllegalArgumentException("trailing content after the message");
+                }
+            } catch (IOException e) {
+                throw new IllegalArgumentException("malformed JSON: " + e.getMessage(), e);
+            }
+            checkNoLoneSurrogates(value);
+            return value;
         }
 
-        static Object parse(String text) {
-            Json p = new Json(text);
-            p.skipWhitespace();
-            Object v = p.value();
-            p.skipWhitespace();
-            if (p.i != text.length()) {
-                throw new IllegalArgumentException("trailing content after the message at offset " + p.i);
-            }
-            return v;
-        }
-
-        private Object value() {
-            if (i >= s.length()) {
-                throw new IllegalArgumentException("unexpected end of input");
-            }
-            return switch (s.charAt(i)) {
-                case '{' -> object();
-                case '[' -> array();
-                case '"' -> string();
-                case 't' -> literal("true", Boolean.TRUE);
-                case 'f' -> literal("false", Boolean.FALSE);
-                case 'n' -> literal("null", null);
-                default -> number();
+        private static Object readValue(JsonReader r) throws IOException {
+            return switch (r.peek()) {
+                case BEGIN_OBJECT -> readObject(r);
+                case BEGIN_ARRAY -> readArray(r);
+                case STRING -> r.nextString();
+                case NUMBER -> readInteger(r);
+                case BOOLEAN -> r.nextBoolean();
+                case NULL -> {
+                    r.nextNull();
+                    yield null;
+                }
+                default -> throw new IllegalArgumentException("unexpected token " + r.peek());
             };
         }
 
-        private Map<String, Object> object() {
-            expect('{');
-            // LinkedHashMap keeps source order for readable diagnostics; comparison
-            // and canonical output never depend on it.
+        private static Map<String, Object> readObject(JsonReader r) throws IOException {
             Map<String, Object> out = new LinkedHashMap<>();
-            skipWhitespace();
-            if (peek() == '}') {
-                i++;
-                return out;
-            }
-            while (true) {
-                skipWhitespace();
-                String key = string();
+            r.beginObject();
+            while (r.hasNext()) {
+                String key = r.nextName();
                 if (out.containsKey(key)) {
                     // C-4: last-wins would silently pick a value the sender did not mean.
                     throw new IllegalArgumentException("duplicate key \"" + key + "\" (C-4)");
                 }
-                skipWhitespace();
-                expect(':');
-                skipWhitespace();
-                out.put(key, value());
-                skipWhitespace();
-                char c = next();
-                if (c == '}') {
-                    return out;
-                }
-                if (c != ',') {
-                    throw new IllegalArgumentException("expected ',' or '}' at offset " + (i - 1));
-                }
+                out.put(key, readValue(r));
             }
+            r.endObject();
+            return out;
         }
 
-        private List<Object> array() {
-            expect('[');
+        private static List<Object> readArray(JsonReader r) throws IOException {
             List<Object> out = new ArrayList<>();
-            skipWhitespace();
-            if (peek() == ']') {
-                i++;
-                return out;
+            r.beginArray();
+            while (r.hasNext()) {
+                out.add(readValue(r));
             }
-            while (true) {
-                skipWhitespace();
-                out.add(value());
-                skipWhitespace();
-                char c = next();
-                if (c == ']') {
-                    return out;
-                }
-                if (c != ',') {
-                    throw new IllegalArgumentException("expected ',' or ']' at offset " + (i - 1));
-                }
-            }
+            r.endArray();
+            return out;
         }
 
-        private String string() {
-            expect('"');
-            StringBuilder sb = new StringBuilder();
-            while (true) {
-                char c = next();
-                if (c == '"') {
-                    return sb.toString();
-                }
-                if (c < 0x20) {
-                    throw new IllegalArgumentException("unescaped control character in string at offset " + (i - 1));
-                }
-                if (c != '\\') {
-                    sb.append(c);
-                    continue;
-                }
-                char esc = next();
-                switch (esc) {
-                    case '"' -> sb.append('"');
-                    case '\\' -> sb.append('\\');
-                    case '/' -> sb.append('/');
-                    case 'b' -> sb.append('\b');
-                    case 'f' -> sb.append('\f');
-                    case 'n' -> sb.append('\n');
-                    case 'r' -> sb.append('\r');
-                    case 't' -> sb.append('\t');
-                    case 'u' -> {
-                        if (i + 4 > s.length()) {
-                            throw new IllegalArgumentException("truncated \\u escape");
-                        }
-                        sb.append((char) Integer.parseInt(s.substring(i, i + 4), 16));
-                        i += 4;
-                    }
-                    default -> throw new IllegalArgumentException("invalid escape \\" + esc);
-                }
-            }
-        }
-
-        private Long number() {
-            int start = i;
-            if (peek() == '-') {
-                i++;
-            }
-            while (i < s.length() && s.charAt(i) >= '0' && s.charAt(i) <= '9') {
-                i++;
-            }
-            String lexeme = s.substring(start, i);
-            if (i < s.length() && (s.charAt(i) == '.' || s.charAt(i) == 'e' || s.charAt(i) == 'E')) {
-                throw new IllegalArgumentException("number " + lexeme + "… is not an integer (C-6)");
-            }
-            if (lexeme.isEmpty() || lexeme.equals("-")) {
-                throw new IllegalArgumentException("expected a value at offset " + start);
+        /** C-6: every v0 number is an integer, representable as a signed 64-bit value. */
+        private static Long readInteger(JsonReader r) throws IOException {
+            String lexeme = r.nextString(); // Gson permits reading a NUMBER token as its raw text.
+            if (lexeme.indexOf('.') >= 0 || lexeme.indexOf('e') >= 0 || lexeme.indexOf('E') >= 0) {
+                throw new IllegalArgumentException("number " + lexeme + " is not an integer (C-6)");
             }
             try {
                 return Long.parseLong(lexeme);
@@ -538,41 +475,28 @@ public final class RoundTrip {
             }
         }
 
-        private Object literal(String word, Object v) {
-            if (!s.startsWith(word, i)) {
-                throw new IllegalArgumentException("invalid literal at offset " + i);
-            }
-            i += word.length();
-            return v;
-        }
-
-        private void skipWhitespace() {
-            while (i < s.length()) {
-                char c = s.charAt(i);
-                if (c == ' ' || c == '\t' || c == '\n' || c == '\r') {
-                    i++;
-                } else {
-                    return;
+        /** C-8: a lone surrogate MUST be refused, never transcoded. */
+        private static void checkNoLoneSurrogates(Object v) {
+            if (v instanceof String s) {
+                for (int i = 0; i < s.length(); i++) {
+                    char c = s.charAt(i);
+                    if (Character.isHighSurrogate(c)) {
+                        if (i + 1 >= s.length() || !Character.isLowSurrogate(s.charAt(i + 1))) {
+                            throw new IllegalArgumentException("lone high surrogate in string (C-8)");
+                        }
+                        i++;
+                    } else if (Character.isLowSurrogate(c)) {
+                        throw new IllegalArgumentException("lone low surrogate in string (C-8)");
+                    }
                 }
-            }
-        }
-
-        private char peek() {
-            if (i >= s.length()) {
-                throw new IllegalArgumentException("unexpected end of input");
-            }
-            return s.charAt(i);
-        }
-
-        private char next() {
-            char c = peek();
-            i++;
-            return c;
-        }
-
-        private void expect(char c) {
-            if (next() != c) {
-                throw new IllegalArgumentException("expected '" + c + "' at offset " + (i - 1));
+            } else if (v instanceof Map<?, ?> m) {
+                for (Object val : m.values()) {
+                    checkNoLoneSurrogates(val);
+                }
+            } else if (v instanceof List<?> l) {
+                for (Object val : l) {
+                    checkNoLoneSurrogates(val);
+                }
             }
         }
 
