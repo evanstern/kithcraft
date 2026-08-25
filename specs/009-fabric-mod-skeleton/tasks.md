@@ -15,15 +15,15 @@ and loads on a dev server.
 **Independent test**: `cd mod && ./gradlew build` green; `./gradlew runServer` loads
 the mod without error (observation recorded).
 
-- [ ] T001 Re-verify target versions with the evidence rule (URL + accessed date):
+- [x] T001 Re-verify target versions with the evidence rule (URL + accessed date):
       current stable Minecraft, matching Fabric loader/API and Yarn build, loom
       version; confirm-or-bump villager-brain-api's yarn-1.21.3+build.1 symbols and
       routing A-2's daylight arithmetic flag; record in
       specs/009-fabric-mod-skeleton/research/versions.md
-- [ ] T002 Scaffold mod/ — Gradle wrapper, settings.gradle, build.gradle
+- [x] T002 Scaffold mod/ — Gradle wrapper, settings.gradle, build.gradle
       (fabric-loom), gradle.properties pinning the T001 versions, fabric.mod.json
       (server entrypoint only), KithcraftMod entrypoint stub; `./gradlew build` green
-- [ ] T003 Verify dev-server load: `./gradlew runServer` observation recorded (mod id
+- [x] T003 Verify dev-server load: `./gradlew runServer` observation recorded (mod id
       in the log, no client jar produced — card AC #7 evidence)
 
 **Checkpoint**: the toolchain exists; JVM code can be written and run.
