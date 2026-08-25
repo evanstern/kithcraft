@@ -48,15 +48,15 @@ llm-routing-and-budget.md §6.3
 
 **Independent test**: the §10.2 end-to-end named test passes, step 5 included.
 
-- [ ] T007 Implement mind/memory/admission.go: admit on urgency ≥ notable / other
+- [x] T007 Implement mind/memory/admission.go: admit on urgency ≥ notable / other
       body or player involved / act_result with authored reason / told_fact or text /
       first sighting of a kind or place; drop repeated background sightings of known
       things (card AC #4); deterministic — no model hook anywhere
-- [ ] T008 Implement mind/memory/instrument.go: admitted buffer size per
+- [x] T008 Implement mind/memory/instrument.go: admitted buffer size per
       villager-day (card AC #6), reported at session end
-- [ ] T009 Admission-gate named tests: one per admit rule, the drop rule, and a
+- [x] T009 Admission-gate named tests: one per admit rule, the drop rule, and a
       determinism check (same stream → same admissions)
-- [ ] T010 The canonical end-to-end (protocol §10.2) against the seamtest double,
+- [x] T010 The canonical end-to-end (protocol §10.2) against the seamtest double,
       including step 5: told-about-orchard cannot durably claim saw (card AC #5)
 
 ## Phase 4 — Closure: gates, wiki, board
