@@ -4,6 +4,7 @@ title: 'V1 - Fabric mod skeleton, vendor session, capability manifest, token reg
 status: To Do
 assignee: []
 created_date: '2026-08-21 23:36'
+updated_date: '2026-08-22 16:48'
 labels:
   - vendor
   - m-0-build
@@ -44,6 +45,12 @@ As a future implementer, I want a mod that can hold a protocol session and hand 
 - [ ] #6 Yarn mappings and version-dependent facts are re-verified against the target Minecraft version
 - [ ] #7 No client jar is produced
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+Operator ruling 2026-08-22 (recorded in sweep-0007-0022 runbook, per-task artifacts section): when this task introduces Gradle, the same PR replaces seam/java-roundtrip's hand-rolled JSON parsing with a library-based harness. The hand-roll existed only to avoid introducing a build system before V1 owned that decision; once Gradle exists, that justification is void. The canonical writer stays custom only if the chosen library provably cannot emit C-1..C-10 canonical form (verify against the vectors, record the outcome).
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->

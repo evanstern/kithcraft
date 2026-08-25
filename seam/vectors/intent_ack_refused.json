@@ -1,0 +1,20 @@
+{
+  "name": "intent_ack_refused",
+  "direction": "vendor_to_mind",
+  "expect": "roundtrip",
+  "note": "The unknown_target refusal shape (§5.3/§5.6). This is a well-formed message, not a malformed one: it is an edge vector because the refusal it carries is the one the protocol most warns about turning into an existence oracle. unknown_target means the vendor never issued this token, never that the referent stopped existing — that discovery is act_result/target_gone's monopoly.",
+  "decoded": {
+    "protocol": "0.1",
+    "message": "intent_ack",
+    "session": "s-0e11",
+    "seq": 0,
+    "body": "b-eda",
+    "world_time": 918262,
+    "payload": {
+      "intent_id": "i-4411",
+      "accepted": false,
+      "reason_code": "unknown_target"
+    }
+  },
+  "frame_hex": "000000b87b22626f6479223a22622d656461222c226d657373616765223a22696e74656e745f61636b222c227061796c6f6164223a7b226163636570746564223a66616c73652c22696e74656e745f6964223a22692d34343131222c22726561736f6e5f636f6465223a22756e6b6e6f776e5f746172676574227d2c2270726f746f636f6c223a22302e31222c22736571223a302c2273657373696f6e223a22732d30653131222c22776f726c645f74696d65223a3931383236327d"
+}

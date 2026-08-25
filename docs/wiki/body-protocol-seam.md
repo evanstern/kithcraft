@@ -1,12 +1,14 @@
 ---
 name: body-protocol-seam
-description: The anti-corner architecture move — a world-agnostic body protocol (perceive / act / remember) between mind daemon and world, with the Minecraft mod as the first body vendor. Why minds never couple to Minecraft, what the seam buys, and the drafted v0 contract — five seam invariants, three surfaces, four core verbs. Load for any protocol or architecture work.
+description: The anti-corner architecture move — a world-agnostic body protocol (perceive / act / remember) between mind daemon and world, with the Minecraft mod as the first body vendor. Why minds never couple to Minecraft, what the seam buys, the v0 contract (five seam invariants, three surfaces, four core verbs), and the wire beneath it — decision-0004's Unix domain socket, length-prefixed canonical JSON framing, and seventeen golden vectors two harnesses agree on. Load for any protocol, transport, or architecture work.
 kind: pattern
 sources:
   - docs/design/kithcraft-brief.md
   - docs/design/mod-stack-comparison.md
   - docs/design/body-protocol-v0.md
-verified_against: 50bd22220d5028abb7161fce8c8ec9919e1639e2
+  - docs/design/seam-wire-v0.md
+  - backlog/decisions/decision-0004 - Seam-transport-UDS-AF_UNIX-SOCK_STREAM-mind-listens-and-vendor-dials.md
+verified_against: 10c6e02972b62b6f00dca67bce1f7b42f879e58a
 ---
 
 # Body-protocol seam
@@ -16,9 +18,11 @@ of **perceive / act / remember**, and the Minecraft mod is merely the first *bod
 implementing it. Minds never couple to Minecraft. This is the deliberate anti-corner
 move — the one interface the project refuses to compromise early.
 
-**The seam is now a contract, not a posture.** TASK-0002 drafted protocol v0 in
-`docs/design/body-protocol-v0.md`; that document, not this note, is the contract. What
-follows is the summary — load the doc for any field-level work.
+**The seam is now a contract with a wire under it.** TASK-0002 drafted protocol v0 in
+`docs/design/body-protocol-v0.md` — the message shapes, and the contract for anything
+field-level. TASK-0007 added the wire beneath them: decision-0004 chose the transport and
+`docs/design/seam-wire-v0.md` defines the framing, with `seam/vectors/` pinning it in bytes.
+Those documents, not this note, are the contract; what follows is the summary.
 
 ## How it works
 
@@ -71,7 +75,35 @@ formed**).
 World concepts cross abstracted: opaque `kind` tokens a mind may compare but never parse,
 meaning carried as `roles` plus prose-only `descriptor`, space as opaque place tokens plus
 coarse bands (no coordinates, no arithmetic), time as integers in a vendor-declared unit
-(never ticks). Transport is deliberately undecided — the shapes are data, not a wire format.
+(never ticks).
+
+## What the wire binds
+
+**The transport is decided.** The protocol deliberately left Q-1 open — the shapes are data,
+not a wire format — and TASK-0007 closed it: decision-0004 (proposed) chooses a **Unix domain
+socket** (`AF_UNIX`, `SOCK_STREAM`) at a configured path, with the **mind daemon listening and
+the body vendor dialing**. Four of the seven T-criteria did not discriminate at all; the choice
+lives in T-4 (restart independence) and T-3 (sessions), which eliminate stdio, and between UDS
+and loopback TCP in UDS's filesystem-permission access control and its absence of a listening
+port. Listening is the mind's because the vendor never accepts a connection — a body that
+opened a socket would be an inbound surface SI-1 has no rule for.
+
+`docs/design/seam-wire-v0.md` is the framing spec, the spec-002 successor: **length-prefixed
+canonical JSON**, a four-byte big-endian byte count and nothing else in the header, one frame
+per message. The header is bare on purpose — a type tag could contradict the envelope, and a
+wall-clock stamp would hand a mind a second clock to difference against coarse bands, one step
+from the arithmetic AR-4 forbids. Sending is canonical (sorted keys, no whitespace, integers
+only, literal UTF-8) while receiving accepts any conforming JSON, which is what makes
+byte-exact round-trip vectors affordable rather than a burden. The connection **is** the
+session; N bodies multiplex over it; a drop ends the session and the vendor re-dials with
+backoff, carrying §6.3's continuity report — there is no resume, no replay buffer, and no
+message-level ack, because each would be T-1's forbidden pull channel wearing a different hat.
+
+`seam/vectors/` holds seventeen golden vectors pinning every percept type, intent shape, and
+session message in **both** decoded form and exact wire bytes; two harnesses sharing no code
+(`seam/go-roundtrip`, `seam/java-roundtrip`) agree on all of them. That agreement, not the
+prose, is what makes the wire real — the Go and Java sides now have something to be wrong
+against before either exists.
 
 The doc proves the seam two ways: a second-vendor sketch (a trivial text world implementing
 the whole surface, which exposed that optional percept channels were being assumed rather
@@ -85,14 +117,29 @@ Mandated by [[design-brief]]; evaluated as constraint R3 in [[mod-stack-decision
 first vendor substrate is [[villager-brain-api]]; the reflex/planner doctrine it carries,
 and the promptworld I machinery it deliberately does not inherit, are in
 [[promptworld-lineage]]. The doctrine port behind v0's cited rule IDs (`EH-n`/`PM-n`/`F-n`)
-is `specs/002-body-protocol-v0/research/doctrine-port.md`.
+is `specs/002-body-protocol-v0/research/doctrine-port.md`; the transport analysis behind
+decision-0004 — the filled T-matrix and the verified platform facts — is
+`specs/007-seam-transport/research.md`. The wire's Go-daemon side is TASK-0008 (M1) and its
+Fabric-mod side TASK-0009 (V1); both were blocked on this note's Q-1 and are now unblocked
+([[v1-demo]]).
 
 ## Operational notes
 
 The protocol doc is the contract; this note is a map to it. Any change to the message
 shapes, the origin vocabulary, or the seam invariants lands there first — and a change to
 an invariant or to `DIRECT_ORIGINS` membership is a **major** version bump, not a revision.
+Wire-form changes land in `seam-wire-v0.md` instead, and a frame-format change is a protocol
+**MAJOR** bump: the frame layer carries no version of its own because nothing in a frame is
+readable until the frame format is already assumed.
 
-Transport remains an open question (the doc's §11 Q-1), as does hearing's engine hook in
-the first vendor (Q-2). When either is decided, this note's summary of "transport is
-deliberately undecided" needs revisiting.
+**Vectors are append-only within a MAJOR.** A MINOR bump adds files to `seam/vectors/`; it
+never edits or deletes an existing one, which is what keeps every existing vector valid
+byte-for-byte across additive changes — and what turns the retained old vectors into the
+older-sender fixtures that prove receivers tolerate unknown fields. Any commit adding a vector
+re-runs `body-protocol-v0.md` §12's six leak passes over the added file (`seam-wire-v0.md` §7.3
+states the obligation); the vector set is clean today because its author had read both audits,
+which is a property that lapses the moment someone who hasn't appends to it.
+
+**Still open:** hearing's engine hook in the first vendor (the protocol's §11 Q-2). Transport
+(Q-1) is closed — but decision-0004 is **proposed**, not accepted: the operator ratifies at the
+TASK-0007 PR, and merge is the ratification act per the decision-0001/0002/0003 precedent.
