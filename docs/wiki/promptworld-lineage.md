@@ -57,8 +57,8 @@ private provenance-stamped belief store, injection doors → `intent`/`act_resul
 → a variable cast with permadeath.
 
 So the real question was never keep-vs-rebuild; it was **which language carries the doctrine,
-the portable assets, and the operator at the lowest cost.** decision-0003 (proposed, pending
-ratification) answers **Go, rebuilt** — with four packages as *source material, not a
+the portable assets, and the operator at the lowest cost.** decision-0003 (accepted 2026-08-21,
+PR #9) answers **Go, rebuilt** — with four packages as *source material, not a
 codebase*: `toolloop` (994 lines, sim-agnostic by construction — its REQUEST/FACT/gate doctrine
 maps one-to-one onto `intent`/`intent_ack`/`act_result`), `persona` (475 lines, no imports),
 `tool`'s registry mechanism (vocabulary replaced by the runtime manifest), and `llm`'s provider
@@ -85,8 +85,8 @@ machinery ([[villager-brain-api]]) under [[mod-stack-decision]].
 
 ## Operational notes
 
-TASK-0004 decided the language (decision-0003, **proposed** — becomes settled fact only when
-the operator ratifies at the PR checkpoint). With mind-daemon work now unblocked, the
+TASK-0004 decided the language (decision-0003, **accepted** — operator ratified by merging
+PR #9, 2026-08-21). With mind-daemon work now unblocked, the
 transferred doctrine items are checkable requirements against I's wiki corpus — consult I's
 `docs/wiki/` INDEX just-in-time rather than porting files. The one sanctioned exception to
 "never read I's tree" is on the record and was exercised once: TASK-0004's assessment read
