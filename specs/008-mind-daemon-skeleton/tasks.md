@@ -12,18 +12,18 @@ Story 1), US2 = sessions (US2), US3 = ingest/intents (US3).
 
 **Independent test**: `cd mind && go test ./wire/...` — vector suite 17/17 green.
 
-- [ ] T001 Create mind/go.mod (module kithcraft/mind, go directive matching toolchain)
+- [x] T001 Create mind/go.mod (module kithcraft/mind, go directive matching toolchain)
       and cmd/minddaemon/main.go stub that parses a --socket flag and exits cleanly
-- [ ] T002 Implement mind/wire/frame.go: 4-byte BE length-prefix read/write, 1 MiB
+- [x] T002 Implement mind/wire/frame.go: 4-byte BE length-prefix read/write, 1 MiB
       pre-allocation cap, connection-fatal error taxonomy per seam-wire-v0.md §2
-- [ ] T003 Implement mind/wire/canonical.go: hand-rolled canonical JSON writer
+- [x] T003 Implement mind/wire/canonical.go: hand-rolled canonical JSON writer
       (C-1..C-10; sorted keys, minimal escaping, literal UTF-8) — encoding/json is
       known non-conformant for output (TASK-0007 finding)
-- [ ] T004 Implement mind/wire/decode.go: tolerant presence-checked decode — V-1
+- [x] T004 Implement mind/wire/decode.go: tolerant presence-checked decode — V-1
       (ignore unknown fields), V-2 (unknown enum decodes, flagged for fallback), V-3
       (unknown percept_type retained uninterpreted), V-5 (missing required field →
       malformed, never defaulted)
-- [ ] T005 Write mind/wire/vectors_test.go: every vector in seam/vectors/ decodes,
+- [x] T005 Write mind/wire/vectors_test.go: every vector in seam/vectors/ decodes,
       re-encodes byte-exactly (census + roundtrip + refusal behavior, mirroring the
       TASK-0007 harness obligations against THIS codec)
 
