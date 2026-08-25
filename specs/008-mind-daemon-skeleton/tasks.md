@@ -72,15 +72,15 @@ kill-and-reconnect continuity test.
 
 ## Phase 4 — Closure: gates, wiki, board
 
-- [ ] T013 Run go vet ./... and go test ./... across the module; fix to green
-- [ ] T014 Scope check: git diff origin/main...HEAD touches only mind/, specs/008-*,
+- [x] T013 Run go vet ./... and go test ./... across the module; fix to green
+- [x] T014 Scope check: git diff origin/main...HEAD touches only mind/, specs/008-*,
       board files, and the runbook log row
-- [ ] T015 Wiki: re-verify body-protocol-seam.md (its prose describes the seam as
+- [x] T015 Wiki: re-verify body-protocol-seam.md (its prose describes the seam as
       contract-only; the first real implementation exists now) — amend honestly,
       grow sources if the note's claims now rest on mind/ code, re-pin, regenerate
       CAPSULES.md if descriptions changed; add an overview.md re-check ("no code
       exists yet" claims are now false — amend)
-- [ ] T016 Tick this file, check card ACs now true (backlog task edit TASK-0008
+- [x] T016 Tick this file, check card ACs now true (backlog task edit TASK-0008
       --check-ac <n>), append phase-done note
 
 ## Dependencies

@@ -1,12 +1,12 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, no code), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, and the first mind-daemon code), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: 50c3def435dd9326d38e51118f08944815cbe80c
+verified_against: PENDING
 ---
 
 # Overview
@@ -14,10 +14,11 @@ verified_against: 50c3def435dd9326d38e51118f08944815cbe80c
 Kithcraft (working lineage label: promptworld II) is a Minecraft server mod that gives an
 embodied player LLM villagers as company. The thesis: survival-crafting games are already
 fun; what they have never had is company — the AI layer is load-bearing for the *feeling*
-of an alive world, not for the game loop. The project is **pre-code**: no mod source
-exists yet. What exists is a ratified design brief, one ratified architecture decision
-(Fabric server-side mod), verified prior-art research, and the development machinery that
-produced them.
+of an alive world, not for the game loop. The Minecraft mod itself is still **pre-code**:
+no Fabric mod source exists yet. What exists is a ratified design brief, one ratified
+architecture decision (Fabric server-side mod), verified prior-art research, the
+development machinery that produced them, and — as of TASK-0008 (M1) — the first real
+code: the mind daemon skeleton in `mind/` ([[body-protocol-seam]]).
 
 ## How it works
 
@@ -48,6 +49,8 @@ decisions ([[mod-stack-decision]]), machinery ([[pdlc-process]], [[model-tiers]]
 
 ## Operational notes
 
-Pre-code means the wiki's sources are docs and config, not `src/`. The first
-implementation PR (expected from TASK-0002/0003/0006) will obligate a wiki-update pass
-and new component notes.
+Most of the wiki's sources remain docs and config, not `src/` — the Fabric mod (vendor
+side) is still pre-code. The mind daemon (`mind/`) is the exception: TASK-0008 landed it,
+[[body-protocol-seam]] now cites its files as sources, and this note's own claims were
+re-verified against it in the same pass. The vendor-side implementation PR (TASK-0009)
+will obligate a further wiki-update pass and new component notes.
