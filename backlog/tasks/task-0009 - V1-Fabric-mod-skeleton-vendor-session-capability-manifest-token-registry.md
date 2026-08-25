@@ -4,7 +4,7 @@ title: 'V1 - Fabric mod skeleton, vendor session, capability manifest, token reg
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 19:21'
+updated_date: '2026-08-25 19:23'
 labels:
   - vendor
   - m-0-build
@@ -39,7 +39,7 @@ Spec: specs/009-fabric-mod-skeleton
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 On a dev server the mod loads and a villager's session opens against a daemon or stub mind, round-tripping S1's golden vectors
+- [x] #1 On a dev server the mod loads and a villager's session opens against a daemon or stub mind, round-tripping S1's golden vectors
 - [x] #2 The capability manifest declares at minimum the four-type percept floor (act_result, observation, sighting, speech), origins, verbs with target shapes, role-annotated salient_kinds, bearings and distance bands
 - [x] #3 The manifest is identical for every body and does not vary with world state (the L-7 test)
 - [x] #4 time_unit is a declared unit, never raw ticks
@@ -72,6 +72,8 @@ T011 gates: ./gradlew build+test 32/32 green, seamRoundTrip green; scope check: 
 T012 wiki: villager-brain-api.md marked UNVERIFIED against MC 26.2 (Yarn discontinued per versions.md), re-derivation deferred to V3/TASK-0014, not performed here; body-protocol-seam.md's First-implementations section extended with the mod/ vendor (CanonicalJson.java, Handshake.java added as sources); overview.md and INDEX.md's vendor-side-still-pre-code claims amended. All three re-pinned to cb5003531192512f992688cbf5a08d7b15799545 (resolves, confirmed via git cat-file -e before writing). CAPSULES.md regenerated (overview.md's description changed).
 
 Card AC #11 (Phase 4) checked; AC #1 (orchestrator's full-handshake-against-daemon judgment) left unchecked, DoD and status untouched per dispatch scope.
+
+AC #1 checked by orchestrator on composite evidence: mod loads on a dev server (Phase 1 runServer observation, kithcraft 0.1.0 + entrypoint log), a session opens against a stub mind over real UDS with byte-identical decode both directions (HandshakeWireClientTest), and S1's golden vectors round-trip 17/17 through the mod's codec (VectorSuiteTest). Live pairing against the real daemon binary is TASK-0021/I1's acceptance check (T-4 restart independence), per the demo build plan.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
