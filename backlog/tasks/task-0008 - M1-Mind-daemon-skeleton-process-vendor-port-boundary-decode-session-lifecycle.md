@@ -3,10 +3,10 @@ id: TASK-0008
 title: >-
   M1 - Mind daemon skeleton: process, vendor port, boundary decode, session
   lifecycle
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:41'
+updated_date: '2026-08-25 19:10'
 labels:
   - mind
   - m-0-build
@@ -47,10 +47,10 @@ Spec: specs/008-mind-daemon-skeleton
 - [x] #4 An unrecognized or absent origin value classifies the percept as secondhand
 - [x] #5 The daemon opens a session against a test double, ingests a scripted percept stream with duplicates and a seq gap, and emits intents
 - [x] #6 Restarting the daemon mid-session re-opens with continuity and reports the gap as a gap rather than backfilling it
-- [ ] #7 Spec phase: Phase 1 — Module, wire codec, vector proof (US1 groundwork)
-- [ ] #8 Spec phase: Phase 2 — Vendor port, listener, session lifecycle (US2)
-- [ ] #9 Spec phase: Phase 3 — Ingest, intents, the double, end-to-end (US3)
-- [ ] #10 Spec phase: Phase 4 — Closure: gates, wiki, board
+- [x] #7 Spec phase: Phase 1 — Module, wire codec, vector proof (US1 groundwork)
+- [x] #8 Spec phase: Phase 2 — Vendor port, listener, session lifecycle (US2)
+- [x] #9 Spec phase: Phase 3 — Ingest, intents, the double, end-to-end (US3)
+- [x] #10 Spec phase: Phase 4 — Closure: gates, wiki, board
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -65,7 +65,15 @@ Phase 2 done (6b2ee3d, sonnet verified — claude-sonnet-5, ~179k subagent token
 Phase 3 done (4f6e819, sonnet verified — claude-sonnet-5, ~186k subagent tokens): ingest.go (validate→mutate, V-6 pure classifier, reconnect-scoped dedup, seq-gap shed accounting — extended to ALL vendor→mind messages sharing the body counter so an interleaved intent_ack isn't misattributed), intents.go (pending set, supersedes, act_result matching, cancel, V-4 verb refusal), seamtest double, both e2e tests (AC #5 scripted stream + AC #6 restart/no-backfill through the real listener). Orchestrator re-ran vet+test green incl. -race per agent. Card ACs #1-#6 all demonstrated by named tests — checked.
 
 Phase 4 (closure, T013-T016) done: go vet + go test ./... green across mind/ (wire, seam, cmd/minddaemon, seamtest); scope check clean (diff stays within mind/, specs/008-*, backlog/, sweep runbook); body-protocol-seam.md and overview.md re-verified and amended (mind/ is no longer contract-only — first real implementation landed), sourced on mind/wire/canonical.go + mind/seam/session.go, re-pinned to f51b933 (verified resolvable); INDEX.md's stale pre-code framing corrected; CAPSULES.md regenerated. tasks.md T013-T016 ticked. Did not check card DoD items or change status per dispatch scope.
+
+spec-bridge sync: Phase 1 — Module, wire codec, vector proof (US1 groundwork): 5/5 · Phase 2 — Vendor port, listener, session lifecycle (US2): 3/3 · Phase 3 — Ingest, intents, the double, end-to-end (US3): 4/4 · Phase 4 — Closure: gates, wiki, board: 4/4 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — Module, wire codec, vector proof (US1 groundwork): 5/5 · Phase 2 — Vendor port, listener, session lifecycle (US2): 3/3 · Phase 3 — Ingest, intents, the double, end-to-end (US3): 4/4 · Phase 4 — Closure: gates, wiki, board: 4/4). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
