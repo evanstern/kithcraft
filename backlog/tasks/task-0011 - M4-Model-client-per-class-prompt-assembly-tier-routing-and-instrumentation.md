@@ -3,9 +3,10 @@ id: TASK-0011
 title: >-
   M4 - Model client, per-class prompt assembly, tier routing, and
   instrumentation
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:37'
+updated_date: '2026-08-25 20:14'
 labels:
   - mind
   - m-0-build
@@ -33,6 +34,8 @@ As an operator, I want every model call routed by class, cached at a genuinely s
 **References.** docs/design/demo-build-plan.md section 3.2 (M4) is the plan of record. Ratified surfaces consumed: decision-0003 + docs/design/llm-routing-and-budget.md (six LLM classes over three tiers, RT-1..RT-7, the stable/variable prompt split in section 2.3, the cost model and its A-n assumptions).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/011-model-client-routing
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -52,3 +55,12 @@ As an operator, I want every model call routed by class, cached at a genuinely s
 - [ ] #2 Docs and wiki are updated and pass freshness tests
 - [ ] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+created: 2026-08-25 20:14
+---
+Sweep runbook tier: sonnet · model cc/claude-sonnet-5[1m] (default tier — model client against RT-1..RT-7; stable/variable prompt split designed in routing §2.3). Served model recorded at dispatch.
+---
+<!-- COMMENTS:END -->
