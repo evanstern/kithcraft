@@ -7,7 +7,7 @@ sources:
   - specs/004-mind-daemon-routing/research/daemon-assessment.md
   - docs/design/llm-routing-and-budget.md
   - backlog/decisions/decision-0003 - Mind-daemon-language-Go-rebuilt-behind-the-seam.md
-verified_against: 7acc232f5cd5cc1008acb56dbab5017337196174
+verified_against: 032ca6bd13c7852c8df9d076c73d2f555cff9386
 ---
 
 # Promptworld lineage
