@@ -36,15 +36,15 @@ completes the handshake against a stub mind.
 **Independent test**: JVM vector suite 17/17 via `./gradlew test`; handshake
 round-trip observed against the stub listener.
 
-- [ ] T004 Choose the JSON library (T001 records candidates) and run the C-1..C-10
+- [x] T004 Choose the JSON library (T001 records candidates) and run the C-1..C-10
       emit check against the vectors; implement mod/wire/CanonicalJson.java — thin
       wrapper if the library conforms, custom writer if not (record which, per the
       operator ruling's carve-out)
-- [ ] T005 Implement mod/wire/FrameCodec.java (4-byte BE length prefix, 1 MiB cap,
+- [x] T005 Implement mod/wire/FrameCodec.java (4-byte BE length prefix, 1 MiB cap,
       connection-fatal taxonomy) and the vector suite as Gradle tests: census +
       decode/meaning/bytes/validation per vector, mirroring the TASK-0007 harness
       obligations against THIS codec
-- [ ] T006 Implement mod/wire/WireClient.java: UDS dial
+- [x] T006 Implement mod/wire/WireClient.java: UDS dial
       (StandardProtocolFamily.UNIX), minimal re-dial backoff, send/receive framing;
       mod/session/Handshake.java + Continuity.java building session_open per
       protocol §6.2 / seam-wire-v0.md §1; prove against an in-test stub mind

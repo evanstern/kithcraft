@@ -52,3 +52,37 @@ beyond carrying the flag forward.
 ## Dev-server load observation (T003)
 
 See `specs/009-fabric-mod-skeleton/research/runserver-observation.md`.
+
+## JSON library choice and C-1..C-10 emit check (T004)
+
+**Chosen: Gson** (`com.google.gson`) — already on the mod's compile classpath transitively
+through the `minecraft` configuration (Minecraft itself bundles and uses Gson; confirmed by a
+clean `./gradlew build` compiling `import com.google.gson.stream.JsonReader` with no new
+dependency line added to `build.gradle`). Per the ladder's rung 4 (already-installed dependency),
+no new dependency was introduced.
+
+**C-1..C-10 emit-check verdict: custom writer needed — Gson cannot be made to emit canonical
+form as a thin wrapper.** Two structural gaps, neither configurable away:
+
+- **C-3** (ascending-by-UTF-8-byte key order): Gson's `JsonObject`/`JsonWriter` preserve
+  insertion order only; there is no sorted-key mode.
+- **C-6** (numbers are integers only, signed-64-bit range, refuse otherwise): Gson's writer
+  and reader are permissive about numeric form (doubles, exponents, out-of-range values) with
+  no built-in mode to reject them.
+
+Per the operator's 2026-08-22 ruling's carve-out ("the canonical writer stays custom only if
+the chosen library provably cannot emit C-1..C-10 canonical form"), `mod/.../wire/CanonicalJson.java`
+implements:
+
+- **decode**: uses Gson's `JsonReader` (streaming tokenizer) to parse — the ruling's "library
+  for parsing is expected either way" — with the wire's stricter rules layered on top (C-4
+  duplicate-key refusal, C-6 integer-only/range check, C-8 lone-surrogate refusal, C-1
+  BOM/strict-UTF-8 check), since Gson's default parsing is lenient about all four.
+- **encode**: hand-written (does not use Gson's `JsonWriter`), sorting keys and emitting
+  integers/escapes/literals per C-1..C-10 directly.
+
+Verified against all 17 `seam/vectors/` fixtures via the Gradle test suite
+(`mod/src/test/java/dev/kithcraft/mod/wire/VectorSuiteTest.java`): every vector's canonical
+re-encode is byte-identical to its pinned `frame_hex`. This is the record T010 (Phase 4) will
+consume when replacing `seam/java-roundtrip`'s hand-rolled parser with a library-based harness
+using this same library and the same verdict.

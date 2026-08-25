@@ -9,6 +9,17 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+
+	testImplementation platform('org.junit:junit-bom:5.11.4')
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+	useJUnitPlatform()
+	// seam/vectors lives one level above mod/ at the repo root; passed explicitly so the
+	// vector suite does not have to guess the test task's working directory.
+	systemProperty 'kithcraft.seamVectorsDir', file('../seam/vectors').absolutePath
 }
 
 processResources {
