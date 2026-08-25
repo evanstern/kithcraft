@@ -1,9 +1,10 @@
 ---
 id: TASK-0012
 title: 'V2 - Body-vendor conformance: percepts out, intents in'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:37'
+updated_date: '2026-08-25 20:14'
 labels:
   - vendor
   - m-0-build
@@ -32,6 +33,8 @@ As a villager, I want the world to tell me only what my body could actually have
 **References.** docs/design/demo-build-plan.md section 3.3 (V2) and its ruling R-8 are the plan of record. Ratified surfaces consumed: docs/design/body-protocol-v0.md (percept surface, the four core verbs, provenance and origin vocabulary, the change_report restriction, section 12's leak passes, Q-2), decision-0002 + docs/design/entity-implementation-comparison.md (nearest_hostile already computed; bounded Mixin surface).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/012-vendor-conformance
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -53,3 +56,12 @@ As a villager, I want the world to tell me only what my body could actually have
 - [ ] #2 Docs and wiki are updated and pass freshness tests
 - [ ] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+created: 2026-08-25 20:14
+---
+Sweep runbook tier: sonnet · model cc/claude-sonnet-5[1m] (default tier — percept/intent conformance to the protocol's written surface; R-8 is verify-then-declare, not design). Served model recorded at dispatch.
+---
+<!-- COMMENTS:END -->
