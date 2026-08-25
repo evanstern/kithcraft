@@ -3,10 +3,12 @@ package dev.kithcraft.mod.session;
 import dev.kithcraft.mod.wire.CanonicalJson;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * L-7 (protocol §6.2, card AC #3): the capability manifest describes the vendor, never the
@@ -49,6 +51,18 @@ class ManifestTest {
 
         assertSame(Handshake.MANIFEST, payload(openA).get("capabilities"));
         assertSame(Handshake.MANIFEST, payload(openB).get("capabilities"));
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void perceptTypesDeclareExactlyWhatPhase1And2Emit() {
+        // T006: the floor plus every extra composed by percept/ as of Phase 1 (self_state) and
+        // Phase 2 (sound — R-8 verified; told_fact, text, change_report). speech/act_result are
+        // floor per §6.2 and were already declared in V1.
+        List<String> perceptTypes = (List<String>) Handshake.MANIFEST.get("percept_types");
+        assertTrue(perceptTypes.containsAll(List.of(
+            "act_result", "observation", "sighting", "speech",
+            "self_state", "sound", "told_fact", "text", "change_report")));
     }
 
     @SuppressWarnings("unchecked")

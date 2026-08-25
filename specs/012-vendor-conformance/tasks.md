@@ -34,15 +34,15 @@ salience-shaped field exists (a reflective/schema test proves it).
 
 **Independent test**: `gradle test` green; R-8 record exists with evidence.
 
-- [ ] T004 R-8: verify a hearing hook against MC 26.2 (research/r8-hearing-hook.md
+- [x] T004 R-8: verify a hearing hook against MC 26.2 (research/r8-hearing-hook.md
       with evidence per the evidence rule); emit sound + declare in manifest if
       verified, else declare unsupported — record the outcome either way (card AC #3)
-- [ ] T005 Implement told_fact and text emission (speech-adjacent channels; §4.6–4.7
+- [x] T005 Implement told_fact and text emission (speech-adjacent channels; §4.6–4.7
       trust shapes) and percept/ChangeReports.java with the §4.10 delivery
       restriction: never to actor or witness (card AC #5) — named test with a
       three-body scenario (actor, witness, absent third party; only the third
       party receives)
-- [ ] T006 Update the session manifest declaration (percept_types, origins,
+- [x] T006 Update the session manifest declaration (percept_types, origins,
       salient_kinds unchanged) to declare exactly what Phase 1–2 emit — L-7
       byte-identity must keep holding (re-run V1's ManifestTest)
 
