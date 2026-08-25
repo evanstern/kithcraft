@@ -4,7 +4,7 @@ title: 'M2 - Event-sourced memory, the belief store, and the episodic admission 
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:37'
-updated_date: '2026-08-25 20:14'
+updated_date: '2026-08-25 20:17'
 labels:
   - mind
   - m-0-build
@@ -48,7 +48,13 @@ Spec: specs/010-event-sourced-memory
 - [ ] #5 The canonical end-to-end (protocol section 10.2) passes against the fake vendor, including step 5: a mind told about the orchard cannot durably claim it saw apple trees there
 - [ ] #6 The E6-input-tokens-per-villager instrument reports admitted buffer size per villager-day
 - [ ] #7 Design check (minds-are-others): the belief store has no external write path from the vendor, the player or a debug command
+- [ ] #8 Spec phase: Phase 1 — The log and the reducer (US1)
+- [ ] #9 Spec phase: Phase 2 — Beliefs, provenance, the RM rules (US2)
+- [ ] #10 Spec phase: Phase 3 — Admission gate, instrument, end-to-end (US3)
+- [ ] #11 Spec phase: Phase 4 — Closure: gates, wiki, board
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
