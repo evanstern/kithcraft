@@ -294,6 +294,13 @@ end.
 
 ## Operator checkpoints (do not proceed silently)
 
+<!-- Merge-policy ruling (2026-08-25, operator): the SWEEP SELF-MERGES its PRs after
+     gates pass (merge commits, serial), including PR #13 forward. Operator review
+     happens only at the named checkpoints below (decision ratifications, escalations,
+     environment prerequisites) — not per-PR. Ruling recorded when the permission
+     classifier flagged the first self-merge (PR #13); the operator chose
+     sweep-self-merge over per-PR review. -->
+
 1. **Sign-off on these lanes** — pending. Includes ruling on the one PROPOSED opus
    escalation (TASK-0007 / S1). TASK-0019's trigger is conditional, not a proposal to
    rule now.
