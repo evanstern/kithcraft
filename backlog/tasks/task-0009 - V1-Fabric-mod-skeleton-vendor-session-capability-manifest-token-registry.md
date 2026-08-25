@@ -4,7 +4,7 @@ title: 'V1 - Fabric mod skeleton, vendor session, capability manifest, token reg
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:10'
+updated_date: '2026-08-25 17:19'
 labels:
   - vendor
   - m-0-build
@@ -44,7 +44,7 @@ Spec: specs/009-fabric-mod-skeleton
 - [ ] #3 The manifest is identical for every body and does not vary with world state (the L-7 test)
 - [ ] #4 time_unit is a declared unit, never raw ticks
 - [ ] #5 The token registry persists across sessions: tokens issued before a server restart resolve to the same referents after it, and tokens are never reused
-- [ ] #6 Yarn mappings and version-dependent facts are re-verified against the target Minecraft version
+- [x] #6 Yarn mappings and version-dependent facts are re-verified against the target Minecraft version
 - [ ] #7 No client jar is produced
 - [ ] #8 Spec phase: Phase 1 — Version re-verification and toolchain (US1 groundwork)
 - [ ] #9 Spec phase: Phase 2 — Wire client and vector proof (US1)
@@ -52,14 +52,14 @@ Spec: specs/009-fabric-mod-skeleton
 - [ ] #11 Spec phase: Phase 4 — Harness replacement, gates, wiki, board
 <!-- AC:END -->
 
-
-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Operator ruling 2026-08-22 (recorded in sweep-0007-0022 runbook, per-task artifacts section): when this task introduces Gradle, the same PR replaces seam/java-roundtrip's hand-rolled JSON parsing with a library-based harness. The hand-roll existed only to avoid introducing a build system before V1 owned that decision; once Gradle exists, that justification is void. The canonical writer stays custom only if the chosen library provably cannot emit C-1..C-10 canonical form (verify against the vectors, record the outcome).
 
 Claimed by sweep-0007-0022 orchestrator 2026-08-22 on branch task-0009-fabric-mod-skeleton (worktree .worktrees/task-0009). Tier: sonnet (default tier per runbook — mod skeleton to the written handshake contract; Yarn-mapping re-verification is verification, not design). Model ID: cc/claude-sonnet-5[1m]. Served model recorded at dispatch. Wire inputs ratified: decision-0004 (UDS, vendor dials), seam-wire-v0.md, seam/vectors/. Carries the 2026-08-22 operator ruling: this task's Gradle PR replaces the hand-rolled java-roundtrip parser.
+
+Phase 1 done (fa30968, sonnet verified — claude-sonnet-5, ~150k subagent tokens): versions re-verified with citations (MC 26.2 stable, Loader 0.19.3, Fabric API 0.158.0+26.2, Loom 1.17.19, Gradle 9.5.1 wrapper); mod/ scaffold builds green, runServer load observed (kithcraft 0.1.0, entrypoint log fired), single server jar — no client jar. FINDING for V3/TASK-0014: Yarn is discontinued (MC 26.1+ unobfuscated) — villager-brain-api.md's yarn-1.21.3 symbols must be re-checked against Mojang official names before brain/Mixin work; routing A-2 daylight flag carried forward. Orchestrator re-ran gradle build green.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
