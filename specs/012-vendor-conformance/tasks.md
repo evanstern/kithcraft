@@ -14,15 +14,15 @@ at emission, honest to AR-1..AR-6.
 **Independent test**: `gradle test` — shape/stamping tests green; no
 salience-shaped field exists (a reflective/schema test proves it).
 
-- [ ] T001 Implement percept/Provenance.java (closed origin vocabulary, stamped at
+- [x] T001 Implement percept/Provenance.java (closed origin vocabulary, stamped at
       emission, source-is-immediate-teller, observed_at/received_at semantics) and
       percept/PerceptEmitter.java (envelope, urgency bands, seq, per-body streams
       over the V1 WireClient session)
-- [ ] T002 Implement percept/Sightings.java: sighting (prose-only doing) and
+- [x] T002 Implement percept/Sightings.java: sighting (prose-only doing) and
       observation with vocabulary scoping (subset of manifest, falsifiable absence
       claim); first-sighting and dedup/shedding per §4.11; nearest_hostile as the
       danger signal; percept/SelfState.java (felt origin, condition bands)
-- [ ] T003 Named tests: every emitted shape passes AR-1..AR-6 checks; provenance
+- [x] T003 Named tests: every emitted shape passes AR-1..AR-6 checks; provenance
       stamped correctly per type; card AC #4's no-salience-field proof; AC #2's
       absence-claim scope test
 
