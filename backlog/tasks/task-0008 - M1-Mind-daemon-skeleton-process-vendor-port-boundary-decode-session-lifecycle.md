@@ -6,7 +6,7 @@ title: >-
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:38'
+updated_date: '2026-08-25 17:41'
 labels:
   - mind
   - m-0-build
@@ -63,6 +63,8 @@ Phase 1 done (72b3c09, sonnet verified — claude-sonnet-5, ~138k subagent token
 Phase 2 done (6b2ee3d, sonnet verified — claude-sonnet-5, ~179k subagent tokens): seam.Conn port declared at the consumer with NewWireConn adapter; UDS listener with decision-0004 liveness-probe unlink; fail-closed negotiation, per-body multiplexing with byte-identical capabilities check; continuity by body token with named no-backfill restart test (previous_session not required, zero fabricated messages). Orchestrator re-ran vet+test green (3 packages). Deviations recorded: sun_path length workaround in listener tests; §1.3 last-open-wins cross-connection rule ponytailed out of phase scope.
 
 Phase 3 done (4f6e819, sonnet verified — claude-sonnet-5, ~186k subagent tokens): ingest.go (validate→mutate, V-6 pure classifier, reconnect-scoped dedup, seq-gap shed accounting — extended to ALL vendor→mind messages sharing the body counter so an interleaved intent_ack isn't misattributed), intents.go (pending set, supersedes, act_result matching, cancel, V-4 verb refusal), seamtest double, both e2e tests (AC #5 scripted stream + AC #6 restart/no-backfill through the real listener). Orchestrator re-ran vet+test green incl. -race per agent. Card ACs #1-#6 all demonstrated by named tests — checked.
+
+Phase 4 (closure, T013-T016) done: go vet + go test ./... green across mind/ (wire, seam, cmd/minddaemon, seamtest); scope check clean (diff stays within mind/, specs/008-*, backlog/, sweep runbook); body-protocol-seam.md and overview.md re-verified and amended (mind/ is no longer contract-only — first real implementation landed), sourced on mind/wire/canonical.go + mind/seam/session.go, re-pinned to f51b933 (verified resolvable); INDEX.md's stale pre-code framing corrected; CAPSULES.md regenerated. tasks.md T013-T016 ticked. Did not check card DoD items or change status per dispatch scope.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
