@@ -8,7 +8,9 @@ sources:
   - docs/design/body-protocol-v0.md
   - docs/design/seam-wire-v0.md
   - backlog/decisions/decision-0004 - Seam-transport-UDS-AF_UNIX-SOCK_STREAM-mind-listens-and-vendor-dials.md
-verified_against: 10c6e02972b62b6f00dca67bce1f7b42f879e58a
+  - mind/wire/canonical.go
+  - mind/seam/session.go
+verified_against: f51b9337a9283bc54231396584ea5903f0df98f9
 ---
 
 # Body-protocol seam
@@ -110,6 +112,19 @@ the whole surface, which exposed that optional percept channels were being assum
 than declared) and a specified in-memory **fake vendor** — scripted percepts in, asserted
 acts out — that tests the rules no compiler can, including reproducing the 75% flood on
 demand by lifting the delivery restriction.
+
+## First implementations
+
+The seam stopped being contract-only in this branch: TASK-0008 (M1) landed the mind side
+in `mind/` — a Go module outside the Gradle build implementing the pieces above. The
+framing and canonical-JSON writer that `seam-wire-v0.md` §2.4 specifies are hand-rolled in
+`mind/wire/canonical.go` (the `encoding/json` non-conformance noted above is why); the UDS
+listener, handshake, byte-identical-capabilities check, and continuity-on-restart from
+this note's "what the wire binds" section are implemented in `mind/seam/session.go`. All
+seventeen `seam/vectors/` golden vectors round-trip through this codec (a third proof,
+alongside the Go and Java throwaway harnesses this note already described). Scope stays
+bounded: no memory store, LLM client, or deliberation live here — those are M2/M4/M5. The
+Fabric-mod (vendor) side is still open, tracked as TASK-0009 (V1).
 
 ## Connections
 
