@@ -4,7 +4,7 @@ title: 'V1 - Fabric mod skeleton, vendor session, capability manifest, token reg
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:29'
+updated_date: '2026-08-25 19:12'
 labels:
   - vendor
   - m-0-build
@@ -40,12 +40,12 @@ Spec: specs/009-fabric-mod-skeleton
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
 - [ ] #1 On a dev server the mod loads and a villager's session opens against a daemon or stub mind, round-tripping S1's golden vectors
-- [ ] #2 The capability manifest declares at minimum the four-type percept floor (act_result, observation, sighting, speech), origins, verbs with target shapes, role-annotated salient_kinds, bearings and distance bands
-- [ ] #3 The manifest is identical for every body and does not vary with world state (the L-7 test)
-- [ ] #4 time_unit is a declared unit, never raw ticks
-- [ ] #5 The token registry persists across sessions: tokens issued before a server restart resolve to the same referents after it, and tokens are never reused
+- [x] #2 The capability manifest declares at minimum the four-type percept floor (act_result, observation, sighting, speech), origins, verbs with target shapes, role-annotated salient_kinds, bearings and distance bands
+- [x] #3 The manifest is identical for every body and does not vary with world state (the L-7 test)
+- [x] #4 time_unit is a declared unit, never raw ticks
+- [x] #5 The token registry persists across sessions: tokens issued before a server restart resolve to the same referents after it, and tokens are never reused
 - [x] #6 Yarn mappings and version-dependent facts are re-verified against the target Minecraft version
-- [ ] #7 No client jar is produced
+- [x] #7 No client jar is produced
 - [ ] #8 Spec phase: Phase 1 — Version re-verification and toolchain (US1 groundwork)
 - [ ] #9 Spec phase: Phase 2 — Wire client and vector proof (US1)
 - [ ] #10 Spec phase: Phase 3 — Manifest (L-7) and token registry (US2 + US3)
@@ -62,6 +62,8 @@ Claimed by sweep-0007-0022 orchestrator 2026-08-22 on branch task-0009-fabric-mo
 Phase 1 done (fa30968, sonnet verified — claude-sonnet-5, ~150k subagent tokens): versions re-verified with citations (MC 26.2 stable, Loader 0.19.3, Fabric API 0.158.0+26.2, Loom 1.17.19, Gradle 9.5.1 wrapper); mod/ scaffold builds green, runServer load observed (kithcraft 0.1.0, entrypoint log fired), single server jar — no client jar. FINDING for V3/TASK-0014: Yarn is discontinued (MC 26.1+ unobfuscated) — villager-brain-api.md's yarn-1.21.3 symbols must be re-checked against Mojang official names before brain/Mixin work; routing A-2 daylight flag carried forward. Orchestrator re-ran gradle build green.
 
 Phase 2 done (fb48d1c, sonnet verified — claude-sonnet-5, ~209k subagent tokens): Gson chosen (already on classpath via Minecraft; no new dep) — C-1..C-10 emit check FAILED for Gson output (no sorted keys, no integer-only numerics), so CanonicalJson.java pairs Gson JsonReader parsing with a custom canonical writer, recorded per the operator ruling's carve-out. FrameCodec + WireClient (UDS via StandardProtocolFamily.UNIX) + Handshake/Continuity built; 26/26 Gradle tests green incl. the 17-vector suite and a stub-mind handshake round-trip. Orchestrator re-ran gradle test green.
+
+Phase 3 done (62f375a, sonnet verified — claude-sonnet-5, ~190k subagent tokens): real static manifest in Handshake.java (4-type floor, 6 origins, 4 core verbs, 4 world-independent salient_kinds, bearings, distance bands, time_unit second) — L-7 proven two ways (byte-compare across bodies/world-states + zero-arg builder makes world state structurally not an input); TokenRegistry pure core + SavedData adapter (MC 26.2 has no PersistentState — SavedData/SavedDataType is the current API, confirmed against the unobfuscated jar); live restart observation recorded (b-0/pl-1/th-2 resolved identically post-restart). Orchestrator re-ran build+test green (32/32) post-merge-reconcile with main. Branch reconciled with post-#13 main; runbook conflict resolved per doctrine.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
