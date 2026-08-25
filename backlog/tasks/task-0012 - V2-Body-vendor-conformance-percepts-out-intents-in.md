@@ -4,7 +4,7 @@ title: 'V2 - Body-vendor conformance: percepts out, intents in'
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:37'
-updated_date: '2026-08-25 20:14'
+updated_date: '2026-08-25 20:20'
 labels:
   - vendor
   - m-0-build
@@ -48,7 +48,13 @@ Spec: specs/012-vendor-conformance
 - [ ] #7 go_to targeting a body resolves to that body's last-seen place, never its live position
 - [ ] #8 unknown_target refuses only an unissued token; a known-but-gone referent is accepted and fails with target_gone after a walk
 - [ ] #9 Protocol section 12's six leak passes run clean over captured payloads: no engine-native type, identifier or coordinate convention in any message shape
+- [ ] #10 Spec phase: Phase 1 — Percept surface: shapes, stamping, urgency (US1 groundwork)
+- [ ] #11 Spec phase: Phase 2 — R-8, told_fact/text, change_report restriction (US1 close)
+- [ ] #12 Spec phase: Phase 3 — Act surface: verbs, ack/result, target resolution (US2)
+- [ ] #13 Spec phase: Phase 4 — Leak passes, gates, wiki, board (US3 + closure)
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
