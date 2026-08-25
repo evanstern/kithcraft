@@ -56,17 +56,19 @@ exactly one act_result.
 **Independent test**: `gradle test` for the decode/ack/result state machine; a
 dev-server observation record for live verb execution.
 
-- [ ] T007 Implement act/IntentHandler.java: intent decode (V-4 refuse unknown
+- [x] T007 Implement act/IntentHandler.java: intent decode (V-4 refuse unknown
       verb), intent_ack acknowledging receipt only, pending-intent bookkeeping,
       exactly one act_result per intent (card AC #6), cancel per §5.7
-- [ ] T008 Implement act/TargetResolution.java per §5.6: body targets resolve to
+- [x] T008 Implement act/TargetResolution.java per §5.6: body targets resolve to
       last-seen place never live position (card AC #7); unknown_target only for
       unissued tokens; known-but-gone accepted then target_gone after the walk
       (card AC #8) — named tests for all three cases
-- [ ] T009 Implement act/Verbs.java: go_to/speak/attend/wait via vanilla Brain<E> +
-      mod handlers per decision-0002 (enumerate any Mixin added); dev-server
-      observation: each verb executed by a real villager body, act_results
-      captured — recorded in the PR description
+- [x] T009 Implement act/Verbs.java: go_to/speak/attend/wait via vanilla Brain<E> +
+      mod handlers per decision-0002 (no Mixin added — `stepWalk`/`speak`/`attend`
+      target plain `PathNavigation`/chat/`LookControl` API). Implementation and
+      unit tests complete; the **live** dev-server observation (each verb executed
+      by a real villager body, act_results captured) is deferred to T011 — recorded
+      in specs/012-vendor-conformance/research/verb-observation.md, not claimed here.
 
 **Checkpoint**: the mind can act and only learns outcomes by perceiving them.
 
