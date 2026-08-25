@@ -10,7 +10,7 @@ sources:
   - backlog/decisions/decision-0004 - Seam-transport-UDS-AF_UNIX-SOCK_STREAM-mind-listens-and-vendor-dials.md
   - mind/wire/canonical.go
   - mind/seam/session.go
-verified_against: PENDING
+verified_against: f51b9337a9283bc54231396584ea5903f0df98f9
 ---
 
 # Body-protocol seam

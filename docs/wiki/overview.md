@@ -6,7 +6,7 @@ sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: PENDING
+verified_against: f51b9337a9283bc54231396584ea5903f0df98f9
 ---
 
 # Overview
