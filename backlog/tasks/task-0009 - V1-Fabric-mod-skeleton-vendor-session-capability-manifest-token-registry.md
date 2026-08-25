@@ -4,7 +4,7 @@ title: 'V1 - Fabric mod skeleton, vendor session, capability manifest, token reg
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:36'
-updated_date: '2026-08-25 17:06'
+updated_date: '2026-08-25 17:10'
 labels:
   - vendor
   - m-0-build
@@ -46,7 +46,13 @@ Spec: specs/009-fabric-mod-skeleton
 - [ ] #5 The token registry persists across sessions: tokens issued before a server restart resolve to the same referents after it, and tokens are never reused
 - [ ] #6 Yarn mappings and version-dependent facts are re-verified against the target Minecraft version
 - [ ] #7 No client jar is produced
+- [ ] #8 Spec phase: Phase 1 — Version re-verification and toolchain (US1 groundwork)
+- [ ] #9 Spec phase: Phase 2 — Wire client and vector proof (US1)
+- [ ] #10 Spec phase: Phase 3 — Manifest (L-7) and token registry (US2 + US3)
+- [ ] #11 Spec phase: Phase 4 — Harness replacement, gates, wiki, board
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
