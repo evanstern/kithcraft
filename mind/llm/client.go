@@ -17,11 +17,11 @@ package llm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
-	"github.com/anthropics/anthropic-sdk-go/packages/ssestream"
 
 	"kithcraft/mind/prompt"
 )
@@ -37,7 +37,8 @@ const DefaultMaxRetries = 2
 // asks for (3-6 calls, one per villager peak) — each call builds its own
 // request and the underlying SDK client is itself concurrency-safe.
 type Client struct {
-	sdk anthropic.Client
+	sdk        anthropic.Client
+	accounting *Accounting
 }
 
 // New builds a wrapper client. opts ride straight through to
@@ -45,34 +46,57 @@ type Client struct {
 // (option.WithHTTPClient) — exactly as the SDK itself takes them, so tests
 // configure this the same way production code does. A caller-supplied
 // option.WithMaxRetries overrides DefaultMaxRetries (opts are applied
-// after it).
+// after it). Accounting is wired in here, not opted into later (FR-005) —
+// the first Send or Stream a Client makes is already counted.
 func New(opts ...option.RequestOption) *Client {
 	all := append([]option.RequestOption{option.WithMaxRetries(DefaultMaxRetries)}, opts...)
-	return &Client{sdk: anthropic.NewClient(all...)}
+	return &Client{sdk: anthropic.NewClient(all...), accounting: newAccounting()}
 }
+
+// Accounting returns this client's per-class call/token counters
+// (accounting.go, card AC #7). Call Report() on it at session end.
+func (c *Client) Accounting() *Accounting { return c.accounting }
 
 // Send performs one non-streaming call for class against the assembled
 // prompt (RT-5: model comes from Registry[class], so concurrent calls in
 // one process each carry their own class's model). Structured-output
-// parsing is structured.go's job — Send returns the raw SDK message.
+// parsing is structured.go's job — Send returns the raw SDK message. The
+// call is recorded into Accounting automatically: on success from the
+// response's Usage, on cancellation as a zero-usage cancelled call (a
+// synchronous call has no partial response to draw usage from — the
+// partial-usage case belongs to Stream). Any other error is not recorded:
+// no usage is known and, past retry exhaustion, nothing was billed.
 func (c *Client) Send(ctx context.Context, class Class, a prompt.Assembled) (*anthropic.Message, error) {
 	params, err := buildParams(class, a)
 	if err != nil {
 		return nil, err
 	}
-	return c.sdk.Messages.New(ctx, params)
+	msg, err := c.sdk.Messages.New(ctx, params)
+	if err != nil {
+		if errors.Is(err, context.Canceled) {
+			c.accounting.record(class, 0, 0, 0, 0, true)
+		}
+		return nil, err
+	}
+	u := msg.Usage
+	c.accounting.record(class, u.InputTokens, u.OutputTokens, u.CacheReadInputTokens, u.CacheCreationInputTokens, false)
+	return msg, nil
 }
 
 // Stream performs a streaming call (RT-1 — E4's latency budget). The
 // caller ranges over the returned stream (stream.Next()/stream.Current())
-// and must Close it when done. Cancelling ctx terminates the stream
-// promptly (RT-2); the stream's Err() then reports the cancellation.
-func (c *Client) Stream(ctx context.Context, class Class, a prompt.Assembled) (*ssestream.Stream[anthropic.MessageStreamEventUnion], error) {
+// and must Close it when done, exactly as against the raw SDK stream —
+// AccountedStream (accounting.go) forwards those methods and, in doing so,
+// accumulates and finalizes usage into Accounting automatically, including
+// a cancelled call's partial usage (RT-2, card AC #7's edge case).
+// Cancelling ctx terminates the stream promptly; the stream's Err() then
+// reports the cancellation.
+func (c *Client) Stream(ctx context.Context, class Class, a prompt.Assembled) (*AccountedStream, error) {
 	params, err := buildParams(class, a)
 	if err != nil {
 		return nil, err
 	}
-	return c.sdk.Messages.NewStreaming(ctx, params), nil
+	return newAccountedStream(c.sdk.Messages.NewStreaming(ctx, params), class, c.accounting), nil
 }
 
 // buildParams translates a class + assembled prompt into the SDK's request

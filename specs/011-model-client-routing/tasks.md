@@ -55,10 +55,10 @@ tests green with no network.
 **Independent test**: accounting tests green; a scripted session of mocked calls
 produces the session-end report.
 
-- [ ] T007 Implement mind/llm/accounting.go: per-class call count, input/output
+- [x] T007 Implement mind/llm/accounting.go: per-class call count, input/output
       tokens, cache read/write splits when reported, cancelled-call partial usage
       counted; session-end report (card AC #7)
-- [ ] T008 Named test: scripted mocked session across all six classes reports
+- [x] T008 Named test: scripted mocked session across all six classes reports
       correct per-class figures, including a cancelled call's partials
 
 ## Phase 4 — Closure: gates, wiki, board
