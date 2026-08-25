@@ -74,18 +74,18 @@ dev-server observation record for live verb execution.
 
 ## Phase 4 — Leak passes, gates, wiki, board (US3 + closure)
 
-- [ ] T010 Implement LeakPassTest: §12's six passes over captured payloads from the
+- [x] T010 Implement LeakPassTest: §12's six passes over captured payloads from the
       Phase 1–3 tests and the dev-server capture (card AC #9); fix any leak found
-- [ ] T011 Dev-server end-to-end: villager body emits percepts a stub mind ingests
+- [x] T011 Dev-server end-to-end: villager body emits percepts a stub mind ingests
       without rejection (card AC #1) — recorded observation
-- [ ] T012 gradle build + gradle test green; scope check: diff touches only mod/,
+- [x] T012 gradle build + gradle test green; scope check: diff touches only mod/,
       specs/012-*, board files, runbook log row; Mixin additions (if any)
       enumerated against decision-0002's bound
-- [ ] T013 Wiki: re-verify notes whose sources this PR touches (body-protocol-seam's
+- [x] T013 Wiki: re-verify notes whose sources this PR touches (body-protocol-seam's
       mod/ sources; villager-brain-api if brain-surface facts were verified in
       passing) — amend honestly, re-pin, regenerate CAPSULES.md if descriptions
       changed
-- [ ] T014 Tick this file, check card ACs now true (backlog CLI in-worktree), append
+- [x] T014 Tick this file, check card ACs now true (backlog CLI in-worktree), append
       phase-done note
 
 ## Dependencies
