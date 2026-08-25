@@ -2,7 +2,7 @@
 id: decision-0004
 title: 'Seam transport: UDS (AF_UNIX SOCK_STREAM), mind listens and vendor dials'
 date: '2026-08-22 03:10'
-status: proposed
+status: accepted
 ---
 ## Context
 
