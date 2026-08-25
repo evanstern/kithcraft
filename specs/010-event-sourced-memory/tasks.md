@@ -28,15 +28,15 @@ llm-routing-and-budget.md §6.3
 
 **Independent test**: `go test ./memory/...` — one named test per RM rule.
 
-- [ ] T004 Implement mind/memory/provenance.go: DIRECT_ORIGINS classifier (§2.7,
+- [x] T004 Implement mind/memory/provenance.go: DIRECT_ORIGINS classifier (§2.7,
       pure function of origin), RM-2/RM-3 citation-resolution gate — coerce
       witnessed→told→inferred, never reject, count coercions
-- [ ] T005 Implement mind/memory/beliefs.go: reducer over the log; PM-1 private
+- [x] T005 Implement mind/memory/beliefs.go: reducer over the log; PM-1 private
       provenance-stamped map; RM-4 upsert rule (secondhand never beats fresher
       firsthand); RM-5/RM-6 read-time confidence and freshness as world_time
       arithmetic (observed_at null = maximally stale); RM-7 deletion only via
       correction / death / witnessed removal
-- [ ] T006 Named tests RM-1 through RM-7 (card AC #3), plus the AC #2 test that the
+- [x] T006 Named tests RM-1 through RM-7 (card AC #3), plus the AC #2 test that the
       store is distinct from any vendor index and AC #7's no-external-write-path
       check (package API surface assertion)
 
