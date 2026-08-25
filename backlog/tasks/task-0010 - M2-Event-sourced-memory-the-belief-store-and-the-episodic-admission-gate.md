@@ -1,9 +1,10 @@
 ---
 id: TASK-0010
 title: 'M2 - Event-sourced memory, the belief store, and the episodic admission gate'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:37'
+updated_date: '2026-08-25 20:14'
 labels:
   - mind
   - m-0-build
@@ -34,6 +35,8 @@ As a villager, I want to know only what I saw or was told, with provenance, so t
 **References.** docs/design/demo-build-plan.md section 3.2 (M2) is the plan of record. Ratified surfaces consumed: docs/design/body-protocol-v0.md (SI-1, SI-5, PM-1, RM-1..RM-7, the canonical end-to-end in section 10.2), decision-0003 + docs/design/llm-routing-and-budget.md (event-sourced memory reimplemented not ported; the episodic admission gate in section 6.3; the E6-input-tokens instrument).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/010-event-sourced-memory
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -53,3 +56,12 @@ As a villager, I want to know only what I saw or was told, with provenance, so t
 - [ ] #2 Docs and wiki are updated and pass freshness tests
 - [ ] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+created: 2026-08-25 20:14
+---
+Sweep runbook tier: sonnet · model cc/claude-sonnet-5[1m] (default tier — reimplementation to a written contract: RM-1..RM-7, admission gate per routing §6.3; judgment calls settled by decision-0003). Served model recorded at dispatch.
+---
+<!-- COMMENTS:END -->
