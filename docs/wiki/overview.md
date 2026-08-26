@@ -6,7 +6,7 @@ sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: 4ee4efe074a060e59122106ee839a3590262bce6
+verified_against: b899d17935278cddec6b69852c8a75164fc23933
 ---
 
 # Overview
@@ -19,9 +19,12 @@ ratified architecture decision (Fabric server-side mod), verified prior-art rese
 development machinery that produced them, the mind daemon skeleton in `mind/` (TASK-0008,
 M1) — since TASK-0010 (M2) carrying its own event-sourced memory: an append-only log, a
 private provenance-stamped belief store, and the deterministic episodic admission gate
-([[body-protocol-seam]]) — and, as of TASK-0009 (V1), the **first vendor-side code**: a
-real Fabric mod in `mod/` implementing the wire client, `session_open` handshake,
-capability manifest, and token registry ([[body-protocol-seam]]).
+([[body-protocol-seam]]) — since TASK-0011 (M4) also an LLM client (`mind/llm/`) routing
+the six villager-cognition classes across three model tiers, with per-class prompt
+assembly (`mind/prompt/`) keeping each class's stable prefix byte-identical for caching,
+and per-class call/token accounting — and, as of TASK-0009 (V1), the **first vendor-side
+code**: a real Fabric mod in `mod/` implementing the wire client, `session_open`
+handshake, capability manifest, and token registry ([[body-protocol-seam]]).
 
 ## How it works
 
@@ -54,10 +57,11 @@ decisions ([[mod-stack-decision]]), machinery ([[pdlc-process]], [[model-tiers]]
 
 Two real code surfaces now exist alongside the docs/config majority of the wiki's
 sources: the mind daemon (`mind/`, TASK-0008/M1, now carrying TASK-0010/M2's
-event-sourced memory in `mind/memory/`) and the Fabric mod vendor (`mod/`,
+event-sourced memory in `mind/memory/` and TASK-0011/M4's LLM client and prompt
+assembly in `mind/llm/` and `mind/prompt/`) and the Fabric mod vendor (`mod/`,
 TASK-0009/V1) — [[body-protocol-seam]] cites both. This note's claims were
-re-verified against `mod/`'s and `mind/memory/`'s existence in this pass
-(2026-08-25). The mod's
+re-verified against `mod/`'s, `mind/memory/`'s, `mind/llm/`'s, and `mind/prompt/`'s
+existence in this pass (2026-08-25). The mod's
 Yarn-mapped brain-API surface ([[villager-brain-api]]) is flagged, not yet
 re-derived, against MC 26.2's official mappings — that re-derivation is V3's
 (TASK-0014) scoped work.
