@@ -1,10 +1,10 @@
 ---
 id: TASK-0012
 title: 'V2 - Body-vendor conformance: percepts out, intents in'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:37'
-updated_date: '2026-08-25 21:26'
+updated_date: '2026-08-26 00:57'
 labels:
   - vendor
   - m-0-build
@@ -60,6 +60,8 @@ Spec: specs/012-vendor-conformance
 Phase 4 closure — AC evidence: #1 composite (Phase 1-3 conformance/manifest tests compose every declared percept type honestly; live dev-server run, verb-observation.md 2026-08-25, proves session_open accepted and act_result percepts ingested without rejection over a real UDS session — self_state heartbeat and the other percept types were not exercised live in this window, unit-tested only). #2 SightingsTest + AbstractionConformanceTest's absence-claim scope proof (Phase 1). #3 research/r8-hearing-hook.md VERIFIED via javap against the pinned MC 26.2 jar. #4 AbstractionConformanceTest + LeakPassTest.p2NoStructuralLeakInAnyBranchableField — no salience/importance/weight field anywhere. #5 ChangeReportsTest's three-body scenario (actor/witness/absent third party). #6 IntentHandlerTest.everyCoreVerbAckedAcceptedYieldsExactlyOneActResult (unit) + verb-observation.md's live run: all four verbs, one act_result each, over a real session. #7 IntentHandlerTest.goToABodyWalksToItsLastSeenPlace + TargetResolutionTest (unit-proven; not exercised live this phase — live run targeted a place token, not a body token). #8 TargetResolutionTest + IntentHandlerTest's unknownTargetIsRefusedForAnUnissuedToken/knownButGoneReferentAcceptsThenFailsTargetGoneAfterTheWalk (unit-proven). #9 LeakPassTest — all six passes (P-1..P-6) green over payloads composed through the real Phase 1-3 machinery. #10-13: tasks.md's own Phase 1-4 checkboxes are now all [x] (commits eeb01f6, bd533b8, 56a5048, and this phase's T010/T011/T013 commits).
 
 DoD: #1 (tests pass) and #3 (spec/backlog in sync) checked. #2 left unchecked — docs/wiki updated and re-pinned (body-protocol-seam, villager-brain-api, CAPSULES regenerated), but the freshness gate reports 3 pre-existing issues predating this phase (body-protocol-seam.md's note-size and capsule-description budgets already over before this PR touched it; promptworld-lineage.md's capsule description, untouched by this PR) — not fixed here; a full note restructure is out of Phase 4's scope, flagged for a future refactor-triage pass.
+
+spec-bridge sync: Phase 1 — Percept surface: shapes, stamping, urgency (US1 groundwork): 3/3 · Phase 2 — R-8, told_fact/text, change_report restriction (US1 close): 3/3 · Phase 3 — Act surface: verbs, ack/result, target resolution (US2): 3/3 · Phase 4 — Leak passes, gates, wiki, board (US3 + closure): 5/5 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
@@ -77,3 +79,9 @@ created: 2026-08-25 20:14
 Sweep runbook tier: sonnet · model cc/claude-sonnet-5[1m] (default tier — percept/intent conformance to the protocol's written surface; R-8 is verify-then-declare, not design). Served model recorded at dispatch.
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — Percept surface: shapes, stamping, urgency (US1 groundwork): 3/3 · Phase 2 — R-8, told_fact/text, change_report restriction (US1 close): 3/3 · Phase 3 — Act surface: verbs, ack/result, target resolution (US2): 3/3 · Phase 4 — Leak passes, gates, wiki, board (US3 + closure): 5/5). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
