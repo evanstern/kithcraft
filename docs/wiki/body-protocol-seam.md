@@ -12,11 +12,16 @@ sources:
   - mind/seam/session.go
   - mod/src/main/java/dev/kithcraft/mod/wire/CanonicalJson.java
   - mod/src/main/java/dev/kithcraft/mod/session/Handshake.java
+  - mod/src/main/java/dev/kithcraft/mod/percept/PerceptEmitter.java
+  - mod/src/main/java/dev/kithcraft/mod/act/IntentHandler.java
+  - mod/src/main/java/dev/kithcraft/mod/act/Verbs.java
+  - mod/src/main/java/dev/kithcraft/mod/live/BodySession.java
+  - specs/012-vendor-conformance/research/verb-observation.md
   - mind/memory/log.go
   - mind/memory/beliefs.go
   - mind/memory/provenance.go
   - mind/memory/admission.go
-verified_against: 4ee4efe074a060e59122106ee839a3590262bce6
+verified_against: 3aa4a2aaceb1dbea2cd24df749032d48e7caa11e
 ---
 
 # Body-protocol seam
@@ -146,9 +151,21 @@ binds" epistemic-hygiene mechanism actually existing in code. `mod/.../tokens/
 TokenRegistry.java` persists the body/place/thing_id/kind token registry across server
 restarts (SavedData-backed; tokens never reused). All seventeen `seam/vectors/` golden
 vectors round-trip through the mod's own codec too — the fourth independent proof, and the
-first from the vendor side rather than a throwaway harness. Scope stays bounded here as
-well: no percept emission beyond the handshake, no intent execution, no brain/schedule
-work — those are V2/V3 (TASK-0014 and beyond).
+first from the vendor side rather than a throwaway harness.
+
+TASK-0012 (V2) then closed the loop this note previously flagged as still open: percept
+emission and intent execution. `mod/.../percept/PerceptEmitter.java` composes and sends
+every declared percept type (sighting, observation, self_state, sound, told_fact, text,
+change_report, act_result), provenance stamped at emission; `mod/.../act/IntentHandler.java`
+decodes intents, acks receipt only, and drives the four core verbs
+(`mod/.../act/Verbs.java`: `go_to`/`speak`/`attend`/`wait`) to exactly one `act_result`
+percept each. `mod/.../live/BodySession.java` (T011) is the minimal live wiring proving this
+on a dev server: a real villager's vanilla `Mob.getNavigation()`/`getLookControl()` drive
+`go_to`/`attend`, no Mixin — plain API only, consistent with decision-0002's bound. Full
+findings, including exactly what the live dev-server run did and did not observe, are in
+`specs/012-vendor-conformance/research/verb-observation.md`. Brain/schedule work (Fabric's
+`Brain<E>` beyond plain `Mob` movement/look) remains open, now V3's (TASK-0014) — see
+[[villager-brain-api]] for the MC 26.2 symbol renames V2 additionally verified in passing.
 
 Both harnesses this note described (`seam/go-roundtrip`, `seam/java-roundtrip`) still
 exist as throwaway, spec-facing proof, independent of either real implementation; the Java
@@ -201,6 +218,13 @@ re-runs `body-protocol-v0.md` §12's six leak passes over the added file (`seam-
 states the obligation); the vector set is clean today because its author had read both audits,
 which is a property that lapses the moment someone who hasn't appends to it.
 
-**Still open:** hearing's engine hook in the first vendor (the protocol's §11 Q-2). Transport
-(Q-1) is closed — but decision-0004 is **proposed**, not accepted: the operator ratifies at the
+**Resolved:** the protocol's §11 Q-2 (hearing's engine hook in the first vendor) — TASK-0012's
+R-8 verified MC 26.2's `net.minecraft.world.level.gameevent` package (`GameEvent`/
+`GameEventListener`/`DynamicGameEventListener`/`EntityPositionSource`) as a plain-API hook, no
+Mixin; `sound` is declared in the manifest and `percept/Sounds.java` composes its content
+(`specs/012-vendor-conformance/research/r8-hearing-hook.md`). Live `GameEventListener`
+registration onto a villager entity (turning a fired vanilla `GameEvent` into an outbound
+`sound` percept end-to-end) is not yet wired — recorded as a scope narrowing in
+`specs/012-vendor-conformance/research/verb-observation.md`, not a blocker. Transport (Q-1) is
+closed — but decision-0004 is **proposed**, not accepted: the operator ratifies at the
 TASK-0007 PR, and merge is the ratification act per the decision-0001/0002/0003 precedent.

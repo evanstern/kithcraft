@@ -14,10 +14,12 @@ import java.util.Map;
  * contract V2 must keep, so where honesty was in doubt the floor was declared and no more:
  *
  * <ul>
- *   <li>{@code percept_types} — the §6.2 floor only ({@code act_result}, {@code observation},
- *       {@code sighting}, {@code speech}); the optional extras ({@code sound},
- *       {@code told_fact}, {@code text}, {@code self_state}, {@code change_report}) are V2's
- *       to declare once it actually emits them.
+ *   <li>{@code percept_types} — the §6.2 floor ({@code act_result}, {@code observation},
+ *       {@code sighting}, {@code speech}) plus the optional extras this vendor now composes
+ *       ({@code self_state}, {@code sound}, {@code told_fact}, {@code text}, {@code
+ *       change_report} — Phase 1/2, TASK-0012 V2). {@code sound} is declared because R-8
+ *       verified a native hearing hook exists (specs/012-vendor-conformance/research/
+ *       r8-hearing-hook.md); every extra here has a composing class in {@code percept/}.
  *   <li>{@code origins} — §2.7's full closed vocabulary (fixed by the protocol, not a vendor
  *       choice).
  *   <li>{@code verbs} — the §5.5 core four only ({@code go_to}, {@code speak}, {@code attend},
@@ -38,8 +40,9 @@ public final class Handshake {
 
     private static Map<String, Object> buildManifest() {
         Map<String, Object> m = new LinkedHashMap<>();
-        // §6.2's four-type floor only — extras are V2's to earn.
-        m.put("percept_types", List.of("act_result", "observation", "sighting", "speech"));
+        // §6.2's four-type floor plus the extras this vendor now emits (TASK-0012 Phase 1/2).
+        m.put("percept_types", List.of("act_result", "observation", "sighting", "speech",
+            "self_state", "sound", "told_fact", "text", "change_report"));
         // §2.7's full closed origin vocabulary.
         m.put("origins", List.of("acted", "saw", "heard", "felt", "told", "read"));
         // §5.5's four core verbs; extended verbs are V2's to declare.

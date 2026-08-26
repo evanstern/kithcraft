@@ -1,36 +1,89 @@
 package dev.kithcraft.mod;
 
-import dev.kithcraft.mod.tokens.TokenRegistry;
-import dev.kithcraft.mod.tokens.TokenRegistryData;
+import dev.kithcraft.mod.live.BodySession;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/** Server-side entrypoint (decision-0002: no client jar). No wire, manifest, or intent
- * execution wiring yet (a body session is opened per V2, not here). */
+import java.io.IOException;
+
+/**
+ * Server-side entrypoint (decision-0002: no client jar). T011's live wiring: on each server
+ * tick, attach a {@link BodySession} to the first {@code Villager} found once the mind
+ * daemon's socket is dialable, then drive that session's tick every tick after.
+ *
+ * <p>ponytail: single-body attach, retried at most once/sec while unattached — a real
+ * multi-body attach loop (spawn events, per-body retry backoff) is V3's job; this is a
+ * dev-server proof, not the production session manager.
+ */
 public class KithcraftMod implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("kithcraft");
+
+	private BodySession attached;
+	// Deliberately not Long.MIN_VALUE: `worldTime - lastAttachAttempt` below would overflow
+	// (worldTime is a small non-negative game-tick count) and wrap to a huge negative value,
+	// which is always < 20 — silently skipping every attach attempt forever.
+	private long lastAttachAttempt = -1000L;
 
 	@Override
 	public void onInitialize() {
 		LOGGER.info("kithcraft mod initialized");
+		ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
+		// T011 diagnostic: ground truth for whether/where an entity actually loads,
+		// independent of the getEntitiesOfClass scan below (which is returning 0 even after
+		// a confirmed "Summoned new Villager" console line — this narrows whether the entity
+		// truly never loads or whether the scan itself is the bug).
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) ->
+			LOGGER.info("[live] ENTITY_LOAD: {} at {}", entity.getClass().getName(), entity.blockPosition()));
+	}
 
-		// TEMPORARY skeleton plumbing (T009, card AC #5): seeds a few probe tokens on first
-		// run and logs what resolves on every start, so a manual `runServer` stop/restart
-		// can be observed to resolve the same tokens to the same referents. Real token
-		// issuance is V2's job, wired to actual world events (villager spawn, place
-		// discovery, sighting) rather than a fixed dev-server-start probe.
-		ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-			TokenRegistryData data = server.overworld().getDataStorage().computeIfAbsent(TokenRegistryData.TYPE);
-			if (data.liveEntries().isEmpty()) {
-				String body = data.issue(TokenRegistry.TokenType.BODY, "dev-token-probe villager");
-				String place = data.issue(TokenRegistry.TokenType.PLACE, "dev-token-probe well");
-				String thing = data.issue(TokenRegistry.TokenType.THING, "dev-token-probe bed");
-				LOGGER.info("[dev-token-probe] first run: issued {}, {}, {} -> {}", body, place, thing, data.liveEntries());
-			} else {
-				LOGGER.info("[dev-token-probe] restart: resolved {}", data.liveEntries());
+	private void onServerTick(MinecraftServer server) {
+		try {
+			onServerTickUnsafe(server);
+		} catch (Throwable t) {
+			// T011 diagnostic: Fabric's event dispatch does not always surface a listener
+			// exception loudly, so this pass logs everything at ERROR rather than risk a
+			// silent no-op (found live: an earlier long-overflow bug in the throttle below
+			// produced exactly this symptom — no attach, no log, no error).
+			LOGGER.error("[live] onServerTick threw", t);
+		}
+	}
+
+	private void onServerTickUnsafe(MinecraftServer server) throws IOException {
+		long worldTime = server.overworld().getGameTime();
+		if (attached == null) {
+			if (worldTime - lastAttachAttempt < 20) {
+				return;
 			}
-		});
+			lastAttachAttempt = worldTime;
+			AABB huge = new AABB(-1000, -256, -1000, 1000, 256, 1000);
+			var villagers = server.overworld().getEntitiesOfClass(Villager.class, huge);
+			var everything = server.overworld().getEntitiesOfClass(net.minecraft.world.entity.Entity.class, huge);
+			LOGGER.info("[live] attach scan at tick {}: {} villager(s), {} total entities: {}", worldTime,
+				villagers.size(), everything.size(),
+				everything.stream().map(e -> e.getClass().getName()).distinct().toList());
+			Villager villager = villagers.stream().findFirst().orElse(null);
+			if (villager == null) {
+				return;
+			}
+			try {
+				attached = BodySession.open(server, villager);
+				LOGGER.info("[live] attached to villager {}", villager.getStringUUID());
+			} catch (IOException e) {
+				LOGGER.warn("[live] mind dial failed, will retry: {}", e.toString());
+			}
+			return;
+		}
+		try {
+			attached.tick(worldTime);
+		} catch (IOException e) {
+			LOGGER.warn("[live] session tick failed, dropping session: {}", e.toString());
+			attached = null;
+		}
 	}
 }
