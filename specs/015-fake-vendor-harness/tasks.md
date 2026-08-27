@@ -48,10 +48,10 @@ proving red-when-lifted.
 
 **Independent test**: `go test` green; H-6 prints the ratio.
 
-- [ ] T006 H-5: issued-but-gone token accepted at ack, fails target_gone only after
+- [x] T006 H-5: issued-but-gone token accepted at ack, fails target_gone only after
       advance(); unissued token refused unknown_target at ack; mutation check
       (FR-003)
-- [ ] T007 H-6 (§10.4): three-body flood scenario, identical script with
+- [x] T007 H-6 (§10.4): three-body flood scenario, identical script with
       restrict_change_reports off then on; memory counts via M2's gate +
       instrument; assert flooded > 3× restricted, zero to actor, zero to
       witnesses; print the ratio; mutation check (FR-004, card AC #3)
