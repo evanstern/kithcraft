@@ -1,19 +1,27 @@
 package dev.kithcraft.mod;
 
+import dev.kithcraft.mod.brain.DuskPairing;
+import dev.kithcraft.mod.cast.Cast;
 import dev.kithcraft.mod.cast.CastData;
 import dev.kithcraft.mod.cast.CastSeeder;
 import dev.kithcraft.mod.live.BodySession;
+import dev.kithcraft.mod.tokens.TokenRegistryData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Server-side entrypoint (decision-0002: no client jar). T011's live wiring: on each server
@@ -32,6 +40,10 @@ public class KithcraftMod implements ModInitializer {
 	// (worldTime is a small non-negative game-tick count) and wrap to a huge negative value,
 	// which is always < 20 — silently skipping every attach attempt forever.
 	private long lastAttachAttempt = -1000L;
+	private DuskPairing duskPairing;
+	private TokenRegistryData pendingTokens;
+	private BlockPos pendingOrigin;
+	private long lastDuskSetupAttempt = -1000L;
 
 	@Override
 	public void onInitialize() {
@@ -52,7 +64,24 @@ public class KithcraftMod implements ModInitializer {
 	private void onServerStarted(MinecraftServer server) {
 		var level = server.overworld();
 		CastData cast = level.getDataStorage().computeIfAbsent(CastData.TYPE);
-		CastSeeder.seedIfNeeded(level, cast, level.getRespawnData().pos());
+		BlockPos origin = level.getRespawnData().pos();
+		CastSeeder.seedIfNeeded(level, cast, origin);
+
+		// T007 (FR-005, R-7): the shared gathering place + each matched cast member's body
+		// token. NOT built here: at SERVER_STARTED, persisted villagers have not finished
+		// loading yet (their ENTITY_LOAD fires a few ticks later — confirmed live, T009), so
+		// findCastVillagers() would return empty and DuskPairing would never have any seats.
+		// Deferred to onServerTick below, retried until the cast is actually found.
+		pendingTokens = level.getDataStorage().computeIfAbsent(TokenRegistryData.TYPE);
+		pendingOrigin = origin;
+	}
+
+	private static List<Villager> findCastVillagers(ServerLevel level) {
+		AABB huge = new AABB(-1000, -256, -1000, 1000, 256, 1000);
+		Set<String> castNames = Cast.MEMBERS.stream().map(Cast.Member::name).collect(Collectors.toSet());
+		return level.getEntitiesOfClass(Villager.class, huge).stream()
+			.filter(v -> castNames.contains(v.getName().getString()))
+			.toList();
 	}
 
 	private void onServerTick(MinecraftServer server) {
@@ -69,6 +98,17 @@ public class KithcraftMod implements ModInitializer {
 
 	private void onServerTickUnsafe(MinecraftServer server) throws IOException {
 		long worldTime = server.overworld().getGameTime();
+		if (duskPairing == null && pendingTokens != null && worldTime - lastDuskSetupAttempt >= 20) {
+			lastDuskSetupAttempt = worldTime;
+			var castVillagers = findCastVillagers(server.overworld());
+			if (!castVillagers.isEmpty()) {
+				duskPairing = DuskPairing.setUp(server.overworld(), pendingTokens, pendingOrigin, castVillagers);
+				pendingTokens = null;
+			}
+		}
+		if (duskPairing != null) {
+			duskPairing.tick(worldTime);
+		}
 		if (attached == null) {
 			if (worldTime - lastAttachAttempt < 20) {
 				return;
