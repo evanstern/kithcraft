@@ -4,10 +4,13 @@
 // hand-rolled channel fake. It scripts a percept stream (including
 // duplicates and a seq gap) and records the intents the daemon emits.
 //
-// Deliberately minimal (T011): S2 (TASK-0015) grows this into a full
-// FakeVendor. No general read API and no autonomous behavior — the
-// double does only what a test tells it to, plus the passive recording a
-// live socket requires (there is no non-blocking peek on a net.Conn).
+// Deliberately minimal (T011): mind/fakevendor (S2, TASK-0015) is its
+// full-shape successor — session lifecycle, acks, resolvable acts, and
+// the H-test harness — for tests that need more than a percept-in/
+// intent-out recording double. No general read API and no autonomous
+// behavior — the double does only what a test tells it to, plus the
+// passive recording a live socket requires (there is no non-blocking peek
+// on a net.Conn).
 package seamtest
 
 import (

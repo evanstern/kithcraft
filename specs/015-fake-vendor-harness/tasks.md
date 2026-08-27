@@ -14,14 +14,14 @@ unable to leak.
 **Independent test**: `go vet` + `go test ./...` green in mind/; API-surface test
 proves the exported shape is exactly §10.1.
 
-- [ ] T001 Implement mind/fakevendor: §10.1's full shape (manifest, open/close,
+- [x] T001 Implement mind/fakevendor: §10.1's full shape (manifest, open/close,
       emit, advance, .acts, resolve, strict, restrict_change_reports) driving the
       mind through the real seam surface per seamtest's from-the-outside pattern
       (FR-001); default intent behaviour ack-record-wait (FR-002); loud script
       errors (resolve on unknown/resolved id, emit after close)
-- [ ] T002 Shape + default-behaviour tests: manifest is §6.2-valid, advance moves
+- [x] T002 Shape + default-behaviour tests: manifest is §6.2-valid, advance moves
       time and nothing else, intents stay pending until resolved
-- [ ] T003 API-surface test (M2's external-package precedent): exported surface is
+- [x] T003 API-surface test (M2's external-package precedent): exported surface is
       exactly §10.1 — no read API, no autonomous behaviour, no beyond-contract
       capability (FR-006, card AC #4/#5)
 
