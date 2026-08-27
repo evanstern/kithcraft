@@ -65,6 +65,15 @@ type FakeVendor struct {
 	acts      []map[string]any
 	pending   map[string]map[string]any // intent_id -> received intent payload
 
+	// issued is every thing_id/place/body token this vendor has ever
+	// mentioned in an Emit'd percept (§5.2: "a token the mind already
+	// knows"). It is bookkeeping derived from what Emit is given, never
+	// a decision about a percept's content (§10.5) — recordAndAck reads
+	// it only to tell an issued-but-gone target from one this vendor
+	// never handed out (H-5, §5.3/§5.6), never to answer "does X still
+	// exist" (that would be the existence oracle §5.6 forbids).
+	issued map[string]bool
+
 	// writeMu serializes conn.WriteMessage calls: wire.WriteFrame forbids
 	// concurrent writers on one connection (mind/wire/frame.go), and both
 	// the caller (Emit/Resolve/Close) and the background recordAndAck
@@ -80,6 +89,7 @@ func New(conn seam.Conn, session, body string, manifest map[string]any) *FakeVen
 		conn: conn, session: session, body: body, manifest: manifest,
 		Strict: true, RestrictChangeReports: true,
 		pending: map[string]map[string]any{},
+		issued:  map[string]bool{},
 	}
 }
 
@@ -131,6 +141,7 @@ func (v *FakeVendor) Emit(percept map[string]any) error {
 		v.mu.Unlock()
 		return fmt.Errorf("fakevendor: Emit before Open or after Close (script error): a closed session emits nothing")
 	}
+	v.noteIssuedTokens(percept)
 	env := v.envelope("percept", percept)
 	v.mu.Unlock()
 	if err := v.write(env); err != nil {
@@ -233,12 +244,83 @@ func (v *FakeVendor) recordAndAck() {
 
 		v.mu.Lock()
 		v.acts = append(v.acts, payload)
-		v.pending[intentID] = payload
-		ack := v.envelope("intent_ack", map[string]any{
-			"intent_id": intentID, "accepted": true, "reason_code": nil,
-		})
+		var ack map[string]any
+		if v.targetUnissued(payload) {
+			// H-5 / §5.3: a token this vendor never issued is refused
+			// here, synchronously, and never joins pending — no
+			// act_result will ever follow for it. An issued token whose
+			// referent is gone takes the other branch below and fails
+			// only later, at Resolve (§5.6).
+			ack = v.envelope("intent_ack", map[string]any{
+				"intent_id": intentID, "accepted": false, "reason_code": "unknown_target",
+			})
+		} else {
+			v.pending[intentID] = payload
+			ack = v.envelope("intent_ack", map[string]any{
+				"intent_id": intentID, "accepted": true, "reason_code": nil,
+			})
+		}
 		v.mu.Unlock()
 		_ = v.write(ack) // best-effort: a write failure surfaces via the next ReadMessage
+	}
+}
+
+// targetUnissued reports whether payload's target names a thing/place/body
+// token this vendor never mentioned in an Emit'd percept (§5.2). It is the
+// only synchronous ack-time refusal H-5 sanctions — it checks nothing about
+// whether the referent still exists, only whether the identifier was ever
+// handed out; an issued token whose referent is gone is NOT unissued and
+// takes the accepted branch, failing only later at Resolve's target_gone
+// (§5.3/§5.6 — this is what keeps the ack from becoming an existence
+// oracle). Caller holds v.mu.
+func (v *FakeVendor) targetUnissued(payload map[string]any) bool {
+	target, ok := payload["target"].(map[string]any)
+	if !ok {
+		return false
+	}
+	key, _ := target["type"].(string)
+	if key != "thing" && key != "place" && key != "body" {
+		return false // "none" or unrecognized: no token to check
+	}
+	id, _ := target[key].(string)
+	if id == "" {
+		return false
+	}
+	return !v.issued[id]
+}
+
+// noteIssuedTokens records every thing_id/place identifier percept mentions
+// as now known to the mind (§5.2) — called on every Emit so targetUnissued
+// can later tell an issued-but-gone token from one never handed out. This
+// is bookkeeping derived from what Emit is given; it does not gate, alter,
+// or interpret the percept (§10.5) — nothing here decides what a percept
+// says, only records identifiers already present in it. Caller holds v.mu.
+func (v *FakeVendor) noteIssuedTokens(percept map[string]any) {
+	if place, ok := percept["place"].(map[string]any); ok {
+		if id, ok := place["place"].(string); ok && id != "" {
+			v.issued[id] = true
+		}
+	}
+	content, _ := percept["content"].(map[string]any)
+	for _, key := range []string{"thing", "about_place"} {
+		m, ok := content[key].(map[string]any)
+		if !ok {
+			continue
+		}
+		for _, idKey := range []string{"thing_id", "place", "body"} {
+			if id, ok := m[idKey].(string); ok && id != "" {
+				v.issued[id] = true
+			}
+		}
+	}
+	if present, ok := content["present"].([]any); ok {
+		for _, item := range present {
+			if m, ok := item.(map[string]any); ok {
+				if id, ok := m["thing_id"].(string); ok && id != "" {
+					v.issued[id] = true
+				}
+			}
+		}
 	}
 }
 
