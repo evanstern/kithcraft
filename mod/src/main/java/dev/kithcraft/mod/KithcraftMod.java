@@ -1,8 +1,11 @@
 package dev.kithcraft.mod;
 
+import dev.kithcraft.mod.cast.CastData;
+import dev.kithcraft.mod.cast.CastSeeder;
 import dev.kithcraft.mod.live.BodySession;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.npc.villager.Villager;
@@ -33,6 +36,7 @@ public class KithcraftMod implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("kithcraft mod initialized");
+		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
 		ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
 		// T011 diagnostic: ground truth for whether/where an entity actually loads,
 		// independent of the getEntitiesOfClass scan below (which is returning 0 even after
@@ -40,6 +44,15 @@ public class KithcraftMod implements ModInitializer {
 		// truly never loads or whether the scan itself is the bug).
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) ->
 			LOGGER.info("[live] ENTITY_LOAD: {} at {}", entity.getClass().getName(), entity.blockPosition()));
+	}
+
+	/** T002 (card AC #6): seed the three-member cast once per world, at the world spawn.
+	 * Idempotent via {@link CastData}'s persisted flag — a restart re-runs this but does not
+	 * re-spawn. */
+	private void onServerStarted(MinecraftServer server) {
+		var level = server.overworld();
+		CastData cast = level.getDataStorage().computeIfAbsent(CastData.TYPE);
+		CastSeeder.seedIfNeeded(level, cast, level.getRespawnData().pos());
 	}
 
 	private void onServerTick(MinecraftServer server) {
