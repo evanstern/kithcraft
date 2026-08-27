@@ -4,7 +4,7 @@ title: S2 - Fake body vendor and the protocol-rule harness
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-27 20:45'
+updated_date: '2026-08-27 21:15'
 labels:
   - seam
   - m-0-build
@@ -54,12 +54,12 @@ Spec: specs/015-fake-vendor-harness
 - [ ] #9 Spec phase: Phase 4 — Canonical end-to-end, gates, wiki, board (US2 close + closure)
 <!-- AC:END -->
 
-
-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Sweep lane 3 claim (2026-08-27). Tier: sonnet · cc/claude-sonnet-5[1m] (default tier per runbook: protocol §10 specifies FakeVendor and H-1..H-6 in detail; execution against a written standard). Served model recorded at dispatch.
+
+Dispatch record (2026-08-27): Phase 1 served by cc/claude-sonnet-5[1m] (VERIFIED from transcript). FakeVendor §10.1 shape landed with reflection surface-lock test; strict/restrict_change_reports flags are data-only until H-tests wire them (Phase 2/3).
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
