@@ -102,6 +102,12 @@ public class KithcraftMod implements ModInitializer {
 			lastDuskSetupAttempt = worldTime;
 			var castVillagers = findCastVillagers(server.overworld());
 			if (!castVillagers.isEmpty()) {
+				// T011 finding (full-cycle-observation.md, 2026-08-27): re-cover the cast's
+				// actual current chunk footprint every boot, not just where CastSeeder
+				// force-loaded at first spawn — see CastSeeder.keepChunksLoaded's own javadoc
+				// for why a stale/too-tight footprint permanently freezes a villager's Brain
+				// without ever fully unloading it.
+				CastSeeder.keepChunksLoaded(server.overworld(), castVillagers);
 				duskPairing = DuskPairing.setUp(server.overworld(), pendingTokens, pendingOrigin, castVillagers);
 				pendingTokens = null;
 			}

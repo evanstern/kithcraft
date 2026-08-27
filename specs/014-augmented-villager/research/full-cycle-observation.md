@@ -107,3 +107,69 @@ data-resource research `pair-observation.md` already scoped out.
 `./gradlew build` green (111 tests, 0 failures/errors) both before this run (baseline) and
 after (no production code changed by this phase's observation work — T010/T011/T009 are
 observation-only tasks this session, per their own scope).
+
+## 2026-08-27 — root cause of the zero-movement finding, found and fixed
+
+Diagnosed on the exact persisted world this doc's run used (`mod/run/world`, cast already
+seeded, reused unchanged), one continuous `./gradlew runServer` boot, no rebuild until after
+the fix was confirmed live.
+
+**Root cause.** `CastSeeder.forceLoadCastChunks` runs exactly once — inside `seedIfNeeded`,
+before the `isSeeded()` early return — so it never re-runs on any subsequent boot, and its
+footprint was computed from spawn-time positions only. `/forceload query` at this session's
+boot confirmed only 2 chunks were still forced: `[1, 0]` and `[1, 1]`. All three cast members'
+*actual* current positions (confirmed via `/data get entity <name> Pos`, all three at
+`x≈32, z≈18–22`) sit in chunk `[2, 1]` — one chunk (Chebyshev distance 1) outside that forced
+set. They got there by ordinary CORE-package wander after the original seeding (T006 already
+documented this same wander live, up to ~14 blocks from spawn) and never wandered back.
+
+This is not "unloaded" — it's worse to diagnose. Confirmed via `javap` on the pinned 26.2 jar
+(`ChunkMap.FORCED_TICKET_LEVEL = ChunkLevel.byStatus(FullChunkStatus.ENTITY_TICKING)`,
+`ChunkLevel`'s `ENTITY_TICKING_LEVEL`/`BLOCK_TICKING_LEVEL`/`FULL_CHUNK_LEVEL` triplet): a
+forced chunk's ticket level propagates outward by Chebyshev distance, so the ring of chunks
+one step beyond any forced chunk sits at `BLOCK_TICKING` — loaded, blocks/physics tick, entity
+NBT is queryable and even jitters (small `Motion` values), but `ENTITY_TICKING` (the level
+Brain/goal-selector AI needs) never applies. A villager that wanders one chunk too far
+freezes permanently — present, queryable, physically jittering, but its Brain never advances
+again: no wander, no schedule transition, no `[dusk] pairing signal`, ever, restart after
+restart, indistinguishable from "hasn't decided to move yet" without this cross-check. This
+also fully explains why `schedule-observation.md` (T006, same session as the original seed)
+DID see real wandering: it queried shortly after the fresh seed, before any villager had
+wandered past the tight, un-padded original footprint.
+
+**How it was confirmed, live, no rebuild.** With the server already up on this persisted
+world: `/data get entity Aldric Pos` → `[32.04675475590949d, 72.0d, 19.41952349530544d]`,
+bit-identical to this doc's original 24-minute-old sample from a prior session — proving the
+freeze is a permanent structural trap, not "insufficient elapsed time." `/forceload query` →
+only `[1,0]`/`[1,1]` forced. Issued `/forceload add 0 -16 47 31` (covers `[2,1]` plus margin,
+a plain console command, no code change) — within the same tick, log lines confirm new
+`ENTITY_LOAD`s (a `Cow`, more `Pig`s, `FallingBlockEntity`s) as the previously-`BLOCK_TICKING`
+area came up to full entity ticking. ~75 seconds later: `/data get entity Aldric Pos` →
+`[22.36676251416939d, 67.5625d, 12.664268232989444d]` — moved ~13 blocks, landed at Y=67.56,
+matching Aldric's claimed-bed Y (67) exactly — and `/data get entity Aldric Brain` now carries
+a brand-new `minecraft:last_slept: 64429L` memory that was absent before the fix. Full
+schedule-driven REST (sleep), not physics jitter, resumed within under two minutes of the
+chunk actually reaching `ENTITY_TICKING`.
+
+**Fix applied** (plain API, no Mixin, mirrors the existing `DuskPairing`-deferred-setup idiom
+already in `KithcraftMod`): `CastSeeder.keepChunksLoaded(ServerLevel, List<Villager>)` computes
+a bounding box from the cast's *actual current* block positions (not a stale spawn-time
+origin) with a 3-chunk margin on every side — comfortably past the ~14-block wander T006
+observed — and force-loads it. `KithcraftMod.onServerTickUnsafe` calls it once per boot, in
+the same throttled-until-found block that already locates the cast for `DuskPairing.setUp`
+(so it re-covers wherever the cast has actually wandered to, every restart, not just where it
+originally spawned). `CastSeeder.forceLoadCastChunks` (the original, spawn-time-only call)
+is unchanged and still runs once at first seed.
+
+**Verification.** Live console commands only, within the one boot described above (no rebuild
+needed to prove the mechanism); `./gradlew build` green after the code fix (20 test-result
+files, 0 failures/errors) as the gate, not re-run live against a fresh 24-minute unattended
+window — that full-cycle re-run (closing T011/T009 for real) is the next session's job, now
+unblocked. This session did not chase whether the still-open `JOB_SITE` question
+(`schedule-observation.md` §3) is affected by the same chunk-boundary mechanism — worth
+checking first thing next session, since a villager whose job-site claim races
+`ValidateNearbyPoi` while sitting in a `BLOCK_TICKING` chunk would silently fail that race
+forever, same shape of bug.
+
+Gate: `./gradlew build` green, 20 test-result files / 0 failures / 0 errors, after this
+session's `CastSeeder.java`/`KithcraftMod.java` changes.

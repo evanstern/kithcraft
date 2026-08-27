@@ -18,6 +18,8 @@ import net.minecraft.world.entity.npc.villager.VillagerData;
 import net.minecraft.world.entity.npc.villager.VillagerProfession;
 import net.minecraft.world.entity.npc.villager.VillagerType;
 
+import java.util.List;
+
 /**
  * Spawns {@link Cast#MEMBERS} into the world, once. Plain API only — no Mixin needed
  * (specs/014-augmented-villager/research/brain-26.2.md §6): a {@link VillagerData} sets
@@ -106,6 +108,47 @@ public final class CastSeeder {
         int maxChunkZ = (origin.getZ() + 2) >> 4;
         for (int cx = minChunkX; cx <= maxChunkX; cx++) {
             for (int cz = minChunkZ; cz <= maxChunkZ; cz++) {
+                level.setChunkForced(cx, cz, true);
+            }
+        }
+    }
+
+    /** Live finding, 2026-08-27 (specs/014-augmented-villager/research/
+     * full-cycle-observation.md): a villager's own CORE-package wander can carry it beyond
+     * {@link #forceLoadCastChunks}'s spawn-time footprint. A chunk one step past a forced
+     * chunk still loads and ticks blocks/physics (confirmed via {@code javap} on {@code
+     * ChunkLevel}: propagated ticket levels reach {@code BLOCK_TICKING} there, one level short
+     * of the {@code ENTITY_TICKING} a forced chunk itself gets) but never runs Brain/goal-
+     * selector AI — the villager reports live-looking NBT (small physics jitter in {@code
+     * Motion}) forever, with position and Brain memories otherwise frozen, since nothing ever
+     * ticks it into deciding to walk. {@code forceLoadCastChunks} alone can't self-heal this
+     * (it only ever runs once, at first seed, per {@link #seedIfNeeded}'s idempotence guard) —
+     * this method re-asserts a forced ticket around the cast's ACTUAL current positions, called
+     * once per boot by {@code KithcraftMod} right after it finds the cast (the same
+     * throttled-until-found idiom {@code DuskPairing.setUp}'s call site already uses), so a
+     * restart always re-covers wherever the cast has actually wandered to, not just where it
+     * spawned. */
+    public static void keepChunksLoaded(ServerLevel level, List<Villager> castVillagers) {
+        if (castVillagers.isEmpty()) {
+            return;
+        }
+        int minChunkX = Integer.MAX_VALUE;
+        int maxChunkX = Integer.MIN_VALUE;
+        int minChunkZ = Integer.MAX_VALUE;
+        int maxChunkZ = Integer.MIN_VALUE;
+        for (Villager villager : castVillagers) {
+            BlockPos pos = villager.blockPosition();
+            minChunkX = Math.min(minChunkX, pos.getX() >> 4);
+            maxChunkX = Math.max(maxChunkX, pos.getX() >> 4);
+            minChunkZ = Math.min(minChunkZ, pos.getZ() >> 4);
+            maxChunkZ = Math.max(maxChunkZ, pos.getZ() >> 4);
+        }
+        // Margin wide enough that CORE-package wander (observed live up to ~14 blocks from
+        // spawn, schedule-observation.md) can never drift a villager past ENTITY_TICKING into
+        // the degraded BLOCK_TICKING halo just beyond the forced set.
+        int marginChunks = 3;
+        for (int cx = minChunkX - marginChunks; cx <= maxChunkX + marginChunks; cx++) {
+            for (int cz = minChunkZ - marginChunks; cz <= maxChunkZ + marginChunks; cz++) {
                 level.setChunkForced(cx, cz, true);
             }
         }
