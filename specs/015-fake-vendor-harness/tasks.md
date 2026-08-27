@@ -34,9 +34,9 @@ proves the exported shape is exactly §10.1.
 **Independent test**: `go test` green; each of H-1..H-4 has a mutation check
 proving red-when-lifted.
 
-- [ ] T004 H-1 (V-5): strict mode — missing provenance, then missing
+- [x] T004 H-1 (V-5): strict mode — missing provenance, then missing
       provenance.origin, both rejected before any state mutation; mutation check
-- [ ] T005 H-2 (V-6) + H-3 (pure classifier) + H-4 (no direct on the wire): unknown
+- [x] T005 H-2 (V-6) + H-3 (pure classifier) + H-4 (no direct on the wire): unknown
       /absent origin classifies secondhand; prose swearing firsthand stays
       secondhand; "direct": true ignored per V-1; mutation checks for each
 
