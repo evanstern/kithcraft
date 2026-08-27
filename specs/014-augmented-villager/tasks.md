@@ -33,14 +33,14 @@ evidence; villagers visible on a dev server with nameplates.
 **Independent test**: `gradle test` green; overrides enumerated in the Mixin config;
 dev-server observation shows wake/work/sleep transitions.
 
-- [ ] T004 Wire wake/work/socialize/sleep scheduling for the cast on the vanilla
+- [x] T004 Wire wake/work/socialize/sleep scheduling for the cast on the vanilla
       substrate per the Phase 1 derivation: POI bed/job-site claims, sleep pathing,
       door use — driven, not reimplemented (FR-003)
-- [ ] T005 Implement mixin/ — the ≤3 task-list overrides suppressing breeding,
+- [x] T005 Implement mixin/ — the ≤3 task-list overrides suppressing breeding,
       gossip, iron-golem summoning (FR-004, card AC #3); each enumerated in the
       Mixin config; a test asserts the config lists at most three and names them;
       drop any override 26.2 makes unnecessary via plain API
-- [ ] T006 Dev-server observation: schedule transitions occur unattended over a
+- [x] T006 Dev-server observation: schedule transitions occur unattended over a
       cycle segment; no breeding/golem events (recorded per the V-task gate)
 
 **Checkpoint**: an unattended vanilla day, suppressions in place.

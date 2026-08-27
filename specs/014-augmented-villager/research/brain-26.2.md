@@ -146,6 +146,45 @@ javap -p -classpath minecraft-merged-deobf-26.2.jar net.minecraft.world.entity.n
   that turns out unnecessary rather than keep it for symmetry. T005 should re-verify the
   caller of `gossip()` before finalizing the Mixin config.
 
+## Phase 2 (T005) addendum — two corrections found finalizing the Mixin config, 2026-08-27
+
+Re-verifying before finalizing (as §5 above asked): two of this section's own findings needed
+correction, both by `javap -p -c` against the same pinned jar.
+
+- **`VillagerMakeLove` lives in `getIdlePackage(float)`, not `getCorePackage(Holder, float)`.**
+  §5's "confirmed present in the core package's behavior set" was a class-existence search
+  only (`javap -p` lists every class `VillagerGoalPackages` references, not which method uses
+  it). Full disassembly (`javap -p -c`) shows `new VillagerMakeLove` at a bytecode offset that
+  falls strictly between `getIdlePackage`'s method header and the next method
+  (`getPanicPackage`) — never inside `getCorePackage`'s range. `VillagerGoalPackagesMixin`
+  targets `getIdlePackage`, the actually-correct method.
+- **The wiring call is not `Villager.registerBrainGoals` at all.** Disassembling
+  `registerBrainGoals(Brain<Villager>)` directly shows its entire body is just
+  `setSchedule(...)` (baby vs. adult) followed by `updateActivityFromSchedule(...)` — it never
+  calls `addActivity`. The actual per-package wiring (`getCorePackage`/`getWorkPackage`/
+  `getIdlePackage`/etc., including `VillagerMakeLove`) runs inside a private static synthetic
+  method (`Villager.lambda$static$0(Villager)`), which is the `Brain.ActivitySupplier`
+  implementation baked into the static `BRAIN_PROVIDER` field
+  (`Brain.provider(sensorTypes, activitySupplier)`); `Brain.Provider.makeBrain` calls
+  `activitySupplier.createActivities(entity)` and feeds the resulting `List<ActivityData>`
+  straight into `Brain`'s constructor — never through the public, additive-only
+  `Brain.addActivity`. This doesn't change FR-004's conclusion (a Mixin is still required,
+  `addActivity` still can't remove anything), but it means the actual suppression target is
+  `VillagerGoalPackages.getIdlePackage` (a stable public static method), not a mixin into
+  `registerBrainGoals` or the private lambda — a strictly easier and less fragile target than
+  either alternative this section originally pointed at.
+- **`gossip()`'s caller, traced**: `TradeWithVillager.tick()` calls
+  `Villager.gossip(ServerLevel, Villager, long)` (confirmed by `javap -p -c` on
+  `TradeWithVillager`); `TradeWithVillager` itself is wired into both the MEET and IDLE
+  packages. This confirms the golem-suppression-via-gossip-cancel finding above: cancelling
+  `gossip` at `HEAD` covers both packages that could trigger it.
+- **`Blocks` has no per-color bed constants (e.g. `RED_BED`) at 26.2.** Colored block families
+  are consolidated into `ColorCollection<T>` (`Blocks.BED` is a
+  `ColorCollection<Block>`; `Blocks.BED.red()` or `.pick(DyeColor.RED)` gets a specific
+  variant) — a T004 finding, recorded here since it's the same "unobfuscated internal
+  restructure" pattern as §1's schedule/environment-attribute finding, not a rename a Yarn diff
+  would have caught either.
+
 ## 6. Cast seeding surface (T002) — fully plain API, no Mixin
 
 ```
