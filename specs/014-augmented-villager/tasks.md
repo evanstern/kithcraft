@@ -52,15 +52,20 @@ dev-server observation shows wake/work/sleep transitions.
 **Independent test**: `gradle test` green — signal-timing unit test proves the
 signal fires on predicted-arrival-minus-~10 s, not on arrival.
 
-- [ ] T007 Implement brain/ dusk pair-formation Activity: pick pair, path both to
+- [x] T007 Implement brain/ dusk pair-formation Activity: pick pair, path both to
       the shared gathering place at dusk (FR-005); gathering place exposed as a
       place token via the existing token registry
-- [ ] T008 Implement the pairing signal: emitted when predicted arrival is ~10 s
+- [x] T008 Implement the pairing signal: emitted when predicted arrival is ~10 s
       out (path-length/speed estimate), carrying pair body tokens + place token in
       seam terms via existing percept types — no protocol extension; no-fire when
       pathing fails (spec edge case); unit tests for timing math and no-fire
 - [ ] T009 Dev-server observation: two villagers converge at dusk; signal precedes
       arrival by ~10 s (logged timestamps recorded per the V-task gate, card AC #4)
+      — **NOT closed**: MEETING_POINT wiring confirmed live (a real boot-order bug
+      found and fixed), but MC 26.2's schedule ignores `/time set` (uses monotonic
+      `getGameTime()`, data-driven boundaries) and this session's real-time budget
+      never reached the MEET window to observe the signal firing. Honest record +
+      root-cause hypotheses + resumption plan: research/pair-observation.md.
 
 **Checkpoint**: M6's pre-generation lever exists.
 
