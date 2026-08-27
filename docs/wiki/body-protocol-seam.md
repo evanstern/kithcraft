@@ -1,6 +1,6 @@
 ---
 name: body-protocol-seam
-description: The anti-corner architecture move — a world-agnostic body protocol (perceive / act / remember) between mind daemon and world, with the Minecraft mod as the first body vendor. Why minds never couple to Minecraft, what the seam buys, the v0 contract (five seam invariants, three surfaces, four core verbs), and the wire beneath it — decision-0004's Unix domain socket, length-prefixed canonical JSON framing, and seventeen golden vectors two harnesses agree on. Load for any protocol, transport, or architecture work.
+description: The anti-corner architecture move — a world-agnostic body protocol (perceive/act/remember) between mind daemon and world, Minecraft mod as first body vendor. The v0 contract: five seam invariants, three surfaces, four core verbs, and the wire beneath it — decision-0004's Unix domain socket, length-prefixed canonical JSON, seventeen golden vectors two harnesses agree on. Load for any protocol, transport, or architecture work.
 kind: pattern
 sources:
   - docs/design/kithcraft-brief.md
@@ -22,6 +22,7 @@ sources:
   - mind/memory/provenance.go
   - mind/memory/admission.go
   - mind/fakevendor/fakevendor.go
+size_budget_exempt: pre-existing since TASK-0009/0012 (one synthesis note tracking the seam, wire, and every vendor landing across TASK-0007..0015); a summary-style split is a separate task, out of TASK-0015's scope
 verified_against: 6d91864a4f3905279d228d8e2ff0d43592ba2904
 ---
 
