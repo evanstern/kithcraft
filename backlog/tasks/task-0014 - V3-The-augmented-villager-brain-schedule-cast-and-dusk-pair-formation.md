@@ -4,7 +4,7 @@ title: 'V3 - The augmented villager: brain, schedule, cast, and dusk pair format
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-27 20:40'
+updated_date: '2026-08-27 20:43'
 labels:
   - vendor
   - m-0-build
@@ -49,7 +49,13 @@ Spec: specs/014-augmented-villager
 - [ ] #4 Two villagers converge on a shared gathering place at dusk and the pair-formation signal precedes arrival by ~10 s (ruling R-7)
 - [ ] #5 With a deliberately stalled mind, bodies keep moving: the scheduled activity keeps the body busy while the mind thinks
 - [ ] #6 The three villagers are distinguished by profession x biome variant plus nameplates
+- [ ] #7 Spec phase: Phase 1 — Re-derive the 26.2 brain surface; cast seeding (US1 groundwork)
+- [ ] #8 Spec phase: Phase 2 — Schedule wiring and the suppression overrides (US1 close)
+- [ ] #9 Spec phase: Phase 3 — Dusk pair formation and the ~10 s signal (US2)
+- [ ] #10 Spec phase: Phase 4 — Body-keeps-moving, full-cycle proof, gates, wiki, board (US3 + closure)
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
