@@ -65,12 +65,12 @@ proving red-when-lifted.
 **Independent test**: full `go vet` + `go test ./...` green; freshness probe green;
 card ACs ticked with citations.
 
-- [ ] T008 The §10.2 canonical end-to-end against FakeVendor: the five-step script
+- [x] T008 The §10.2 canonical end-to-end against FakeVendor: the five-step script
       through a real session, step 5's epistemic assertion (secondhand origin
       class, no witnessed claim) (FR-005)
-- [ ] T009 Close TASK-0010 AC #5 with the T008 test as citation (backlog CLI
+- [x] T009 Close TASK-0010 AC #5 with the T008 test as citation (backlog CLI
       in-worktree, note referencing the deliberate carry from PR #15)
-- [ ] T010 Gates + wiki + board: go vet/test green; body-protocol-seam.md (and any
+- [x] T010 Gates + wiki + board: go vet/test green; body-protocol-seam.md (and any
       touched notes) re-verified and honestly re-pinned — the seam note's harness
       claims now real; CAPSULES regenerated if descriptions changed; freshness
       probe green; card ACs ticked with citations; runbook log row updated
