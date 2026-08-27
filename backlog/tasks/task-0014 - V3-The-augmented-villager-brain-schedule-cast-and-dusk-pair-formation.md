@@ -1,10 +1,10 @@
 ---
 id: TASK-0014
 title: 'V3 - The augmented villager: brain, schedule, cast, and dusk pair formation'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-25 17:19'
+updated_date: '2026-08-27 20:40'
 labels:
   - vendor
   - m-0-build
@@ -22,6 +22,7 @@ ordinal: 14000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
+<!-- SECTION:DESCRIPTION:BEGIN -->
 As a player, I want three named neighbours who live a full day without me, so that the village is somewhere I arrived rather than something I have to run.
 
 **Scope boundary.** `Schedule` get/set for wake/work/socialize/sleep on the vanilla `Brain<E>` substrate; `Activity` registration and task-list assignment; memory modules; POI bed and job-site claim, sleep pathing, door use — all inherited free per decision-0002. The bounded Mixin surface, **enumerated and no larger**: up to three task-list overrides suppressing breeding, gossip and iron-golem summoning (the conversion-cancel injection belongs to V5). Cast setup: three named villagers distinguished by profession x biome variant plus nameplates. The dusk **pair-formation Activity** implementing ruling **R-7**: villagers path to a shared gathering place at dusk, and the pairing signal is emitted **~10 s ahead of arrival** so M6 can pre-generate the opening turn. And the rule that makes the whole latency posture survivable: **the scheduled activity keeps the body busy while the mind thinks** — a villager standing motionless awaiting a response has converted a 20-second thought into a 20-second bug, and no tier change fixes it.
@@ -35,6 +36,9 @@ As a player, I want three named neighbours who live a full day without me, so th
 **References.** docs/design/demo-build-plan.md section 3.3 (V3) and its ruling R-7 are the plan of record. Ratified surfaces consumed: decision-0002 + docs/design/entity-implementation-comparison.md (augmented vanilla VillagerEntity, the bounded ~4-injection Mixin budget, schedules/POI/pathing inherited free, profession x biome variant), docs/design/kithcraft-brief.md (the micromanagement spell-breaker), docs/design/llm-routing-and-budget.md (section 5.2 lever 2, pre-generation ahead of arrival).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+<!-- SECTION:DESCRIPTION:END -->
+
+Spec: specs/014-augmented-villager
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -51,6 +55,8 @@ As a player, I want three named neighbours who live a full day without me, so th
 
 <!-- SECTION:NOTES:BEGIN -->
 Upstream finding from TASK-0009 Phase 1 (2026-08-25, specs/009-fabric-mod-skeleton/research/versions.md): target is MC 26.2, which is UNOBFUSCATED — Yarn discontinued after 1.21.11. villager-brain-api.md's symbol names (checked at yarn-1.21.3+build.1) must be re-verified against Mojang official names before this task's brain/Mixin work; routing A-2's daylight arithmetic also still unverified at 26.2.
+
+Sweep lane 3 claim (2026-08-27). Tier: sonnet · cc/claude-sonnet-5[1m] (default tier per runbook: vanilla Brain<E> substrate work mapped in villager-brain-api; Mixin surface enumerated and bounded by decision-0002; the 26.2 symbol re-derivation is verification, not design). Served model recorded at dispatch.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
