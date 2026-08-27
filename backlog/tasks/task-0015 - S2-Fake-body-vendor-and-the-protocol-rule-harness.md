@@ -4,7 +4,7 @@ title: S2 - Fake body vendor and the protocol-rule harness
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-27 20:41'
+updated_date: '2026-08-27 20:45'
 labels:
   - seam
   - m-0-build
@@ -48,7 +48,13 @@ Spec: specs/015-fake-vendor-harness
 - [ ] #3 H-6 reproduces the 75% flood and prints the ratio (flooded.memory_count > 3x restricted.memory_count)
 - [ ] #4 Design check (minds-are-others): the fake vendor exposes no read API and no method by which a mind can learn world state without acting
 - [ ] #5 The fake vendor has no autonomous behaviour and no capability the real vendors lack (section 10.5 scope discipline)
+- [ ] #6 Spec phase: Phase 1 — FakeVendor shape and scope discipline (US2 + US3 groundwork)
+- [ ] #7 Spec phase: Phase 2 — The cheap rules: H-1..H-4 (US1 groundwork)
+- [ ] #8 Spec phase: Phase 3 — The structural rules: H-5 and H-6 (US1 close)
+- [ ] #9 Spec phase: Phase 4 — Canonical end-to-end, gates, wiki, board (US2 close + closure)
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
