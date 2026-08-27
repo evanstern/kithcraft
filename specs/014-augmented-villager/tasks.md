@@ -13,15 +13,15 @@ decision-0002, demo-build-plan R-7, villager-brain-api.md (partial 26.2 verifica
 **Independent test**: `gradle test` green; research/brain-26.2.md exists with cited
 evidence; villagers visible on a dev server with nameplates.
 
-- [ ] T001 Re-derive the Brain<E> surface against MC 26.2 (FR-001): Activity
+- [x] T001 Re-derive the Brain<E> surface against MC 26.2 (FR-001): Activity
       registration, addActivity task-list assignment, Sensor refresh,
       MemoryModuleType/POI registration, ScheduleBuilder or its successor —
       javap/source evidence with dates in research/brain-26.2.md; note which
       extension points need Mixin/accessor vs plain API at 26.2
-- [ ] T002 Implement cast/ — seed three named villagers (profession × biome variant,
+- [x] T002 Implement cast/ — seed three named villagers (profession × biome variant,
       nameplates, card AC #6), identity persisted across restart (SavedData
       pattern); unit tests for seeding idempotence and identity survival
-- [ ] T003 Amend docs/wiki/villager-brain-api.md: replace the UNVERIFIED carry-
+- [x] T003 Amend docs/wiki/villager-brain-api.md: replace the UNVERIFIED carry-
       forward sections with the derived 26.2 facts (honest re-pin after amendment)
 
 **Checkpoint**: the substrate is known, the cast exists.
