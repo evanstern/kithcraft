@@ -76,16 +76,36 @@ signal fires on predicted-arrival-minus-~10 s, not on arrival.
 **Independent test**: full `gradle build` + `gradle test` green; freshness probe
 green; card ACs ticked with citations.
 
-- [ ] T010 Body-keeps-moving (FR-006, card AC #5): audit that no schedule/activity
+- [x] T010 Body-keeps-moving (FR-006, card AC #5): audit that no schedule/activity
       code path awaits a mind response (structural — the seam surface is async
       already; assert no blocking call sites); dev-server observation with a stub
-      mind that never responds: bodies continue full schedule
+      mind that never responds: bodies continue full schedule — CLOSED:
+      `research/body-keeps-moving.md`. Audit confirms brain/cast never touches the
+      mind; live proof ran 24m42s with the mind permanently stalled at dial (1,474
+      failed attempts, zero errors, zero stalls).
 - [ ] T011 The full-cycle unattended observation (FR-007, card AC #1/#2): three
       villagers, one full day/night, no player action — criteria checklist recorded
-      (wake, work, dusk socialize, sleep in claimed beds, zero breeding/golems)
-- [ ] T012 Gates + wiki + board: gradle build/test green; villager-brain-api.md +
+      (wake, work, dusk socialize, sleep in claimed beds, zero breeding/golems) —
+      **NOT closed**: `research/full-cycle-observation.md`. Zero breeding/zero golem
+      confirmed (AC #2) across a 24m42s / ~24400-tick run. Wake/work/dusk-socialize/
+      sleep NOT observed — all three villagers' positions were bit-identical at
+      every sampled point across the entire run, never approaching their claimed
+      bed or the meeting point. Honest root-cause hypotheses + resumption plan
+      recorded; not force-closed. Same run re-attempted inherited T009 (still no
+      `[dusk]` signal — see below).
+- [ ] T009 (inherited from Phase 3, re-attempted this phase): still **NOT closed**.
+      No `[dusk] pairing signal` fired in this phase's 24m42s run either — this run
+      rules out Phase 3's "already within arrival radius" hypothesis (villagers
+      were 5+ blocks from the meeting point the entire time and never moved closer);
+      the root cause now appears shared with T011's non-closure above (no schedule-
+      driven relocation observed at all this session). See
+      `research/full-cycle-observation.md`'s T009 section.
+- [x] T012 Gates + wiki + board: gradle build/test green; villager-brain-api.md +
       any other touched notes re-verified and honestly re-pinned; CAPSULES
       regenerated if descriptions changed; freshness probe green; card ACs ticked
-      with citing evidence (backlog CLI in-worktree); runbook log row updated
+      with citing evidence (backlog CLI in-worktree); runbook log row updated —
+      CLOSED: 111 tests green, `villager-brain-api.md` re-pinned with Phase 2/3
+      findings folded in, freshness probe green, card ACs #2/#3/#5/#6 ticked with
+      citations (AC #1/#4 left honestly unticked — see T011/T009 above).
 
 **Checkpoint**: V3 done — the village lives a day without anyone.

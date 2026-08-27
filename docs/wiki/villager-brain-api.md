@@ -7,7 +7,9 @@ sources:
   - docs/design/mod-stack-comparison.md
   - specs/012-vendor-conformance/research/verb-observation.md
   - specs/014-augmented-villager/research/brain-26.2.md
-verified_against: 2b3535131ed00533cffaabdc3749b6143dff0599
+  - specs/014-augmented-villager/research/pair-observation.md
+  - specs/014-augmented-villager/research/full-cycle-observation.md
+verified_against: 2b19674267f26b216d22617e2ec0ef1def69eb7e
 ---
 
 # Villager brain API (Fabric substrate)
@@ -65,6 +67,22 @@ villager-relevant constants confirmed present (`NEAREST_LIVING_ENTITIES`,
 `SecondaryPoiSensor`). A custom sensor is a plain subclass registered into
 `BuiltInRegistries.SENSOR_TYPE` (public `DefaultedRegistry`) — plain API, no Mixin.
 
+**Schedule reads monotonic game time, not the mutable day-time field (Phase 3 finding,
+load-bearing for anyone driving a schedule-dependent test).** `javap -p -c` on
+`Villager.registerBrainGoals` shows `updateActivityFromSchedule` fed
+`level().getGameTime()` — the ever-increasing tick counter — not the level's cyclical
+day-time field. `/time set <n>` only writes that mutable day-time field; it has **no effect
+on which `Activity` is active**, confirmed live by repeated `/time set` jumps that never
+budged the schedule while this mod's own `getGameTime()`-based tick log kept climbing
+unaffected. The only way to move a villager through WORK → MEET → REST in a dev-server
+observation is to let real server ticks elapse (20/s) — there is no time-skip shortcut. The
+actual day-boundary-to-`Activity` mapping is supplied by a reloadable data resource neither
+Phase 3 nor Phase 4 located (see `specs/014-augmented-villager/research/pair-observation.md`
+and `.../full-cycle-observation.md`) — a full 24000-tick real-time window is not yet
+*confirmed* to guarantee crossing every `Activity` (Phase 4 ran one such window and did not
+observe a work/meet/rest transition; root cause undetermined, see `full-cycle-
+observation.md`).
+
 **Extension points — the blanket "Mixin/accessor required" claim from the Yarn-mapped pass
 does not hold uniformly at 26.2; it splits per type:**
 
@@ -85,17 +103,27 @@ does not hold uniformly at 26.2; it splits per type:**
   `Brain.addActivity(Activity.MEET, ...)` avoids minting a new Activity at all. Left for
   Phase 3 to decide, not resolved here.
 - **Omitting a vanilla behavior from a stock task-list package (breeding/gossip/golem
-  suppression, FR-004) — Mixin required.** `Villager.registerBrainGoals(Brain<Villager>)`,
-  the method that actually calls `addActivity` with vanilla's packages, is **private**, and
-  `addActivity` is additive-only (confirmed above) — there is no plain-API way to leave a
-  specific vanilla `BehaviorControl` (e.g. `VillagerMakeLove`, the breeding task) out of a
-  package once `registerBrainGoals` runs. This confirms FR-004's bounded Mixin surface is
-  structurally necessary, not a design choice 26.2 makes obsolete. One further finding for
-  Phase 2 to weigh: golem-summoning is not an independent task at all —
-  `Villager.gossip(ServerLevel, Villager, long)` calls `spawnGolemIfNeeded(...)` directly
-  from inside its own body (confirmed by bytecode disassembly), so a single Mixin
-  injection on `gossip()` may suppress both gossip and golem-summoning, potentially leaving
-  the "≤3 task-list overrides" budget at two real overrides rather than three.
+  suppression, FR-004) — Mixin required, but not where Phase 1 first pointed.**
+  `Villager.registerBrainGoals(Brain<Villager>)` is private, but full bytecode disassembly
+  (Phase 2, `javap -p -c`) found its entire body is only `setSchedule(...)` +
+  `updateActivityFromSchedule(...)` — **it never calls `addActivity` at all**, correcting
+  Phase 1's class-existence-only reading. The actual per-package wiring
+  (`getCorePackage`/`getWorkPackage`/`getIdlePackage`/etc.) runs inside a private static
+  synthetic lambda baked into `Villager`'s static `Brain.Provider` field, never through the
+  public, additive-only `Brain.addActivity`. Net effect on FR-004 is unchanged (a Mixin is
+  still structurally required; `addActivity` still can't remove anything), but the actual,
+  stable Mixin target is `VillagerGoalPackages.getIdlePackage(float)` (a public static method
+  — not `registerBrainGoals` or the private lambda). Disassembly also located
+  `VillagerMakeLove` (breeding) precisely: constructed inside `getIdlePackage`, not
+  `getCorePackage` as Phase 1's class-existence search assumed. Golem-summoning is a side
+  effect of `Villager.gossip(ServerLevel, Villager, long)` (calls `spawnGolemIfNeeded`
+  directly from its own body); `gossip()`'s caller was traced to
+  `TradeWithVillager.tick()` (wired into both the MEET and IDLE packages), so cancelling
+  `gossip` at `HEAD` covers gossip and golem-summoning in one injection. **Implemented Mixin
+  surface, confirmed live (Phase 2/T005): 2 overrides, not 3** —
+  `VillagerGoalPackagesMixin` (`getIdlePackage`, drops `VillagerMakeLove`) and
+  `VillagerGossipMixin` (`gossip()`, `HEAD`-cancel) — `MixinConfigTest` and a live dev-server
+  run (zero breeding/golem events across every observed run this task) both confirm.
 
 The brief's claim that "Fabric exposes activity/schedule injection into real villager
 brains" is confirmed at the symbol level, not just the shape level: injection is real,
@@ -129,3 +157,13 @@ skeleton/research/versions.md`'s "villager-brain-api.md re-check" section, TASK-
 flagged this page for full re-derivation). Full command-by-command evidence:
 `specs/014-augmented-villager/research/brain-26.2.md`. Citations for the pre-26.2 baseline
 this page evolved from: `specs/001-mod-stack-decision/research/prior-art.md` §6.
+
+**Re-pinned 2026-08-27 (TASK-0014 Phase 4, T012):** folded in two corrections/additions this
+page had not yet carried — Phase 2's re-derivation of the actual suppression-Mixin target
+(`getIdlePackage`, not `registerBrainGoals`) and Phase 3's monotonic-`getGameTime` schedule
+finding. Both are load-bearing for anyone extending this substrate or driving a live
+schedule observation. Prose otherwise re-confirmed still true against current code; nothing
+else changed. The open question this page now flags but does not resolve — whether a
+24000-tick real-time window is actually guaranteed to cross every `Activity` at 26.2 — is
+Phase 4's own honest non-closure, not a regression in the symbol facts above; see
+`specs/014-augmented-villager/research/full-cycle-observation.md`.
