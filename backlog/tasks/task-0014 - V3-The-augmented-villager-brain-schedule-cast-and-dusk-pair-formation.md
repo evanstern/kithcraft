@@ -4,7 +4,7 @@ title: 'V3 - The augmented villager: brain, schedule, cast, and dusk pair format
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-27 20:43'
+updated_date: '2026-08-27 21:03'
 labels:
   - vendor
   - m-0-build
@@ -55,14 +55,14 @@ Spec: specs/014-augmented-villager
 - [ ] #10 Spec phase: Phase 4 — Body-keeps-moving, full-cycle proof, gates, wiki, board (US3 + closure)
 <!-- AC:END -->
 
-
-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 Upstream finding from TASK-0009 Phase 1 (2026-08-25, specs/009-fabric-mod-skeleton/research/versions.md): target is MC 26.2, which is UNOBFUSCATED — Yarn discontinued after 1.21.11. villager-brain-api.md's symbol names (checked at yarn-1.21.3+build.1) must be re-verified against Mojang official names before this task's brain/Mixin work; routing A-2's daylight arithmetic also still unverified at 26.2.
 
 Sweep lane 3 claim (2026-08-27). Tier: sonnet · cc/claude-sonnet-5[1m] (default tier per runbook: vanilla Brain<E> substrate work mapped in villager-brain-api; Mixin surface enumerated and bounded by decision-0002; the 26.2 symbol re-derivation is verification, not design). Served model recorded at dispatch.
+
+Dispatch record (2026-08-27): Phase 1 served by cc/claude-sonnet-5[1m] (VERIFIED from transcript). Key 26.2 findings: Schedule/ScheduleBuilder gone, addActivity additive-only, MemoryModuleType/PoiType plain-API, gossip() calls spawnGolemIfNeeded directly (one injection may cover both), Activity.MEET available for dusk meet.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
