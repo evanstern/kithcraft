@@ -75,20 +75,27 @@ func ParseIntent(class Class, raw string) (Intent, error) {
 }
 
 // Digest is E6's structured output (A-9): nightly consolidation's parsed
-// result — a summary plus the beliefs it formed. M7 owns the actual
-// belief/narrative content; Beliefs stays a bag of fields until M7 defines
-// its shape.
+// result — a summary, the beliefs it formed, and the ordinal m1..mN
+// references (body-protocol-v0.md §2.3, mind/consolidate T002) it cites as
+// evidence. References is the field M4 ponytailed and M7 (mind/consolidate)
+// completes: the prompt convention IS the identity mechanism, so the model
+// cites "m3" rather than a (world_time, hash) pair it was never given, and
+// mind/consolidate maps accepted references back to durable identity.
+// Beliefs stays a bag of fields — its shape is still M7's to define beyond
+// the reference convention.
 type Digest struct {
-	Summary string           `json:"summary"`
-	Beliefs []map[string]any `json:"beliefs,omitempty"`
+	Summary    string           `json:"summary"`
+	Beliefs    []map[string]any `json:"beliefs,omitempty"`
+	References []string         `json:"references,omitempty"`
 }
 
 // DigestSchema is the JSON Schema sent as E6's output_config.format.
 var DigestSchema = map[string]any{
 	"type": "object",
 	"properties": map[string]any{
-		"summary": map[string]any{"type": "string"},
-		"beliefs": map[string]any{"type": "array", "items": map[string]any{"type": "object"}},
+		"summary":    map[string]any{"type": "string"},
+		"beliefs":    map[string]any{"type": "array", "items": map[string]any{"type": "object"}},
+		"references": map[string]any{"type": "array", "items": map[string]any{"type": "string"}},
 	},
 	"required":             []string{"summary"},
 	"additionalProperties": false,
