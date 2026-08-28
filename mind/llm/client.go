@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
@@ -107,6 +108,13 @@ func (c *Client) Stream(ctx context.Context, class Class, a prompt.Assembled) (*
 // when both a stable prefix exists (E1 has none) and the class's Cached
 // flag is set (§4.3: E2/E3/E4 yes; E1/E5/E6 no) — RT-3's placement is
 // therefore structural, not a per-call decision a caller could get wrong.
+//
+// ANTHROPIC_MODEL_PREFIX, if set, is prepended to the request's model ID
+// only — a host behind a routing proxy may require an augmented spelling
+// (e.g. "cc/") that a bare API ID like "claude-opus-5" 404s against. The
+// canonical IDs in classes.go are the product's ratified choice and never
+// change; Accounting is keyed by Class (accounting.go), not by this string,
+// so accounting/logs are unaffected either way.
 func buildParams(class Class, a prompt.Assembled) (anthropic.MessageNewParams, error) {
 	cfg, ok := Registry[class]
 	if !ok {
@@ -114,7 +122,7 @@ func buildParams(class Class, a prompt.Assembled) (anthropic.MessageNewParams, e
 	}
 
 	params := anthropic.MessageNewParams{
-		Model:     anthropic.Model(cfg.Model),
+		Model:     anthropic.Model(os.Getenv("ANTHROPIC_MODEL_PREFIX") + cfg.Model),
 		MaxTokens: int64(cfg.MaxTokens),
 		Messages: []anthropic.MessageParam{
 			anthropic.NewUserMessage(anthropic.NewTextBlock(a.Variable)),
