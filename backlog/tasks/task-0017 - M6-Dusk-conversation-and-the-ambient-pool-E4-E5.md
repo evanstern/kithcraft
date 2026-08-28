@@ -1,9 +1,10 @@
 ---
 id: TASK-0017
 title: 'M6 - Dusk conversation and the ambient pool (E4, E5)'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
+updated_date: '2026-08-28 19:20'
 labels:
   - mind
   - m-0-build
@@ -37,6 +38,8 @@ As a player, I want to overhear my neighbours talking about the day, the work, a
 **References.** docs/design/demo-build-plan.md section 3.2 (M6) is the plan of record. Ratified surfaces consumed: decision-0003 + docs/design/llm-routing-and-budget.md (E4 on Sonnet 5 with thinking off under the < 3 s ceiling, E5 ambient pool on Haiku 4.5, section 5.2 lever 2 pre-generation), docs/design/kithcraft-brief.md (the dusk-conversation beat; the tedium and politeness-policing spell-breakers), docs/design/body-protocol-v0.md (speak -> speech in earshot).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/017-dusk-conversation
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -50,6 +53,12 @@ As a player, I want to overhear my neighbours talking about the day, the work, a
 - [ ] #7 Design check (tedium): lines do not repeat within a cycle, conversations reach a natural end rather than looping or hitting a turn cap mid-sentence, and the stall-line is used sparingly
 - [ ] #8 Design check (politeness-policing): a villager may resent, grumble and say so, but never lectures, moralizes, or gates anything on the player's conduct
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 017 stub + link ride this claim commit
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
