@@ -63,11 +63,35 @@
 
 ## Phase 3 — The ambient pool (US3)
 
-- [ ] T007 E5 pool: one batched Haiku 4.5 call per villager per in-game day,
-      ~8 persona-flavoured lines; serve < 200 ms measured; no intra-cycle
-      repeat; daily refresh on world_time rollover (card AC #5)
-- [ ] T008 Specific-remark escalation: targeted trigger → live Haiku call, not
-      the pool (card AC #6); pool-empty stall-line policy sparing (card AC #7)
+- [x] T007 `AmbientPool` (`mind/converse/pool.go`, named distinctly from
+      pregen.go's `Pool` per Phase 2's naming note): `Refill` runs one
+      batched E5 call/villager/day (asserted Haiku 4.5, non-streaming —
+      `TestE5UsesHaiku45`) producing ~8 persona-flavoured lines
+      (`TestAmbientPool_RefillProducesLines`); `Serve` is a mutex-guarded
+      map lookup, measured < 200 ms, and removes each line as it's served
+      so nothing repeats within a cycle
+      (`TestAmbientPool_ServeUnderBudgetNoRepeat`); daily refresh keyed by
+      `day int64` (world_time arithmetic, M2 convention — computing it is
+      the daemon wiring's job, not this package's, same posture as
+      pregen.go's `PairKey.Day`): `Serve` on a day that doesn't match the
+      pool's last `Refill` reports pool-empty rather than serving
+      yesterday's still-unspent lines (`TestAmbientPool_DayRolloverClearsYesterday`,
+      card AC #5).
+- [x] T008 `IsTargeted`/`Escalate` (`mind/converse/pool.go`): a non-empty
+      trigger subject routes to `Escalate`, a live E5 call (same Haiku 4.5
+      tier as the pool, made live instead of batched) that never touches
+      `AmbientPool` (`TestIsTargeted`, `TestEscalate_LiveCallBypassesPool`,
+      card AC #6). `StallLines`/`Stall`: the pool-empty stall-line policy
+      (spec.md Edge Cases) — `Stall` takes no `*llm.Client`, so it cannot
+      make a model call by construction, not by caller discipline; picks
+      deterministically from four short, non-committal lines
+      (`TestStall_NeverCallsModel`, `TestStall_Deterministic`; card AC #7's
+      stall clause). Deviation: no anti-repetition or usage-rate tracking
+      on `Stall` itself — "used rarely, never a prefix tic" is a caller
+      discipline this phase documents (`Stall`'s doc comment: "a
+      substitute for a turn where Serve had nothing", not a default
+      reply), not a mechanism enforced here; T009 (Phase 4) is where the
+      tedium checks get consolidated across the whole class.
 
 ## Phase 4 — Spell-breaker checks, gates, and closure
 
