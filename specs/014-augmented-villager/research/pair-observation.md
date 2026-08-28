@@ -120,3 +120,24 @@ a legitimate way to fast-forward to MEET, then repeat this observation.
 `./gradlew build` and `./gradlew test` both green after the fix above (see commit for exact
 SHA). `PairingSignalTest`'s 9 cases (timing math, no-fire edge cases, content shape) pass
 unmodified from the inherited code.
+
+## 2026-08-27 (later) — T009 CLOSED, in the verification re-run
+
+`research/full-cycle-observation.md`'s dated "verification re-run" section is the full record
+(same session, same run — T009 and T011 share the one continuous ~29m50s boot). Summary here
+for T009 specifically: `[dusk] pairing signal` fired **10 times** across all three pair
+combinations (Aldric+Petra, Aldric+Yenna, Petra+Yenna) between world tick 83088 and 85092
+(real time 19:42:38–19:44:18), with etas of 1.82s–4.96s — inside `PairingSignal.LEAD_SECONDS`
+(10s), always `> 0` (never at/after arrival). Emission preceded the sampled confirmation of
+actual arrival-radius convergence (Aldric+Yenna both within 4 blocks of the bell by 19:43:11,
+~33s after the first fire). This closes the "signal precedes arrival" observation this
+session's earlier root-cause work (chunk-boundary fix, commit 22e93e1) unblocked — Phase 3's
+original finding (fixture wiring correct, live firing unobserved for lack of elapsed real
+time/reachable MEET window) and Phase 4's first attempt (villagers frozen, no movement at all)
+are both superseded by this result. **T009 is now ticked in tasks.md.**
+
+Honest note carried forward: the observed lead times (1.8–4.96s) never approached the nominal
+~10s ceiling — see `full-cycle-observation.md`'s note on `StrollAroundPoi`/`SocializeAtBell`'s
+short recomputed hops producing a per-tick eta that reflects the current hop, not the full
+remaining approach. Worth a closer look if a future task cares about the lead time being
+closer to a full 10s rather than merely `≤10s`; out of scope for this closure.

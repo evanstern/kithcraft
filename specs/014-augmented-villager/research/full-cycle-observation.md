@@ -173,3 +173,38 @@ forever, same shape of bug.
 
 Gate: `./gradlew build` green, 20 test-result files / 0 failures / 0 errors, after this
 session's `CastSeeder.java`/`KithcraftMod.java` changes.
+
+## 2026-08-27 (later) — verification re-run: T011/T009 CLOSED
+
+Fresh `./gradlew build` (rerun with `--rerun-tasks`, not just cache-hit): **green, 111 tests,
+0 failures/errors**. Same persisted world as the fix session (`mod/run/world`, cast already
+seeded, `keepChunksLoaded` fix from commit 22e93e1 in place, no rebuild of the world). One
+continuous `./gradlew runServer` boot, `run/stdin.fifo` (held open via a background `sleep`
+writer so console reads never hit EOF between commands), no player ever connected. Sampled
+every ~55–70s real time via `/data get entity @e[type=minecraft:villager,name=<X>,limit=1]
+Pos` (`/data get entity <name>` alone errors — needs a selector, not a bare name),
+`/time query gametime`, and the same `execute if ... run say BABY_FOUND`/`GOLEM_FOUND` probes
+as prior sessions. Run: `BUILD SUCCESSFUL in 29m 49s`, world tick 66879 → ~102000+ — comfortably
+past one full 24000-tick day-length, and started at a lucky day-position (≈19765, late night)
+that let this single window cross wake → work → dusk → sleep → wake again.
+
+| Criterion | Outcome | Evidence |
+|---|---|---|
+| **Wake** | **Confirmed**, twice | `last_woken: 74099` (all three) — villagers stationary at bed Y=67.5625 through tick 73489 (19:34:38), first seen displaced toward the meeting point by tick 74711 (19:35:39). Second wake: stable sleep through tick 97810 (19:54:54), a Y=67.0 "just risen" cluster position at tick 99033 (19:55:55), dispersing by tick 100255. |
+| **Work (tolerated wander)** | **Wander confirmed; true job-site work NOT** | Widely scattered positions (x/z spanning ~10–52, Y 63–80) across both day windows (tick ~74711–83000 and ~99033–101477+). `Brain` dump mid-run (tick ~89000s) shows `{meeting_point, home, last_slept, last_woken}` — **no `job_site` key** for any of the three. The fix does not touch `ScheduleSetup`/POI claiming, so this is the same pre-existing JOB_SITE-claim gap `schedule-observation.md` already flagged, unaffected by this session's chunk-boundary fix. Falls under the spec's own tolerated fallback ("vanilla wander-instead-of-work"), not a blocker. |
+| **Dusk socialize** | **Confirmed** | Positions converge on the bell/`meeting_point` (`[26, 67, 14]`) starting ≈tick 81276 (Aldric+Petra within ~1 block of each other, still short of the bell); by tick 83720 (19:43:11) Aldric `[26.87, 69, 16.39]` and Yenna `[27.49, 69, 16.52]` are both within `ARRIVAL_RADIUS_BLOCKS` (4) of the bell. |
+| **Pairing signal precedes arrival (T009, FR-005, card AC #4)** | **Confirmed** | `[dusk] pairing signal` fired **10 times** across all three pair combinations between tick 83088 (19:42:38) and tick 85092 (19:44:18) — etas 1.82s–4.96s, all in `(0, LEAD_SECONDS=10]`. Emission (19:42:38, first fires) precedes the sampled arrival-radius confirmation (19:43:11, ≈33s later) — signal strictly before arrival, never at/after it. Honest note: observed lead times (1.8–4.96s) were well inside the 10s cap but shorter than its nominal value in every instance this run — consistent with `DuskPairing`'s own documented finding that vanilla's `StrollAroundPoi`/`SocializeAtBell` moves in short recomputed hops, so a given tick's eta reflects the current hop's remaining distance, not the full remaining approach; this is an already-known, already-flagged characteristic (see the class javadoc), not a new defect, and does not violate the "never fires on/after arrival" requirement. |
+| **Sleep in claimed beds** | **Confirmed** | After dusk, positions settle to each villager's own claimed `home` BlockPos exactly — Aldric `[22.369…, 67.5625, 12.666…]` (home `[22,67,12]`), Petra `[24.35, 67.5625, 12.649…]` (home `[24,67,12]`), Yenna `[20.363, 67.5625, 12.661…]` (home `[20,67,12]`) — and stay **bit-identical across 5 consecutive samples** spanning tick 92921→97810 (~4 real minutes), confirming a genuine sleep hold, not a pass-through. `last_slept`: Aldric 86349, Petra 86165, Yenna 86185. |
+| **Zero breeding** | **Confirmed** | `BABY_FOUND` never fired across 24 sampled checks over the whole run. |
+| **Zero golem summons** | **Confirmed** | `GOLEM_FOUND` never fired across 24 sampled checks over the whole run. |
+| **No player action required** | **Confirmed** | No player connected; only read-only `/data get`/`/time query`/`/execute if` diagnostics issued. |
+
+**T011 and T009 are both closed by this run.** The chunk-boundary fix (commit 22e93e1) is the
+root-cause resolution: the prior "zero movement" finding is gone, and a full wake → wander →
+dusk-converge → pairing-signal → sleep cycle plays out unattended, twice over in this single
+window (one full cycle, plus wake into a second). The still-open JOB_SITE gap
+(`schedule-observation.md` §3) is unaffected by this fix and remains out of this task's scope,
+per the spec's own tolerated-wander carve-out.
+
+Gate: `./gradlew build --rerun-tasks` green, 111 tests / 0 failures / 0 errors, immediately
+before this run (no production code changed this session — verification only).

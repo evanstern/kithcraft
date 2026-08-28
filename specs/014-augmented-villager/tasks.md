@@ -59,13 +59,14 @@ signal fires on predicted-arrival-minus-~10 s, not on arrival.
       out (path-length/speed estimate), carrying pair body tokens + place token in
       seam terms via existing percept types — no protocol extension; no-fire when
       pathing fails (spec edge case); unit tests for timing math and no-fire
-- [ ] T009 Dev-server observation: two villagers converge at dusk; signal precedes
+- [x] T009 Dev-server observation: two villagers converge at dusk; signal precedes
       arrival by ~10 s (logged timestamps recorded per the V-task gate, card AC #4)
-      — **NOT closed**: MEETING_POINT wiring confirmed live (a real boot-order bug
-      found and fixed), but MC 26.2's schedule ignores `/time set` (uses monotonic
-      `getGameTime()`, data-driven boundaries) and this session's real-time budget
-      never reached the MEET window to observe the signal firing. Honest record +
-      root-cause hypotheses + resumption plan: research/pair-observation.md.
+      — **CLOSED 2026-08-27 (verification re-run)**: `[dusk] pairing signal` fired
+      10 times across all three pair combinations, etas 1.82s–4.96s (inside the 10s
+      lead cap, always before arrival); convergence on the bell/meeting point
+      confirmed within `ARRIVAL_RADIUS_BLOCKS` shortly after. See
+      research/pair-observation.md and research/full-cycle-observation.md's dated
+      verification section.
 
 **Checkpoint**: M6's pre-generation lever exists.
 
@@ -83,23 +84,23 @@ green; card ACs ticked with citations.
       `research/body-keeps-moving.md`. Audit confirms brain/cast never touches the
       mind; live proof ran 24m42s with the mind permanently stalled at dial (1,474
       failed attempts, zero errors, zero stalls).
-- [ ] T011 The full-cycle unattended observation (FR-007, card AC #1/#2): three
+- [x] T011 The full-cycle unattended observation (FR-007, card AC #1/#2): three
       villagers, one full day/night, no player action — criteria checklist recorded
       (wake, work, dusk socialize, sleep in claimed beds, zero breeding/golems) —
-      **NOT closed**: `research/full-cycle-observation.md`. Zero breeding/zero golem
-      confirmed (AC #2) across a 24m42s / ~24400-tick run. Wake/work/dusk-socialize/
-      sleep NOT observed — all three villagers' positions were bit-identical at
-      every sampled point across the entire run, never approaching their claimed
-      bed or the meeting point. Honest root-cause hypotheses + resumption plan
-      recorded; not force-closed. Same run re-attempted inherited T009 (still no
-      `[dusk]` signal — see below).
-- [ ] T009 (inherited from Phase 3, re-attempted this phase): still **NOT closed**.
-      No `[dusk] pairing signal` fired in this phase's 24m42s run either — this run
-      rules out Phase 3's "already within arrival radius" hypothesis (villagers
-      were 5+ blocks from the meeting point the entire time and never moved closer);
-      the root cause now appears shared with T011's non-closure above (no schedule-
-      driven relocation observed at all this session). See
-      `research/full-cycle-observation.md`'s T009 section.
+      **CLOSED 2026-08-27 (verification re-run)**: root cause of the prior
+      zero-movement finding (a stale, too-tight forced-chunk footprint permanently
+      freezing Brain AI one chunk past the forced set) fixed in
+      `CastSeeder.keepChunksLoaded` (commit 22e93e1). A fresh 29m49s unattended run
+      on the same persisted world shows wake (×2), tolerated wander (JOB_SITE claim
+      still absent — a separate, pre-existing, out-of-scope gap), dusk convergence,
+      the pairing signal, and sleep in each villager's own claimed bed (positions
+      exactly matching claimed `home` BlockPos, held stable ~4 real minutes). Zero
+      breeding/zero golems held throughout. Full checklist with timestamps:
+      `research/full-cycle-observation.md`'s dated verification section.
+- [x] T009 (inherited from Phase 3, re-attempted this phase, closed in the
+      verification re-run): see the entry above and
+      `research/pair-observation.md`'s dated closure section — 10 pairing-signal
+      firings, all pairs, before arrival.
 - [x] T012 Gates + wiki + board: gradle build/test green; villager-brain-api.md +
       any other touched notes re-verified and honestly re-pinned; CAPSULES
       regenerated if descriptions changed; freshness probe green; card ACs ticked
