@@ -4,17 +4,32 @@
 
 ## Phase 1 — Verify before building (US0)
 
-- [ ] T001 R-4 verified: does POI re-claim have natural lag after
+- [x] T001 R-4 verified: does POI re-claim have natural lag after
       `releaseAllPois()` at 26.2? Evidence at the brain-26.2.md standard
       (javap + decompiled source, cited), recorded in research/death-26.2.md
-- [ ] T002 R-5 verified: where the zombie-siege trigger sits at 26.2, whether
+      — **no engine-side cooldown**; `releaseAllPois`/`releasePoi`/
+      `PoiManager.release` run synchronously with no delay field anywhere;
+      the only lag is another villager's own `AcquirePoi` scan cadence
+      (~1-2s) or pathfind-retry backoff (2-22s, capped 20s) — grief period
+      must be an explicit vendor-side hold, not natural lag.
+- [x] T002 R-5 verified: where the zombie-siege trigger sits at 26.2, whether
       one targeted injection suppresses it, and whether a 3-villager cast
       meets eligibility at all; same evidence standard, same findings doc
-      (card AC #1)
-- [ ] T003 STOP/GO recorded: if the suppression point is not where death §1
+      (card AC #1) — trigger is `VillageSiege.tick(ServerLevel, boolean)`
+      (sole per-tick entry, one class); one `@Inject(HEAD, cancellable) →
+      ci.cancel()` suppresses it fully; eligibility is pure POI-occupancy
+      density (`PoiManager.isVillageCenter`) with no door/population count in
+      26.2 — a 3-villager cast always qualifies once any bed/job-site POI is
+      claimed.
+- [x] T003 STOP/GO recorded: if the suppression point is not where death §1
       assumes, or suppression needs >1 targeted injection — STOP, surface to
       operator (runbook checkpoint 4); otherwise GO recorded with the planned
-      injection point
+      injection point — **GO**. Suppression point matches death §1's
+      assumption; exactly one targeted injection needed; total Mixin surface
+      (V3's 2 + siege + conversion-cancel) lands at 4, decision-0002's ~4
+      ceiling. Planned injection:
+      `dev.kithcraft.mod.mixin.VillageSiegeMixin` on `VillageSiege.tick`,
+      `@At("HEAD")`, unconditional `ci.cancel()`.
 
 ## Phase 2 — Suppression and permadeath (US1)
 
