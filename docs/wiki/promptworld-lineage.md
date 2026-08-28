@@ -1,6 +1,6 @@
 ---
 name: promptworld-lineage
-description: What Kithcraft inherits from promptworld I and what it deliberately discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall), code does not (sim engine, executor, governor, guardian all die; 62% of I's non-test lines, measured). Carries decision-0003's resolution: the daemon does not survive the seam in any language, so the mind is rebuilt in Go with four named packages as source material. Load when a design question touches mind architecture or when tempted to import promptworld I code.
+description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall); code does not (sim engine, executor, governor, guardian all die; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language; the mind is rebuilt in Go, old packages kept only as source material. Load for mind-architecture questions or before importing promptworld I code.
 kind: concept
 sources:
   - docs/design/kithcraft-brief.md
