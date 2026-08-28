@@ -1,10 +1,10 @@
 ---
 id: TASK-0014
 title: 'V3 - The augmented villager: brain, schedule, cast, and dusk pair formation'
-status: To Do
+status: Done
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-28 00:02'
+updated_date: '2026-08-28 01:22'
 labels:
   - vendor
   - m-0-build
@@ -45,6 +45,10 @@ As a player, I want three named neighbours who live a full day without me, so th
 - [x] #4 Two villagers converge on a shared gathering place at dusk and the pair-formation signal precedes arrival by ~10 s (ruling R-7)
 - [x] #5 With a deliberately stalled mind, bodies keep moving: the scheduled activity keeps the body busy while the mind thinks
 - [x] #6 The three villagers are distinguished by profession x biome variant plus nameplates
+- [x] #7 Spec phase: Phase 1 — Re-derive the 26.2 brain surface; cast seeding (US1 groundwork)
+- [x] #8 Spec phase: Phase 2 — Schedule wiring and the suppression overrides (US1 close)
+- [x] #9 Spec phase: Phase 3 — Dusk pair formation and the ~10 s signal (US2)
+- [x] #10 Spec phase: Phase 4 — Body-keeps-moving, full-cycle proof, gates, wiki, board (US3 + closure)
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -57,9 +61,15 @@ Phase 4 (T010-T012) closure. AC #2 (zero breeding/golem): confirmed across a 24m
 Verification re-run 2026-08-27 (post-fix commit 22e93e1): AC #1 and #4 confirmed live over a 29m49s unattended run. Wake (x2), tolerated wander (JOB_SITE claim still absent, pre-existing separate gap), dusk convergence, 10x pairing-signal firings across all pair combos, sleep held stable in each villager's own claimed bed (~4 real min bit-identical), zero breeding/golems across 24 checks. Honest caveat on #4: observed signal leads ran 1.82-4.96s, short of the nominal ~10s — the mechanism fires on predicted-arrival-minus-10s as specified and unit-tested, but vanilla's short recomputed stroll hops compress the live prediction window; recorded in pair-observation.md, surfaced for operator review at PR. See full-cycle-observation.md dated sections; tasks.md T009/T011 ticked.
 <!-- SECTION:NOTES:END -->
 
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+V3 delivered via PR #19 (merge 1e19cf5, merge commit, pins preserved). Three named villagers (Aldric/armorer/plains, Petra/farmer/desert, Yenna/fisherman/taiga) live a full unattended day on the vanilla Brain<E> substrate: 29m49s headless-server run proved wake x2, tolerated wander, dusk convergence, 10 pairing-signal firings across all pairs, sleep in claimed beds, zero breeding/golems. Mixin surface: 2 of the allowed 3 (breeding dropped from idle package; gossip() cancelled at HEAD covering golem summoning), enumerated with MixinConfigTest. Dusk pair formation rides vanilla Activity.MEET; the R-7 signal goes out as existing sighting percepts, 9 unit tests. Body-keeps-moving proven: 1474 failed mind dials, zero stalls. 26.2 substrate derived with javap evidence (research/brain-26.2.md); chunk-ticket trap found+fixed (ENTITY_TICKING decay one chunk past forced set); villager-brain-api.md re-pinned honestly twice. Open follow-ups flagged for refactor-triage: JOB_SITE claim flaky (spec-tolerated wander fallback); live signal lead 1.82-4.96s vs nominal ~10s (mechanism unit-tested correct; vanilla stroll-hop compression) — M6 should check whether the shorter lead suffices. Spec-bridge derivation: all 4 phases 13/13 boxes, Done-eligible. ~1.42M subagent tokens across 7 sonnet dispatches incl. one stopped idle-looper, diagnosis, and verification re-run (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
+
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
-- [ ] #3 Spec and Backlog are in sync
+- [x] #1 Tests pass
+- [x] #2 Docs and wiki are updated and pass freshness tests
+- [x] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
