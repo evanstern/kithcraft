@@ -175,3 +175,42 @@ javap -p -constants -classpath minecraft-merged-deobf-26.2.jar net.minecraft.wor
   past it.
 
 **Planned injection point for T004**: `dev.kithcraft.mod.mixin.VillageSiegeMixin`, `@Mixin(VillageSiege.class)`, `@Inject(method = "tick", at = @At("HEAD"), cancellable = true)`, `ci.cancel()` — no arguments consumed, no eligibility replication needed in the Mixin itself since cancelling before any of `tryToSetupSiege`/`trySpawn` runs is sufficient regardless of what they would have found.
+
+## R-6 (Phase 2 / T005): where does zombie-villager conversion sit, is it one-Mixin cancellable?
+
+```
+jar tf minecraft-merged-deobf-26.2.jar | grep -i ZombieVillager
+javap -p -c -classpath minecraft-merged-deobf-26.2.jar net.minecraft.world.entity.monster.zombie.Zombie
+javap -p -classpath minecraft-merged-deobf-26.2.jar net.minecraft.world.entity.monster.zombie.ZombieVillager
+```
+
+- `Zombie.killedEntity(ServerLevel, LivingEntity, DamageSource)` bytecode: after
+  `super.killedEntity(...)`, if `level.getDifficulty()` is `NORMAL` or `HARD` and the victim is
+  a `Villager`, it rolls (`HARD`: always; `NORMAL`: `random.nextBoolean()`, i.e. 50%) whether to
+  call `this.convertVillagerToZombieVillager(level, villager)`. Only one call site for that
+  method exists anywhere in the jar (confirmed: `grep`-for-symbol across every extracted
+  `.class` file finds the invocation only inside `Zombie.class` itself, at this one point).
+- `Zombie.convertVillagerToZombieVillager(ServerLevel, Villager)` bytecode is five instructions
+  long: offset 0 constructs `ConversionParams.single(villager, true, true)`, then immediately
+  (still inside the same expression, no branch before it) calls
+  `Villager.convertTo(EntityTypes.ZOMBIE_VILLAGER, params, afterConversion)`, checks the result
+  non-null, and returns that as a boolean. **HEAD is the very first instruction** — nothing runs
+  before an injection there, so cancelling to return `false` means `Villager.convertTo` never
+  executes at all; no entity substitution begins.
+- Ordering relative to death: `Villager.die(DamageSource)` calls `releaseAllPois()` synchronously
+  (R-4, offset 37) *before* `super.die()` (offset 41) — and `killedEntity` is invoked on the
+  attacker from inside `LivingEntity.die()`'s own body, gating whether `dropAllDeathLoot`/removal
+  proceed (`if (attacker == null || attacker.killedEntity(...)) { ...drop loot, remove... }`).
+  So by the time `convertVillagerToZombieVillager` would run, the victim's POIs are already
+  released either way (matches death-mechanics.md §1: "`die()`/`releaseAllPois()` fires either
+  way"). Cancelling conversion means `killedEntity` returns whatever `Monster.killedEntity`'s
+  default already was (unaffected by the villager branch) — the villager's own in-flight
+  `die()` call sees a truthy result and falls through to its ordinary loot-drop/removal path
+  exactly as a normal killing blow would. **No extra "route to normal death" code is needed in
+  the Mixin** — cancelling the substitution is sufficient; the normal path is what's left when
+  the abnormal one is removed.
+
+**Verdict: one targeted injection.** `dev.kithcraft.mod.mixin.ZombieConversionMixin`,
+`@Mixin(Zombie.class)`, `@Inject(method = "convertVillagerToZombieVillager", at = @At("HEAD"),
+cancellable = true)`, `cir.setReturnValue(false)`. Total Mixin surface: V3's 2 + siege (1) +
+this (1) = **4**, decision-0002's ceiling, matching Phase 1's budget projection exactly.

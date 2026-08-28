@@ -33,13 +33,35 @@
 
 ## Phase 2 — Suppression and permadeath (US1)
 
-- [ ] T004 Siege-suppression Mixin at the verified point; suppressed regardless
-      of eligibility; MixinConfigTest enumeration updated (card AC #2)
-- [ ] T005 Conversion-cancel Mixin: conversion terminal-equivalent, routed
+- [x] T004 Siege-suppression Mixin at the verified point; suppressed regardless
+      of eligibility; MixinConfigTest enumeration updated (card AC #2) —
+      `dev.kithcraft.mod.mixin.VillageSiegeMixin` on `VillageSiege.tick`,
+      `@At("HEAD")`, unconditional `ci.cancel()`, exactly as death-26.2.md R-5
+      planned; `kithcraft.mixins.json` lists it with a `kithcraftPurposes`
+      citation. (Live zero-siege dev-server observation is Phase 4/T011, not
+      this box — this is the Mixin half of card AC #2.)
+- [x] T005 Conversion-cancel Mixin: conversion terminal-equivalent, routed
       through the death path; total Mixin surface within decision-0002's bound
-      (card AC #3)
-- [ ] T006 Structural absence checks: no self-preservation surface added
-      (card AC #10), no friendly-fire guardrail (card AC #11); gradle green
+      (card AC #3) — `dev.kithcraft.mod.mixin.ZombieConversionMixin` on
+      `Zombie.convertVillagerToZombieVillager`, `@At("HEAD")`, cancellable,
+      `cir.setReturnValue(false)`. Conversion point verified fresh this phase
+      (death-26.2.md R-6, `javap -p -c` on `Zombie`/`ZombieVillager`,
+      2026-08-28): `Zombie.killedEntity` rolls conversion odds and calls this
+      one method, whose entire body is `Villager.convertTo(...)` — cancelling
+      at HEAD (offset 0, nothing runs first) prevents the entity substitution
+      outright; the victim's own `die()` (POIs already released beforehand,
+      per R-4) falls through to its ordinary loot/removal path unchanged, so
+      no explicit "route to death" code was needed — the normal path is what
+      remains once the abnormal one is removed. Total Mixin surface: V3's 2 +
+      siege (1) + this (1) = **4**, decision-0002's ceiling exactly.
+- [x] T006 Structural absence checks: no self-preservation surface added
+      (card AC #10), no friendly-fire guardrail (card AC #11); gradle green —
+      `mod/src/test/java/dev/kithcraft/mod/death/StructuralAbsenceTest.java`,
+      grep-style regression scan over `mod/src/main/java` for
+      feed(ing)/escort(ing)/vigilan(t|ce) and friendly[- ]?fire; both absent,
+      both tests pass. `MixinConfigTest`'s bound raised 3→4 (still enumerated,
+      still purpose-cited per name — decision-0002's ceiling, not an open
+      bound). `./gradlew build test`: **113 tests, 0 failures, 0 errors.**
 
 ## Phase 3 — Remains, grief, tokens (US2 + US3)
 
