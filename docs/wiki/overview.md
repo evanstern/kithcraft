@@ -1,12 +1,12 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, and the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, and the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: b899d17935278cddec6b69852c8a75164fc23933
+verified_against: 186a6ba28f07213cb3de55fbe58147c9b7eb4ea2
 ---
 
 # Overview
@@ -22,9 +22,13 @@ private provenance-stamped belief store, and the deterministic episodic admissio
 ([[body-protocol-seam]]) — since TASK-0011 (M4) also an LLM client (`mind/llm/`) routing
 the six villager-cognition classes across three model tiers, with per-class prompt
 assembly (`mind/prompt/`) keeping each class's stable prefix byte-identical for caching,
-and per-class call/token accounting — and, as of TASK-0009 (V1), the **first vendor-side
-code**: a real Fabric mod in `mod/` implementing the wire client, `session_open`
-handshake, capability manifest, and token registry ([[body-protocol-seam]]).
+and per-class call/token accounting — since TASK-0013 (M3) also `mind/persona/`: E1
+(Opus 5) generates each villager's name, values, endogenous desires, anchor line, and
+drift markers at birth, written once at mode 0444 with no post-genesis write path, and
+guarded by a model-free validator that rejects stated drift with zero LLM
+involvement — and, as of TASK-0009 (V1), the **first vendor-side code**: a real Fabric
+mod in `mod/` implementing the wire client, `session_open` handshake, capability
+manifest, and token registry ([[body-protocol-seam]]).
 
 ## How it works
 
@@ -57,11 +61,15 @@ decisions ([[mod-stack-decision]]), machinery ([[pdlc-process]], [[model-tiers]]
 
 Two real code surfaces now exist alongside the docs/config majority of the wiki's
 sources: the mind daemon (`mind/`, TASK-0008/M1, now carrying TASK-0010/M2's
-event-sourced memory in `mind/memory/` and TASK-0011/M4's LLM client and prompt
-assembly in `mind/llm/` and `mind/prompt/`) and the Fabric mod vendor (`mod/`,
-TASK-0009/V1) — [[body-protocol-seam]] cites both. This note's claims were
-re-verified against `mod/`'s, `mind/memory/`'s, `mind/llm/`'s, and `mind/prompt/`'s
-existence in this pass (2026-08-25). The mod's
+event-sourced memory in `mind/memory/`, TASK-0011/M4's LLM client and prompt assembly
+in `mind/llm/` and `mind/prompt/`, and TASK-0013/M3's persona genesis and firewall in
+`mind/persona/`) and the Fabric mod vendor (`mod/`, TASK-0009/V1) —
+[[body-protocol-seam]] cites both. This note's claims were re-verified against `mod/`'s,
+`mind/memory/`'s, `mind/llm/`'s, `mind/prompt/`'s, and `mind/persona/`'s existence in
+this pass (2026-08-28). The `mind/persona/` live-genesis proof
+(specs/013-persona-genesis/live-run.md) succeeded in this pass: three real E1 calls on
+Opus 5 produced three validator-accepted personas, written 0444 at
+`mind/run/persona/` and re-bound correctly on a simulated daemon restart. The mod's
 Yarn-mapped brain-API surface ([[villager-brain-api]]) is flagged, not yet
 re-derived, against MC 26.2's official mappings — that re-derivation is V3's
 (TASK-0014) scoped work.

@@ -200,3 +200,25 @@ func TestBreakpointPlacement(t *testing.T) {
 		})
 	}
 }
+
+// TestModelPrefix proves ANTHROPIC_MODEL_PREFIX is applied to the request's
+// model ID when set, and leaves it untouched when unset — the classes.go
+// canonical IDs stay the product's choice; only the wire spelling changes.
+func TestModelPrefix(t *testing.T) {
+	params, err := buildParams(E1, prompt.Assembled{Variable: "x"})
+	if err != nil {
+		t.Fatalf("buildParams: %v", err)
+	}
+	if got := string(params.Model); got != ModelOpus5 {
+		t.Fatalf("Model = %q, want unprefixed %q", got, ModelOpus5)
+	}
+
+	t.Setenv("ANTHROPIC_MODEL_PREFIX", "cc/")
+	params, err = buildParams(E1, prompt.Assembled{Variable: "x"})
+	if err != nil {
+		t.Fatalf("buildParams: %v", err)
+	}
+	if want := "cc/" + ModelOpus5; string(params.Model) != want {
+		t.Fatalf("Model = %q, want %q", params.Model, want)
+	}
+}

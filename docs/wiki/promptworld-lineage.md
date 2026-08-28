@@ -1,13 +1,13 @@
 ---
 name: promptworld-lineage
-description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall); code does not (sim engine, executor, governor, guardian all die; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language; the mind is rebuilt in Go, old packages kept only as source material. Load for mind-architecture questions or before importing promptworld I code.
+description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall, ported for real in mind/persona/ TASK-0013); code does not (sim, executor, governor, guardian; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language; Go rebuild, old packages kept as source material. Load before importing I code or for mind-architecture questions.
 kind: concept
 sources:
   - docs/design/kithcraft-brief.md
   - specs/004-mind-daemon-routing/research/daemon-assessment.md
   - docs/design/llm-routing-and-budget.md
   - backlog/decisions/decision-0003 - Mind-daemon-language-Go-rebuilt-behind-the-seam.md
-verified_against: 032ca6bd13c7852c8df9d076c73d2f555cff9386
+verified_against: c4278829d8dc3b019e4f73fb25b724395c961ac8
 ---
 
 # Promptworld lineage
@@ -63,6 +63,18 @@ codebase*: `toolloop` (994 lines, sim-agnostic by construction — its REQUEST/F
 maps one-to-one onto `intent`/`intent_ack`/`act_result`), `persona` (475 lines, no imports),
 `tool`'s registry mechanism (vocabulary replaced by the runtime manifest), and `llm`'s provider
 layer minus its dead `cognition` dependency.
+
+**Update (TASK-0013, 2026-08-28): `persona` is no longer source-material-only.**
+`mind/persona/` now ports its two-half firewall design for real, ahead of the other
+three source-material packages above: genesis (one E1/Opus-5 call per villager,
+generating name, values, endogenous desires, an anchor line, and drift markers —
+brief #5's "generated, not authored" delta from I — with decision-0002's profession ×
+biome-variant pairing carried through, never model-invented), write-once 0444 storage
+with no post-genesis write path (proven at the type level by an external-package
+reflection test), and a model-free validator (anchor echo + drift lexicon, including
+an authored cast-wide moralizing lexicon that vetoes the politeness-policing
+spell-breaker at birth) that provably imports no `llm` code. See
+specs/013-persona-genesis.
 
 Two findings worth carrying, because they change how the doctrine list above should be read:
 

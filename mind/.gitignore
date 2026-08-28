@@ -1,0 +1,4 @@
+# Daemon runtime data (T010, specs/013-persona-genesis): generated persona
+# files and any other runtime state a live run produces. Never committed —
+# these are per-environment artifacts, not source.
+run/
