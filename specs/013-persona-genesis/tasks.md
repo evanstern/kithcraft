@@ -51,16 +51,25 @@ authored moralizing lexicon — with zero model involvement, provable.
 **Independent test**: `go test ./persona/...` — validator tests green,
 including the no-llm-import structural test.
 
-- [ ] T004 Implement mind/persona/validate.go: anchor echo (verbatim under
+- [x] T004 Implement mind/persona/validate.go: anchor echo (verbatim under
       whitespace/case normalization) + drift-marker matching (word-boundary,
       case-insensitive) + reject-with-reason; document the honest limit
       (stated drift only; subtle drift parked for a model-judged validator)
-- [ ] T005 Implement mind/persona/moralizing.go: authored cast-wide moralizing
+- [x] T005 Implement mind/persona/moralizing.go: authored cast-wide moralizing
       lexicon (politeness-policing spell-breaker words); validator applies it
       to every persona in union with the persona's own markers
-- [ ] T006 Named tests: anchor-echo reject/accept, drift-marker reject at word
+- [x] T006 Named tests: anchor-echo reject/accept, drift-marker reject at word
       boundary any case (AC #3), moralizing reject cast-wide (AC #6 lexicon
       half), plus the structural test that validate.go imports no llm code
+
+**Deviation from plan.md (T004 exported surface):** Phase 1's external
+API-surface test (`persona_external_test.go`) asserted the package's exported
+top-level function set was exactly `{Load, WriteOnce}`. Adding `Validate`
+required widening that assertion to `{Load, Validate, WriteOnce}` — `Validate`
+is read-only over its `Persona` argument (it opens no file and returns no
+persona), so it is not a write path and the AC #2 guarantee is unchanged; the
+test file's want-list and doc comment were updated to name it explicitly so
+a future addition is still caught.
 
 **Checkpoint**: the validatory half of the firewall exists; rejection is a
 testable 100% guarantee.

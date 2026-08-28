@@ -43,9 +43,11 @@ func TestPersona_NoMethodsOnPersonaType(t *testing.T) {
 // (plan.md: "a test reading the source, same as S2's reflection lock, since
 // Go has no per-file import visibility") — this test parses the package's
 // non-test source and asserts its exported top-level function set is
-// exactly {Load, WriteOnce}. WriteOnce's own refusal is proven at runtime by
-// TestWriteOnce_RefusesExistingFile below; this test proves there is no
-// OTHER exported function that could overwrite an existing persona.
+// exactly {Load, Validate, WriteOnce}. WriteOnce's own refusal is proven at
+// runtime by TestWriteOnce_RefusesExistingFile below; Validate (Phase 2) is
+// read-only over its Persona argument and has no write path of its own —
+// this test proves there is no OTHER exported function that could overwrite
+// an existing persona.
 func TestPersona_ExportedFunctionSurface_IsExactlyLoadAndWriteOnce(t *testing.T) {
 	_, thisFile, _, ok := runtime.Caller(0)
 	if !ok {
@@ -76,7 +78,7 @@ func TestPersona_ExportedFunctionSurface_IsExactlyLoadAndWriteOnce(t *testing.T)
 		}
 	}
 	sort.Strings(funcs)
-	want := []string{"Load", "WriteOnce"}
+	want := []string{"Load", "Validate", "WriteOnce"}
 	if !reflect.DeepEqual(funcs, want) {
 		t.Fatalf("persona package's exported top-level functions = %v, want exactly %v — any addition is a new candidate write path to an existing persona", funcs, want)
 	}
