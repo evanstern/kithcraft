@@ -16,20 +16,32 @@ post-genesis write path.
 **Independent test**: `go test ./persona/...` — storage + external
 API-surface tests green, no LLM code in the loop.
 
-- [ ] T001 Implement mind/persona/persona.go: Persona type (cast id, name,
+- [x] T001 Implement mind/persona/persona.go: Persona type (cast id, name,
       values, endogenous desires, anchor line, drift markers, profession,
       biome variant); verify the demo cast pairing against the vendor mod's
       seeded cast (TASK-0014 cast/) and record it
-- [ ] T002 Implement mind/persona/files.go: WriteOnce (0444, refuses existing),
+- [x] T002 Implement mind/persona/files.go: WriteOnce (0444, refuses existing),
       Load (read-only, binds by cast id, errors on unknown/missing — never
       regenerates)
-- [ ] T003 External API-surface test (persona_external_test): reflection over
+- [x] T003 External API-surface test (persona_external_test): reflection over
       the exported surface asserts no exported mutation path for an existing
       persona (AC #2's "no code path to attempt"); restart/re-bind unit test
       over temp files (AC #4 unit half)
 
 **Checkpoint**: the structural half of the firewall exists and is proven at
 the type level.
+
+**Deviation from plan.md (T001 verification), recorded here per plan.md's
+own instruction:** plan.md's "Key decisions already settled" section assumed
+the demo cast is uniform Plains with farmer/librarian/cleric professions.
+Reading the vendor mod's actual seeded cast
+(`mod/src/main/java/dev/kithcraft/mod/cast/Cast.java`, `Cast.MEMBERS`) shows
+three DISTINCT profession × biome-variant pairs instead: Aldric —
+armorer/plains, Petra — farmer/desert, Yenna — fisherman/taiga. This is the
+real decision-0002 pairing and is what `mind/persona/persona.go` records in
+its doc comment; no code changed as a result (Persona's fields already carry
+Profession/BiomeVariant generically), only the assumed values were corrected
+at the source of truth.
 
 ## Phase 2 — Model-free validator (US3 + US4 lexicon half)
 
