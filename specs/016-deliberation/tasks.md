@@ -4,17 +4,40 @@
 
 ## Phase 1 — The bounded loop (US1)
 
-- [ ] T001 `mind/deliberate/`: loop skeleton — compose intent via `seam.Pending`,
+- [x] T001 `mind/deliberate/`: loop skeleton — compose intent via `seam.Pending`,
       REQUEST/FACT/gate mapping onto intent/intent_ack/act_result; bounded
       iterations (config with default); structured-output decode of the model's
       intent value (A-9)
-- [ ] T002 Verb vocabulary read from the session manifest — no compiled-in verb
+      — `loop.go`: `Loop.Run` ports toolloop's *shape* (round → REQUEST →
+      await FACT → hand to sink → repeat, bounded) onto intent/act_result;
+      decode reuses `llm.ParseIntent` (no new Intent type). Note: the spec
+      does not pin exact multi-round semantics (when does a deliberation
+      propose a *second* intent?) — resolved here as: a `Proposer` signals
+      `ErrDone` when it has nothing further, mirroring toolloop's
+      `model_done`; `DefaultMaxIterations=5` is a placeholder bound
+      (`ponytail:` comment in loop.go) pending a real multi-round E2/E3
+      trigger, which is out of this phase's scope per plan.md's Risks note.
+- [x] T002 Verb vocabulary read from the session manifest — no compiled-in verb
       list in the deliberation path; structural test proves it (card AC #2)
-- [ ] T003 Token-only targets: descriptive targets rejected before compose; every
+      — `manifest.go`'s `ManifestVerbs` is the only place a verb name is
+      read; `manifest_test.go`'s `TestNoCompiledInVerbVocabulary` greps
+      every non-test source file in the package for a hardcoded core-verb
+      literal (fails the build if one is added), plus a behavioural test
+      proving two different manifests yield two different accepted sets.
+- [x] T003 Token-only targets: descriptive targets rejected before compose; every
       composed target traceable to a token the mind was given (card AC #7)
-- [ ] T004 Loop treats only act_result as fact — the fact handed to M2's
+      — `tokens.go`'s `Tokens`/`Observe`/`ValidateTarget`; a bare string or
+      an unseen place/thing/body token is rejected in `Loop.Run` before
+      `seam.Pending.Compose` is ever called.
+- [x] T004 Loop treats only act_result as fact — the fact handed to M2's
       admission gate derives from act_result, never from intent emission
       (card AC #1); tests green (`go vet` + `go test ./...`)
+      — `Loop.Deliver` is the *only* call site that invokes `Config.OnFact`;
+      `TestLoop_TreatsOnlyActResultAsFact` asserts no fact fires between
+      send and delivery, and `TestLoop_FactWiresIntoAdmissionGate` wires a
+      real `memory.Gate.Decide` as the sink end-to-end. `go vet ./...` and
+      `go test ./...` both green in `mind/` (16 new tests in
+      `mind/deliberate`, whole-module suite unaffected).
 
 ## Phase 2 — The job-board decision (US2)
 
