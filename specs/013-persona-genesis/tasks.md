@@ -131,11 +131,11 @@ survive a daemon restart; all gates green; wiki honest.
 **Independent test**: live run recorded (PR description); `go vet ./...` +
 `go test ./...` green; freshness probe green.
 
-- [ ] T010 Live genesis run (ANTHROPIC_API_KEY from root .env): three real E1
+- [x] T010 Live genesis run (ANTHROPIC_API_KEY from root .env): three real E1
       calls, three 0444 files, validator accepts all three; record model
       served, token counts, and any drift-rejection retries in the PR (AC #1
       live half)
-- [ ] T011 Restart/re-bind proof over the real files: reload binds each
+- [x] T011 Restart/re-bind proof over the real files: reload binds each
       persona to its cast id (AC #4 live half); tick card ACs #1–#6 with
       citing tests/observations
 - [x] T012 Gates + re-ground: go vet + go test green; wiki notes whose sources
@@ -143,24 +143,20 @@ survive a daemon restart; all gates green; wiki honest.
       overview); CAPSULES regenerated if any description changed; freshness
       probe green
 
-**Deviation/blocker (T010, T011 — recorded per plan.md's own instruction,
-not a code judgment call): the live run STOPPED on an auth/billing-shaped
-failure, not on any code defect.** A live-tagged test harness was built
-(`mind/persona/genesis_live_test.go`, `go test -tags=live`) — the smallest
-vehicle that reuses the existing mocked-test scaffolding rather than adding
-a cmd binary. Credentials were exported from the root `.env` into the
-process env (never printed/committed) and the first real E1 call returned
-`404 "No active credentials for provider: anthropic"`. Per the dispatch's
-explicit STOP rule ("if a call fails on auth/billing, STOP and report — do
-not retry into a bill"), the run halted after its one sanctioned retry —
-zero personas were generated, zero files written. Full record, a diagnostic
-lead, and the exact re-run command: specs/013-persona-genesis/live-run.md.
-T010 and T011 stay unchecked; T011's live-tagged restart test
-(`TestLiveRestart_LoadsAndBindsRealFiles`) correctly skips with no real
-files to load, rather than being forced green. This is an
-environment/credentials question for an operator, outside a sonnet-tier
-implementer's scope to resolve by guessing — flagged rather than retried
-further.
+**Resolution (T010, T011 — the blocker recorded in the prior revision of
+this section is closed).** The prior attempt's 404 was diagnosed by the
+orchestrator (direct curl, not re-diagnosed here) as model-ID-prefix
+routing on the proxy behind `ANTHROPIC_BASE_URL`, not a credentials or
+path-shape problem: bare API IDs (`claude-opus-5`) have no provider route
+on this host; the host form (`cc/claude-opus-5`) 200s. `mind/llm/client.go`
+gained a minimal `ANTHROPIC_MODEL_PREFIX` env override (commit 186a6ba,
+default `""`, no-op) applied to the request's model ID only at
+request-build time — `classes.go`'s canonical IDs are unchanged. Re-running
+the same command from the prior revision with `ANTHROPIC_MODEL_PREFIX=cc/`
+set produced three real E1 calls, all validator-accepted on the first
+attempt, three 0444 persona files, and a passing (not skipped)
+`TestLiveRestart_LoadsAndBindsRealFiles` over those real files. Full record:
+specs/013-persona-genesis/live-run.md.
 
 **T012's freshness probe, precisely:** `node .../gates/cli.mjs freshness .
 docs/wiki` reports 2 remaining failures, both on

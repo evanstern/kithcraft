@@ -6,7 +6,7 @@ sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: c4278829d8dc3b019e4f73fb25b724395c961ac8
+verified_against: 186a6ba28f07213cb3de55fbe58147c9b7eb4ea2
 ---
 
 # Overview
@@ -67,9 +67,9 @@ in `mind/llm/` and `mind/prompt/`, and TASK-0013/M3's persona genesis and firewa
 [[body-protocol-seam]] cites both. This note's claims were re-verified against `mod/`'s,
 `mind/memory/`'s, `mind/llm/`'s, `mind/prompt/`'s, and `mind/persona/`'s existence in
 this pass (2026-08-28). The `mind/persona/` live-genesis proof
-(specs/013-persona-genesis/live-run.md) is a recorded, environment-blocked attempt as
-of this pass — unit tests against a mocked client are green, real personas are not yet
-on disk. The mod's
+(specs/013-persona-genesis/live-run.md) succeeded in this pass: three real E1 calls on
+Opus 5 produced three validator-accepted personas, written 0444 at
+`mind/run/persona/` and re-bound correctly on a simulated daemon restart. The mod's
 Yarn-mapped brain-API surface ([[villager-brain-api]]) is flagged, not yet
 re-derived, against MC 26.2's official mappings — that re-derivation is V3's
 (TASK-0014) scoped work.
