@@ -134,9 +134,18 @@
 
 ## Phase 4 — Proofs, gates, and closure (US4)
 
-- [ ] T010 Percept-channel proofs: witness gets ordinary sightings (no death
+- [x] T010 Percept-channel proofs: witness gets ordinary sightings (no death
       percept type); absent villager gets change_report change:"gone" on
-      return + grave sighting (card AC #8)
+      return + grave sighting (card AC #8) —
+      `mod/src/test/java/dev/kithcraft/mod/death/DeathPerceptChannelTest.java`,
+      4 tests: structural absence (no death-shaped string in
+      `Handshake.MANIFEST`'s `percept_types`), witness sighting composition
+      (`origin:"saw"`, `doing:"dying"`), the §4.10 restriction resolving to
+      exactly the absent body (no acting villager — a zombie holds no body
+      token) plus its grave sighting, and all three envelopes pushed and
+      received over a real loopback UDS `WireClient` session against a stub
+      mind listener (`HandshakeWireClientTest`'s harness, reused). All 4
+      green.
 - [ ] T011 Dev-server observation: zombie-kill → grave + bundle + grief hold +
       zero sieges over the window; recorded per the runbook's dev-server-proofs
       gate (card ACs #2, #4 live halves)
