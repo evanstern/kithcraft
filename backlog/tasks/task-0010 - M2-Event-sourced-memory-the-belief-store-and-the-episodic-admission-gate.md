@@ -4,7 +4,7 @@ title: 'M2 - Event-sourced memory, the belief store, and the episodic admission 
 status: Done
 assignee: []
 created_date: '2026-08-21 23:37'
-updated_date: '2026-08-25 20:55'
+updated_date: '2026-08-27 21:38'
 labels:
   - mind
   - m-0-build
@@ -45,7 +45,7 @@ Spec: specs/010-event-sourced-memory
 - [x] #2 The private, provenance-stamped map is kept distinct from the vendor's resolution index, which the mind never reads
 - [x] #3 RM-1..RM-7 hold: witnessed claims, coerce-never-reject, secondhand never beats fresher firsthand, confidence and freshness computed at read time from world_time, and only a correction, a death or a witnessed removal deletes a fact
 - [x] #4 The deterministic episodic admission gate admits per routing section 6.3 and drops repeated background sightings of already-known things
-- [ ] #5 The canonical end-to-end (protocol section 10.2) passes against the fake vendor, including step 5: a mind told about the orchard cannot durably claim it saw apple trees there
+- [x] #5 The canonical end-to-end (protocol section 10.2) passes against the fake vendor, including step 5: a mind told about the orchard cannot durably claim it saw apple trees there
 - [x] #6 The E6-input-tokens-per-villager instrument reports admitted buffer size per villager-day
 - [x] #7 Design check (minds-are-others): the belief store has no external write path from the vendor, the player or a debug command
 - [x] #8 Spec phase: Phase 1 — The log and the reducer (US1)
@@ -64,6 +64,8 @@ AC#5 left unticked deliberately: its wording is 'against the fake vendor'. e2e_t
 Phases 1-4 summary: P1 (T001-T003) append-only JSONL event log, unexported Event fields, (world_time,hash) identity, replay-verifies-hash-on-read. P2 (T004-T006) provenance.go's direct_perception classifier + RM-2/RM-3 coerce-never-reject citation gate; beliefs.go's private PM-1 store, RM-4 upsert rule, RM-5/RM-6 read-time confidence/freshness arithmetic, RM-7 closed-vocabulary retraction. P3 (T007-T010) admission.go's routing-section-6.3 gate (5 admit rules + drop rule, deterministic, no model call), instrument.go's per-villager-day buffer-size instrument, e2e_test.go's protocol-10.2 walkthrough proving step 5. P4 (T011-T013): go vet + go test green (kithcraft/mind/... all packages), diff scope confirmed clean (mind/, specs/010-*, backlog/, docs/design/sweep-0007-0022-runbook.md only), body-protocol-seam.md and overview.md amended and re-pinned to reflect M2's landing, CAPSULES.md regenerated for overview's changed description, 6 of 7 card ACs ticked on cited tests, AC#5 left honestly open pending S2/TASK-0015's fake vendor.
 
 spec-bridge sync: Phase 1 — The log and the reducer (US1): 3/3 · Phase 2 — Beliefs, provenance, the RM rules (US2): 3/3 · Phase 3 — Admission gate, instrument, end-to-end (US3): 4/4 · Phase 4 — Closure: gates, wiki, board: 3/3 — status In Progress → Done
+
+AC #5 closed by TASK-0015 T008: the section-10.2 canonical end-to-end now runs against the fake vendor (mind/fakevendor/e2e_test.go), completing the deliberate carry from PR #15.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done

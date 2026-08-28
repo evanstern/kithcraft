@@ -1,6 +1,6 @@
 ---
 name: body-protocol-seam
-description: The anti-corner architecture move — a world-agnostic body protocol (perceive / act / remember) between mind daemon and world, with the Minecraft mod as the first body vendor. Why minds never couple to Minecraft, what the seam buys, the v0 contract (five seam invariants, three surfaces, four core verbs), and the wire beneath it — decision-0004's Unix domain socket, length-prefixed canonical JSON framing, and seventeen golden vectors two harnesses agree on. Load for any protocol, transport, or architecture work.
+description: The anti-corner architecture move — a world-agnostic body protocol (perceive/act/remember) between mind daemon and world, Minecraft mod as first body vendor. The v0 contract: five seam invariants, three surfaces, four core verbs, and the wire beneath it — decision-0004's Unix domain socket, length-prefixed canonical JSON, seventeen golden vectors two harnesses agree on. Load for any protocol, transport, or architecture work.
 kind: pattern
 sources:
   - docs/design/kithcraft-brief.md
@@ -21,7 +21,9 @@ sources:
   - mind/memory/beliefs.go
   - mind/memory/provenance.go
   - mind/memory/admission.go
-verified_against: 3aa4a2aaceb1dbea2cd24df749032d48e7caa11e
+  - mind/fakevendor/fakevendor.go
+size_budget_exempt: pre-existing since TASK-0009/0012 (one synthesis note tracking the seam, wire, and every vendor landing across TASK-0007..0015); a summary-style split is a separate task, out of TASK-0015's scope
+verified_against: 6d91864a4f3905279d228d8e2ff0d43592ba2904
 ---
 
 # Body-protocol seam
@@ -120,9 +122,10 @@ against before either exists.
 
 The doc proves the seam two ways: a second-vendor sketch (a trivial text world implementing
 the whole surface, which exposed that optional percept channels were being assumed rather
-than declared) and a specified in-memory **fake vendor** — scripted percepts in, asserted
-acts out — that tests the rules no compiler can, including reproducing the 75% flood on
-demand by lifting the delivery restriction.
+than declared) and an in-memory **fake vendor** — scripted percepts in, asserted acts
+out — that tests the rules no compiler can, including reproducing the 75% flood on demand by
+lifting the delivery restriction. Both are now real code, not just doc-proven (see "First
+implementations" below).
 
 ## First implementations
 
@@ -188,6 +191,24 @@ rejects it. `admission.go` implements routing §6.3's deterministic episodic adm
 gate between the percept inbox and the log. Scope stays bounded once more: no model call
 anywhere in this package (routing §1.2) — a model authoring belief claims is M4/M5's work,
 not this one's.
+
+S2 (TASK-0015) then made this note's "fake vendor" real: `mind/fakevendor/fakevendor.go`
+implements §10.1's shape exactly (manifest, open/close, emit, advance, `.acts`, resolve,
+`strict`, `restrict_change_reports`) driving the mind under test over the real
+`mind/seam`/`mind/wire` surface — `mind/seamtest`'s from-the-outside pattern grown to full
+session lifecycle rather than replaced. `mind/fakevendor/harness_test.go` and `h5_test.go`
+land the six protocol-rule tests (H-1..H-6, §10.3) each rule names in this note's "epistemic
+hygiene" and "delivery restriction" paragraphs above, each with a mutation check proving it
+turns red when its rule is lifted; `flood_test.go` reproduces the 75% flood on demand
+(§10.4), asserting the flooded run's memory count (via `mind/memory`'s own admission gate,
+never the vendor) exceeds 3x the restricted run's. `mind/fakevendor/e2e_test.go` closes
+TASK-0010's AC #5: the canonical end-to-end (§10.2) now runs against FakeVendor rather than
+directly against `mind/memory`, with percept ingest, admission, and belief formation on the
+real mind machinery and step 5's epistemic assertion — a told belief about the old orchard
+cannot durably become witnessed — proven over the wire. Scope stays bounded once more: no
+read API on the vendor (`fakevendor_test.go`'s API-surface test pins the exported method and
+field set to exactly §10.1), no capability beyond the contract — the fake vendor cannot be
+told from a world.
 
 ## Connections
 
