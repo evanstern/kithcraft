@@ -128,6 +128,7 @@ public final class DuskPairing {
             }
             villager.getBrain().setMemory(MemoryModuleType.MEETING_POINT, gatheringPlace);
             String bodyToken = tokens.issue(TokenRegistry.TokenType.BODY, member.name());
+            LOGGER.info("[dusk] {} body token: {}", member.name(), bodyToken);
             seats.add(new Seat(villager, member, bodyToken));
         }
         return new DuskPairing(placeToken, bellPos, List.copyOf(seats));

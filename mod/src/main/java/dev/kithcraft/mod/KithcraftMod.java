@@ -76,6 +76,9 @@ public class KithcraftMod implements ModInitializer {
 		// Deferred to onServerTick below, retried until the cast is actually found.
 		pendingTokens = level.getDataStorage().computeIfAbsent(TokenRegistryData.TYPE);
 		pendingOrigin = origin;
+		// T011 dev-server proof (card AC #9): every token that still resolves at boot, so a
+		// retired token's absence here after a restart is directly observable in the log.
+		LOGGER.info("[live] token registry live entries at boot: {}", pendingTokens.liveEntries());
 
 		// T007-T009: registers the Fabric API death hooks (no new Mixin — see
 		// LiveDeathHandling's class doc). One registration per server start; the supplier

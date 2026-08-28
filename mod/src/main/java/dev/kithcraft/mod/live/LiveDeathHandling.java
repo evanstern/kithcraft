@@ -116,8 +116,10 @@ public final class LiveDeathHandling {
 
         DuskPairing pairing = duskPairing.get();
         if (pairing != null) {
-            pairing.bodyTokenFor(villager.getUUID()).ifPresentOrElse(tokens::retire,
-                () -> LOGGER.warn("[death] no body token on record for {}; nothing retired", name));
+            pairing.bodyTokenFor(villager.getUUID()).ifPresentOrElse(token -> {
+                tokens.retire(token);
+                LOGGER.info("[death] retired body token {} for {} (never reissued)", token, name);
+            }, () -> LOGGER.warn("[death] no body token on record for {}; nothing retired", name));
         }
 
         BlockPos gravePos = placeGrave(level, villager, name);
@@ -175,8 +177,12 @@ public final class LiveDeathHandling {
             villager.getBrain().getMemory(type).ifPresent(globalPos -> {
                 BlockPos pos = globalPos.pos();
                 Optional<BlockPos> claimed = poi.take(t -> true, (t, p) -> p.equals(pos), pos, 0);
-                claimed.ifPresent(p -> holds.add(new PendingHold(p,
-                    GriefPeriod.start(villager.getName().getString() + "'s " + type, now))));
+                claimed.ifPresent(p -> {
+                    GriefPeriod.Hold hold = GriefPeriod.start(villager.getName().getString() + "'s " + type, now);
+                    holds.add(new PendingHold(p, hold));
+                    LOGGER.info("[death] grief hold started: {} at {} until tick {}", hold.referent(), p,
+                        hold.heldUntilTick());
+                });
             });
         }
     }
@@ -188,6 +194,7 @@ public final class LiveDeathHandling {
                 return false;
             }
             level.getPoiManager().release(h.pos());
+            LOGGER.info("[death] grief hold released: {} at {} (tick {})", h.hold().referent(), h.pos(), worldTime);
             return true;
         });
     }
