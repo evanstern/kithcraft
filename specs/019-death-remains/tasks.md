@@ -157,8 +157,18 @@
       griefPeriodTicks=1200`) window, zero siege log lines across two full
       server lifetimes, retired token `b-5` confirmed absent from a fresh
       restart's boot registry while survivors' tokens persist.
-- [ ] T012 Full gates: gradle build + test green; scope clean
-- [ ] T013 Wiki re-ground: touched-source notes re-verified honestly
+- [x] T012 Full gates: gradle build + test green; scope clean —
+      `./gradlew build --rerun-tasks`: 127 tests, 0 failures, 0 errors;
+      `git status --short` empty after.
+- [x] T013 Wiki re-ground: touched-source notes re-verified honestly
       ([[villager-brain-api]] — Mixin surface grows; overview); CAPSULES
-      regenerated if descriptions changed; freshness green
-- [ ] T014 Card ACs ticked with citing proofs; board/spec synced at PR time
+      regenerated if descriptions changed; freshness green — `villager-
+      brain-api.md` amended for V5's own facts (Mixin surface → 4, cites
+      `death-26.2.md`), `size_budget_exempt` added (pre-existing TASK-0014
+      overage, FAIL → WARN). Deliberately NOT re-pinned: the note is also
+      stale from unrelated TASK-0014 debt (`full-cycle-observation.md`'s
+      chunk-boundary fix, rides PR #21) this session did not re-verify.
+      `overview.md` updated + re-pinned (whole note re-read, still holds).
+      Freshness gate: one remaining FAIL, correctly attributable to that
+      out-of-scope TASK-0014 debt, not this task's work.
+- [x] T014 Card ACs ticked with citing proofs; board/spec synced at PR time

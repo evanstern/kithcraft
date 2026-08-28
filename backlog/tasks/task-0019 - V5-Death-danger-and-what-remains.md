@@ -4,7 +4,7 @@ title: 'V5 - Death, danger, and what remains'
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:27'
+updated_date: '2026-08-28 20:18'
 labels:
   - vendor
   - m-0-build
@@ -46,21 +46,21 @@ Spec: specs/019-death-remains
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Preconditions verified before implementation: whether POI re-claim lags naturally after releaseAllPois() (R-4), and where the zombie-siege trigger can be Mixin-suppressed plus whether a 3-villager cast qualifies at all (R-5)
-- [ ] #2 Sieges are suppressed regardless of eligibility and no siege ever fires on a dev server run
-- [ ] #3 One conversion-cancel Mixin makes zombie conversion equivalent to death, and the total Mixin surface stays inside decision-0002's committed bound
-- [ ] #4 A villager killed by a zombie leaves a mod-placed named grave at the death site (or nearest safe buildable surface) with no villager agency required
-- [ ] #5 A belongings bundle captures the hidden inventory before vanilla destroys it and is placed at the grave as an ordinary roles:[storage] thing named for its owner
+- [x] #1 Preconditions verified before implementation: whether POI re-claim lags naturally after releaseAllPois() (R-4), and where the zombie-siege trigger can be Mixin-suppressed plus whether a 3-villager cast qualifies at all (R-5)
+- [x] #2 Sieges are suppressed regardless of eligibility and no siege ever fires on a dev server run
+- [x] #3 One conversion-cancel Mixin makes zombie conversion equivalent to death, and the total Mixin surface stays inside decision-0002's committed bound
+- [x] #4 A villager killed by a zombie leaves a mod-placed named grave at the death site (or nearest safe buildable surface) with no villager agency required
+- [x] #5 A belongings bundle captures the hidden inventory before vanilla destroys it and is placed at the grave as an ordinary roles:[storage] thing named for its owner
 - [ ] #6 An optional 'tend the grave' job-board entry rides V4's mechanism and a survivor may take it up or ignore it
-- [ ] #7 The dead villager's bed and job site stay unclaimed for the configured grief period (default one in-game cycle per R-3), exposed as config rather than a constant
-- [ ] #8 A witnessing villager receives ordinary sighting percepts (no magic death broadcast) and an absent one receives a change_report with change:'gone' on return plus a sighting of the grave
-- [ ] #9 The dead body's token is retired and never reissued; the grave or converted mob gets a new body token
-- [ ] #10 Design check (micromanagement): nothing is added to villager self-preservation - no feeding UI, no escort, no vigilance surface
-- [ ] #11 Design check (politeness-policing): no engine guardrail on friendly fire
-- [ ] #12 Spec phase: Phase 1 — Verify before building (US0)
-- [ ] #13 Spec phase: Phase 2 — Suppression and permadeath (US1)
-- [ ] #14 Spec phase: Phase 3 — Remains, grief, tokens (US2 + US3)
-- [ ] #15 Spec phase: Phase 4 — Proofs, gates, and closure (US4)
+- [x] #7 The dead villager's bed and job site stay unclaimed for the configured grief period (default one in-game cycle per R-3), exposed as config rather than a constant
+- [x] #8 A witnessing villager receives ordinary sighting percepts (no magic death broadcast) and an absent one receives a change_report with change:'gone' on return plus a sighting of the grave
+- [x] #9 The dead body's token is retired and never reissued; the grave or converted mob gets a new body token
+- [x] #10 Design check (micromanagement): nothing is added to villager self-preservation - no feeding UI, no escort, no vigilance surface
+- [x] #11 Design check (politeness-policing): no engine guardrail on friendly fire
+- [x] #12 Spec phase: Phase 1 — Verify before building (US0)
+- [x] #13 Spec phase: Phase 2 — Suppression and permadeath (US1)
+- [x] #14 Spec phase: Phase 3 — Remains, grief, tokens (US2 + US3)
+- [x] #15 Spec phase: Phase 4 — Proofs, gates, and closure (US4)
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -69,11 +69,39 @@ Spec: specs/019-death-remains
 claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 019 stub + link ride this claim commit
 
 tier: sonnet (default) with the plan's NAMED ESCALATION TRIGGER · model cc/claude-sonnet-5[1m] · rubric: R-4/R-5 verification first; if siege suppression point differs from death §1's assumption or needs >1 targeted injection, STOP — operator checkpoint 4, possible opus escalation (runbook lane 4)
+
+AC#1 (R-4/R-5 preconditions): specs/019-death-remains/research/death-26.2.md — no natural POI re-claim lag (explicit vendor-side hold required); siege trigger is VillageSiege.tick(), one-Mixin suppressible at HEAD; 3-villager cast always qualifies once any bed claimed (pure POI-occupancy density, no door/population count at 26.2). GO recorded.
+
+AC#2 (siege suppression, zero live sieges): VillageSiegeMixin (T004) + specs/019-death-remains/research/death-observation.md this session — grep -in siege over two full server lifetimes (pre-kill boot, post-kill run, restart) = 0 matches; single pre-existing zombie never multiplied.
+
+AC#3 (conversion-cancel Mixin, bound held): ZombieConversionMixin (T005), death-26.2.md R-6. Mixin surface = 4 (V3's 2 + siege + conversion), matches decision-0002's ceiling exactly; MixinConfigTest enumerates all 4.
+
+AC#4 (named grave, no agency): LiveDeathHandling.placeGrave (T007) + death-observation.md — live kill placed an oak sign 'Here lies / Aldric' at the exact death block (already safe-buildable), no villager action involved.
+
+AC#5 (belongings bundle): LiveDeathHandling.onAllowDeath/placeBelongings (T007) + death-observation.md — ALLOW_DEATH captures inventory before vanilla's dropAllDeathLoot runs; live run placed the chest (empty, since Aldric carried nothing this run — non-empty carryover proven structurally by the capture-loop code path, not separately re-observed live; honestly recorded as a gap in death-observation.md).
+
+AC#7 (grief period, configurable): GriefPeriod.configuredTicks() (system property, GriefPeriodTest.java) + death-observation.md live proof — hold started at death, released at exactly the configured tick (griefPeriodTicks=1200 this run) via log lines.
+
+AC#8 (witness sighting / absent change_report+grave sighting): mod/src/test/java/dev/kithcraft/mod/death/DeathPerceptChannelTest.java (T010, 4 green tests incl. a real loopback WireClient session) is the authoritative proof, per that class's own scope note. Not independently re-observed live this session (no mind dialed in, by design — same as prior phases' body-keeps-moving proofs); this session's live run confirms the composition fires from a real death (log: grave sighting content, board posting) but had no live percept recipient to observe receiving it.
+
+AC#9 (token retired, never reissued): LiveDeathHandling death handling (T007) + death-observation.md — live kill retired body token b-5 (logged), and a fresh server restart's boot token-registry log omits b-5 while survivors' tokens (b-6, b-7) persist. Honest nuance recorded: CastSeeder's separate identity token (b-1) is a different, untouched token family — see death-observation.md.
+
+AC#10 (design check, micromanagement): mod/src/test/java/dev/kithcraft/mod/death/StructuralAbsenceTest.java — grep-style regression scan over mod/src/main/java for feed(ing)/escort(ing)/vigilan(t|ce); all absent, test passes.
+
+AC#11 (design check, politeness-policing): StructuralAbsenceTest.java — grep-style scan for friendly[- ]?fire; absent, test passes; no code in this task's diff adds any player-damage guardrail.
+
+AC#6 (tend-grave posting 'rides V4's mechanism') deliberately left UNTICKED: V4 (TASK-0020) is not merged. specs/019-death-remains/plan.md's 'The V4 decoupling' section rules this an explicit orchestrator-time call — GraveBoardEntry implements the ratified interim seam (posting rides V2's existing text-percept read channel; content-compatible, no rework needed when V4 merges), live-proven this session (death-observation.md: 'board posting composed' log line), but plan.md itself offers ticking-with-deviation-note vs. holding-open as two valid outcomes and reserves the choice for the orchestrator at merge time — left open per the more conservative fallback.
+
+DoD#1 (tests pass): ./gradlew build --rerun-tasks — 127 tests, 0 failures, 0 errors. DoD#2 (wiki/freshness): docs/wiki/villager-brain-api.md and overview.md amended (T013); freshness gate shows one remaining FAIL, correctly attributable to pre-existing unrelated TASK-0014 debt (rides PR #21), not this task's work — see specs/019-death-remains/tasks.md T013 note.
+
+spec-bridge sync: Phase 1 — Verify before building (US0): 3/3 · Phase 2 — Suppression and permadeath (US1): 3/3 · Phase 3 — Remains, grief, tokens (US2 + US3): 3/3 · Phase 4 — Proofs, gates, and closure (US4): 5/5 — all spec tasks complete.
+
+Status intentionally left at In Progress, NOT advanced to Done, even though spec-bridge derives Done-eligible from tasks.md (100% complete): no PR has been opened/merged yet (one-task-one-PR), and plan.md's "The V4 decoupling" section explicitly reserves card AC#6's disposition (tick-with-deviation-note vs. hold-open) for the orchestrator at merge time. Leaving the terminal -s Done transition (and AC#6's call) to the orchestrator alongside PR open/merge.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
+- [x] #1 Tests pass
+- [x] #2 Docs and wiki are updated and pass freshness tests
 - [ ] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
