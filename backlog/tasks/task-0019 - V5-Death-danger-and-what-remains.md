@@ -4,7 +4,7 @@ title: 'V5 - Death, danger, and what remains'
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 20:18'
+updated_date: '2026-08-28 20:20'
 labels:
   - vendor
   - m-0-build
@@ -51,7 +51,7 @@ Spec: specs/019-death-remains
 - [x] #3 One conversion-cancel Mixin makes zombie conversion equivalent to death, and the total Mixin surface stays inside decision-0002's committed bound
 - [x] #4 A villager killed by a zombie leaves a mod-placed named grave at the death site (or nearest safe buildable surface) with no villager agency required
 - [x] #5 A belongings bundle captures the hidden inventory before vanilla destroys it and is placed at the grave as an ordinary roles:[storage] thing named for its owner
-- [ ] #6 An optional 'tend the grave' job-board entry rides V4's mechanism and a survivor may take it up or ignore it
+- [x] #6 An optional 'tend the grave' job-board entry rides V4's mechanism and a survivor may take it up or ignore it
 - [x] #7 The dead villager's bed and job site stay unclaimed for the configured grief period (default one in-game cycle per R-3), exposed as config rather than a constant
 - [x] #8 A witnessing villager receives ordinary sighting percepts (no magic death broadcast) and an absent one receives a change_report with change:'gone' on return plus a sighting of the grave
 - [x] #9 The dead body's token is retired and never reissued; the grave or converted mob gets a new body token
@@ -97,6 +97,8 @@ DoD#1 (tests pass): ./gradlew build --rerun-tasks — 127 tests, 0 failures, 0 e
 spec-bridge sync: Phase 1 — Verify before building (US0): 3/3 · Phase 2 — Suppression and permadeath (US1): 3/3 · Phase 3 — Remains, grief, tokens (US2 + US3): 3/3 · Phase 4 — Proofs, gates, and closure (US4): 5/5 — all spec tasks complete.
 
 Status intentionally left at In Progress, NOT advanced to Done, even though spec-bridge derives Done-eligible from tasks.md (100% complete): no PR has been opened/merged yet (one-task-one-PR), and plan.md's "The V4 decoupling" section explicitly reserves card AC#6's disposition (tick-with-deviation-note vs. hold-open) for the orchestrator at merge time. Leaving the terminal -s Done transition (and AC#6's call) to the orchestrator alongside PR open/merge.
+
+AC #6 ticked by orchestrator ruling (plan.md 'The V4 decoupling'): the tend-grave entry rides the board READ CHANNEL (Q-6) — the mechanism V4 formalizes — as fixture-independent posting content (GraveBoardEntry, GraveBoardEntryTest x2); when TASK-0020 lands its board book the entry rides it without rework. Deviation note per plan; the hold-open fallback was declined because the tested artifact exists.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
