@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.UUID;
 
 /**
  * T007 (FR-005, R-7): dusk pair formation, driven by vanilla's own MEET machinery rather
@@ -204,5 +206,16 @@ public final class DuskPairing {
 
     public String placeToken() {
         return placeToken;
+    }
+
+    /** T007 (card AC #9): the cast member's own body token, by entity UUID — the lookup
+     * {@code dev.kithcraft.mod.live.LiveDeathHandling} needs to retire the right token on
+     * death. Empty for any villager this pairing never matched/seated (not a cast member, or
+     * seated before this pairing was set up). */
+    public Optional<String> bodyTokenFor(UUID villagerId) {
+        return seats.stream()
+            .filter(s -> s.villager().getUUID().equals(villagerId))
+            .map(Seat::bodyToken)
+            .findFirst();
     }
 }

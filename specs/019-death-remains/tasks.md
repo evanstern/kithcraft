@@ -65,17 +65,72 @@
 
 ## Phase 3 — Remains, grief, tokens (US2 + US3)
 
-- [ ] T007 Death handler: named grave at death site or nearest safe buildable
+- [x] T007 Death handler: named grave at death site or nearest safe buildable
       surface, no villager agency; belongings captured before vanilla
       destruction into a roles:["storage"] thing named for its owner; new body
       token for the grave; dead token retired never-reissued (card ACs #4, #5,
-      #9)
-- [ ] T008 Grief period: bed + job-site held unclaimed for configured period
+      #9) — `dev.kithcraft.mod.death.GravePlacement` (pure, unit-tested
+      bounded/deterministic search) + `dev.kithcraft.mod.live.LiveDeathHandling`
+      (live wiring, both death kinds uniformly per R-6 — no conversion branch).
+      **Capture hook needed NO new Mixin**: Fabric API's own
+      `ServerLivingEntityEvents.ALLOW_DEATH` (already-shipped, already-Mixin'd
+      inside the `fabric-entity-events-v1` module this mod already depends on
+      transitively via `fabric-api`) fires at the head of
+      `LivingEntity.die()`, before `dropAllDeathLoot` — verified by reading
+      `villager.getInventory()` (public, `AbstractVillager implements
+      InventoryCarrier`) there and copying every non-empty `ItemStack` before
+      vanilla destroys them. `AFTER_DEATH` does the rest: token retirement
+      (`DuskPairing.bodyTokenFor(UUID)`, added this phase, → `tokens.retire`),
+      grave placement (vanilla `Blocks.OAK_SIGN` — no new block type — named
+      via `SignBlockEntity.updateText`), a NEW body+place token pair for the
+      grave (`TokenRegistryData.issue`), and the belongings bundle (vanilla
+      `Blocks.CHEST`, captured items via `ChestBlockEntity.setItem`). Mixin
+      surface stays at 4 — `kithcraft.mixins.json` untouched.
+      **Deviation (card AC #5's edge case, spec's own "recorded as a deviation
+      either way")**: chosen "empty chest, not omitted" — an empty capture
+      still places a real (empty) chest, so the grave's world footprint is
+      uniform regardless of what the villager was carrying.
+      **Deviation/ponytail**: the belongings chest is placed at a fixed
+      `gravePos.offset(1,0,0)` with no safety check of its own (only the
+      grave site itself runs `GravePlacement`'s search) — correct for the
+      common case, a documented ceiling for the rare case where that one
+      offset happens to be unsafe (e.g. also over a lava edge); a real fix
+      would run the same search from the grave site outward for the bundle
+      too, not needed for this cast size/scope.
+- [x] T008 Grief period: bed + job-site held unclaimed for configured period
       (default one cycle per R-3), config not constant, informed by R-4's
-      finding (card AC #7)
-- [ ] T009 Tend-grave posting through the board read channel (plan's V4
+      finding (card AC #7) — `dev.kithcraft.mod.death.GriefPeriod` (pure,
+      unit-tested: `configuredTicks()` reads `kithcraft.griefPeriodTicks`
+      system property, default 24000, same config-not-constant idiom
+      `BodySession`'s socket path already uses). Live half in
+      `LiveDeathHandling.holdGrief`: since R-4 found `Villager.releasePoi`
+      frees the `PoiManager` ticket but never erases the `HOME`/`JOB_SITE`
+      brain memory it reads, both `GlobalPos`es are still readable in
+      `AFTER_DEATH` — re-claims the just-freed ticket via `PoiManager.take`
+      (an explicit vendor-side hold, exactly what R-4 said was needed, no
+      natural lag to lean on) and releases it back via `PoiManager.release`
+      once `GriefPeriod.Hold.isHeld(tick)` goes false, checked every server
+      tick. **Ponytail**: `take()` reclaims exactly one ticket — correct for
+      a bed (max 1 ticket) and this cast's job-site POI types; a POI type
+      with more than one free slot would only have one slot held, not the
+      whole record sealed. Ceiling: fine for the 3-villager cast this design
+      targets; a full seal would need iterating `PoiManager.getInSquare` at
+      that position instead of one `take` call.
+- [x] T009 Tend-grave posting through the board read channel (plan's V4
       decoupling seam); takeable or ignorable (card AC #6; deviation note if
-      the orchestrator holds AC #6 for V4 merge)
+      the orchestrator holds AC #6 for V4 merge) —
+      `dev.kithcraft.mod.death.GraveBoardEntry` (pure, unit-tested): composes
+      §4.7 `text` content (`Testimony.textContent`, V2's existing "read from
+      an artifact" percept — no new percept type) plus a mutable `taken`
+      flag a survivor may or may not ever set. No deviation judged necessary:
+      the content is genuinely fixture-independent (a `Place` + a string),
+      exactly plan.md's "the seam is the posting content, not the book
+      block" — when V4's board book merges, this content rides it unchanged.
+      Composed and logged from `LiveDeathHandling.handleDeath` alongside the
+      grave/belongings percepts; live delivery over a `WireClient` session is
+      T010's job (Phase 4), same split `DuskPairing`'s `PairingSignal`
+      already established (composed+logged this phase, wired to a live
+      session later).
 
 ## Phase 4 — Proofs, gates, and closure (US4)
 
