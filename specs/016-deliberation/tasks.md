@@ -141,11 +141,32 @@
 
 ## Phase 4 — Design checks, gates, and closure
 
-- [ ] T010 Scripted-evening micromanagement check against the fake vendor +
+- [x] T010 Scripted-evening micromanagement check against the fake vendor +
       scripted model: postings get worked without re-posting; refusals carry
       persona-grounded reasons (card AC #8)
-- [ ] T011 Full gates: `go vet` + `go test ./...` green; scope clean
-- [ ] T012 Wiki re-ground: notes whose sources this branch touches re-verified
+      — `evening_test.go`: `TestEveningOfPostings_WorkGetsDoneWithoutRepostingOrPolicing`
+      drives three board postings through a real `mind/fakevendor.FakeVendor` over
+      the real `net.Pipe`-backed `seam.Conn` wire (a `wireVendor` adapter stamps the
+      envelope exactly as `loop.go`'s `Vendor` doc describes a real wiring — Phases
+      1-3's tests used `VendorFunc` doubles directly, no wire in between). Each
+      posting is answered with exactly one intent (`FakeVendor.Acts()` == 3 for 3
+      postings — no re-posting needed) and, once resolved, the villager's Loop
+      completes without a second round. No two of the two claims and one decline
+      share a reason string; the decline's is grounded in a named prior commitment
+      ("I promised Mira...to mind the stall"), not a canned refusal.
+- [x] T011 Full gates: `go vet` + `go test ./...` green; scope clean
+      — both green across the whole `mind/` module (10 packages); the evening test
+      also passes under `-race -count=20`. `git status --short` showed only
+      `evening_test.go` before that commit.
+- [x] T012 Wiki re-ground: notes whose sources this branch touches re-verified
       honestly (overview at minimum — mind gains a deliberation loop); CAPSULES
       regenerated if any description changed; freshness probe green
-- [ ] T013 Card ACs ticked with citing proofs; board/spec synced at PR time
+      — `overview.md` and `promptworld-lineage.md` amended (mind/deliberate/ now
+      exists; toolloop's REQUEST/FACT/gate shape graduated from source material to
+      a real port) and re-pinned to this branch's Phase 4 HEAD; CAPSULES regenerated
+      for both changed descriptions; the freshness gate script
+      (`grounding-wiki/0.57.0/gates/freshness.mjs`) exits 0. `body-protocol-seam.md`
+      and `v1-demo.md` checked (both grep-matched "mind/") — no cited source touched
+      and no claim invalidated (deliberation sits above the seam, not a new
+      wire/vendor landing either note tracks) — left untouched.
+- [x] T013 Card ACs ticked with citing proofs; board/spec synced at PR time
