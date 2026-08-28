@@ -1,9 +1,10 @@
 ---
 id: TASK-0013
 title: M3 - Persona genesis and the persona firewall
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:38'
+updated_date: '2026-08-28 18:07'
 labels:
   - mind
   - m-0-build
@@ -37,6 +38,8 @@ As a player, I want the villagers to be people I did not write, so that their co
 **References.** docs/design/demo-build-plan.md section 3.2 (M3) is the plan of record. Ratified surfaces consumed: docs/design/kithcraft-brief.md (#5 weirdness dial, the minds-are-others constraint, the politeness-policing spell-breaker), decision-0003 + docs/design/llm-routing-and-budget.md (E1 on Opus 5, three calls, the doctrine-transfer checklist), decision-0002 (profession x biome variant as cast distinctiveness).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/013-persona-genesis
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
