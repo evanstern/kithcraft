@@ -4,7 +4,7 @@ title: 'V3 - The augmented villager: brain, schedule, cast, and dusk pair format
 status: Done
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-28 01:22'
+updated_date: '2026-08-28 19:15'
 labels:
   - vendor
   - m-0-build
@@ -35,6 +35,8 @@ As a player, I want three named neighbours who live a full day without me, so th
 **References.** docs/design/demo-build-plan.md section 3.3 (V3) and its ruling R-7 are the plan of record. Ratified surfaces consumed: decision-0002 + docs/design/entity-implementation-comparison.md (augmented vanilla VillagerEntity, the bounded ~4-injection Mixin budget, schedules/POI/pathing inherited free, profession x biome variant), docs/design/kithcraft-brief.md (the micromanagement spell-breaker), docs/design/llm-routing-and-budget.md (section 5.2 lever 2, pre-generation ahead of arrival).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/014-augmented-villager
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
