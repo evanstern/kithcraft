@@ -83,18 +83,42 @@ conservative and instructs away from moralizers.
 **Independent test**: `go test ./persona/...` — genesis tests green against a
 mocked client (no network).
 
-- [ ] T007 Implement mind/persona/genesis.go: per-entry E1 call via the llm
+- [x] T007 Implement mind/persona/genesis.go: per-entry E1 call via the llm
       client at class E1's config (Opus 5, no cache, pre-session), structured
       persona output (schema following mind/llm/structured.go's idiom; JSON-
       in-text strict-decode fallback recorded if structured fights E1 config),
       profession/biome pairing carried into the persona
-- [ ] T008 The genesis prompt: conservative weirdness dial (brief #5), values
+- [x] T008 The genesis prompt: conservative weirdness dial (brief #5), values
       + endogenous desires demanded, anchor line + drift markers demanded as
       output fields, explicit anti-moralizing instruction
-- [ ] T009 Named tests with mocked client: exactly three calls for three
+- [x] T009 Named tests with mocked client: exactly three calls for three
       entries on E1 (AC #1 unit half), pairing present in output (AC #5),
       prompt-content tests for dial + anti-moralizing instruction (AC #6
       prompt half); generated-persona-through-validator round-trip
+
+**Deviation from plan.md (T007, the structured-output-vs-E1-config risk
+resolved):** plan.md flagged this as an open risk, to be resolved at
+implementation. It resolved to the fallback: `mind/llm/classes.go`'s
+Registry sets E1's `StructuredOutput: false` (§1.3/A-9 — only E2/E3/E6 carry
+it), and `client.go`'s `buildParams` only attaches
+`output_config.format` when both that flag is true and `SchemaFor` names the
+class; `SchemaFor` (structured.go) only names E2/E3/E6. Structured output
+therefore genuinely fights E1's already-ratified config — changing it would
+mean editing the Registry's data, which is out of this task's scope and not
+a genesis-implementer's call. `genesis.go` instead asks E1 for a single JSON
+object in prose and strict-decodes it (`parseGenesisOutput`), reusing
+`structured.go`'s bounded-failure idiom directly: a malformed or
+missing-required-field response returns the same `*llm.ParseError` E2/E3/E6
+already use, never a panic or a silently-empty Persona.
+
+**Deviation from persona_external_test.go's want-list (T007, following
+Phase 2's precedent):** the exported top-level function set widened again,
+from `{Load, Validate, WriteOnce}` to `{Genesis, Load, Validate, WriteOnce}`.
+Genesis writes, but only by calling WriteOnce internally — it opens no write
+path WriteOnce doesn't already guard (a second Genesis call against an
+existing cast id still refuses, proven by TestWriteOnce_RefusesExistingFile),
+so it is not a second, independent way to overwrite an existing persona. The
+test file's want-list and doc comment were updated to name it explicitly.
 
 **Checkpoint**: genesis is complete and cheap to prove; only the live run
 remains.
