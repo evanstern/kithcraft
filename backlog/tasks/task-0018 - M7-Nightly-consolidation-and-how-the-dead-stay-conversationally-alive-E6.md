@@ -1,9 +1,10 @@
 ---
 id: TASK-0018
 title: 'M7 - Nightly consolidation, and how the dead stay conversationally alive (E6)'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
+updated_date: '2026-08-28 19:22'
 labels:
   - mind
   - m-0-build
@@ -33,6 +34,8 @@ As a villager, I want to wake up having kept what mattered about yesterday — i
 **References.** docs/design/demo-build-plan.md section 3.2 (M7) and its ruling R-9 are the plan of record. Ratified surfaces consumed: decision-0003 + docs/design/llm-routing-and-budget.md (E6 on Opus 5, the sleep-window trigger, no formativeness scoring pass in v1, the no-marker-on-failure rule, harness T-b), docs/design/death-mechanics.md (section 3 memory carry, token discipline), docs/design/body-protocol-v0.md (RM-7: time alone never deletes a fact), docs/design/kithcraft-brief.md (#4 stories told about them).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/018-consolidation
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -44,6 +47,12 @@ As a villager, I want to wake up having kept what mattered about yesterday — i
 - [ ] #5 A witnessed death is retrieved at high frequency in the following cycle's conversation context, at lower frequency two cycles later, and is still present rather than deleted well after that
 - [ ] #6 Ruling R-9 holds: a dead villager's mind is archived not terminated, its log is readable, no session opens for it, and its body token is retired and never reissued
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 018 stub + link ride this claim commit
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
