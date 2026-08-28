@@ -95,12 +95,31 @@
 
 ## Phase 4 — Spell-breaker checks, gates, and closure
 
-- [ ] T009 Tedium checks consolidated: no repeats within cycle, natural end,
-      stall-line sparing (card AC #7 complete)
-- [ ] T010 Politeness-policing: no lecture/moralize/conduct-gate template in
-      E4/E5 assembly — structural check on prompt text + scripted content check
-      (card AC #8)
-- [ ] T011 Full gates: `go vet` + `go test ./...` green; scope clean
-- [ ] T012 Wiki re-ground: touched-source notes re-verified honestly (overview
-      at minimum); CAPSULES regenerated if descriptions changed; freshness green
-- [ ] T013 Card ACs ticked with citing proofs; board/spec synced at PR time
+- [x] T009 Tedium checks consolidated (card AC #7 complete): no-repeats
+      (`pool_test.go` `TestAmbientPool_ServeUnderBudgetNoRepeat`) and
+      natural-end (`converse_test.go` `TestExchange_SafetyBoundNeverFires`)
+      already had proving tests; stall-line sparing was doc-comment only —
+      closed with `tedium_test.go`'s
+      `TestAmbientPool_StallOnlyAfterExhaustion`, a full-day simulation
+      proving Stall is reached only for genuine overflow past the 8-line
+      batch (2 of 10 draws), never interspersed with real lines.
+- [x] T010 Politeness-policing (card AC #8): `politeness_test.go`'s
+      `TestPromptAssembly_NoModeratingLexicon` source-scans converse.go and
+      pool.go for `mind/persona`'s Moralizing lexicon (the source-read
+      technique `persona/no_llm_import_test.go` uses);
+      `TestExchange_ResentfulContentPassesThroughUnfiltered` and
+      `TestAmbientPool_ResentfulLinePassesThroughUnfiltered` prove scripted
+      grumbling/resentful content is spoken/served verbatim — no
+      conduct-gating mechanism exists.
+- [x] T011 Full gates: `go vet ./...` and `go test -race -count=1 ./...`
+      green in `mind/`; scope clean (only the two new Phase 4 test files).
+- [x] T012 Wiki re-ground: `docs/wiki/overview.md` amended (TASK-0017/M6's
+      `mind/converse/` named alongside prior milestones, honest limit on
+      the live latency ceiling stated) and re-pinned to branch HEAD. All
+      other notes' declared sources are untouched by this branch
+      (`git log <verified_against>..HEAD -- <sources>` empty for
+      promptworld-lineage.md, body-protocol-seam.md, v1-demo.md) and their
+      prose doesn't track per-task build status the way overview.md does,
+      so no change. CAPSULES.md not regenerated: no note description
+      changed.
+- [x] T013 Card ACs ticked (#1-#12) with citing proofs; board/spec synced.
