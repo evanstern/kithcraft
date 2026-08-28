@@ -4,7 +4,7 @@ title: 'M7 - Nightly consolidation, and how the dead stay conversationally alive
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:22'
+updated_date: '2026-08-28 19:24'
 labels:
   - mind
   - m-0-build
@@ -46,12 +46,18 @@ Spec: specs/018-consolidation
 - [ ] #4 v1 runs no formativeness scoring pass: the admission gate decides eligibility and E6 decides what mattered
 - [ ] #5 A witnessed death is retrieved at high frequency in the following cycle's conversation context, at lower frequency two cycles later, and is still present rather than deleted well after that
 - [ ] #6 Ruling R-9 holds: a dead villager's mind is archived not terminated, its log is readable, no session opens for it, and its body token is retired and never reissued
+- [ ] #7 Spec phase: Phase 1 — The nightly digest (US1 + US2)
+- [ ] #8 Spec phase: Phase 2 — The death carry (US3)
+- [ ] #9 Spec phase: Phase 3 — Archived, not terminated (US4)
+- [ ] #10 Spec phase: Phase 4 — Gates and closure
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 018 stub + link ride this claim commit
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: consolidation ports the measured machinery shape (ordinal convention, no-marker-on-failure); R-9 is ruled (runbook lane 4)
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
