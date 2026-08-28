@@ -1,9 +1,10 @@
 ---
 id: TASK-0019
 title: 'V5 - Death, danger, and what remains'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
+updated_date: '2026-08-28 19:25'
 labels:
   - vendor
   - m-0-build
@@ -39,6 +40,8 @@ As a player, I want the walls and torches I built to be the reason my friends ar
 **References.** docs/design/demo-build-plan.md section 3.3 (V5) and its rulings R-3, R-4, R-5 are the plan of record. Ratified surfaces consumed: docs/design/death-mechanics.md (admitted/suppressed causes, grave + belongings + POI grief period, memory carry, section 6.2's open items), decision-0002 + docs/design/entity-implementation-comparison.md (the bounded Mixin budget, the GossipManager genericity caveat), docs/design/body-protocol-v0.md (change_report delivery restriction, token discipline), docs/design/kithcraft-brief.md (the micromanagement and politeness-policing spell-breakers).
 
 **Suggested tier: `sonnet` with a named escalation trigger (next sweep's runbook decides).**
+
+Spec: specs/019-death-remains
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -55,6 +58,12 @@ As a player, I want the walls and torches I built to be the reason my friends ar
 - [ ] #10 Design check (micromanagement): nothing is added to villager self-preservation - no feeding UI, no escort, no vigilance surface
 - [ ] #11 Design check (politeness-policing): no engine guardrail on friendly fire
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 019 stub + link ride this claim commit
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
