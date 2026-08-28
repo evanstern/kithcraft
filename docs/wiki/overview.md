@@ -1,12 +1,12 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, and the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, its bounded E2/E3 deliberation loop, and the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: 186a6ba28f07213cb3de55fbe58147c9b7eb4ea2
+verified_against: b179249bae7e1cc3e14c8833bdcc743fc7687d54
 ---
 
 # Overview
@@ -28,7 +28,11 @@ drift markers at birth, written once at mode 0444 with no post-genesis write pat
 guarded by a model-free validator that rejects stated drift with zero LLM
 involvement — and, as of TASK-0009 (V1), the **first vendor-side code**: a real Fabric
 mod in `mod/` implementing the wire client, `session_open` handshake, capability
-manifest, and token registry ([[body-protocol-seam]]).
+manifest, and token registry ([[body-protocol-seam]]). TASK-0016 (M5) then added
+`mind/deliberate/`: the bounded E2/E3 deliberation loop, porting toolloop's REQUEST/FACT/gate
+shape (decision-0003, [[promptworld-lineage]]) onto intent/intent_ack/act_result, plus the
+§5.5 urgency interrupt and the K=10 situated memory window — a villager now claims or
+declines a posted job with an authored reason of its own, rather than executing a command.
 
 ## How it works
 
@@ -62,11 +66,12 @@ decisions ([[mod-stack-decision]]), machinery ([[pdlc-process]], [[model-tiers]]
 Two real code surfaces now exist alongside the docs/config majority of the wiki's
 sources: the mind daemon (`mind/`, TASK-0008/M1, now carrying TASK-0010/M2's
 event-sourced memory in `mind/memory/`, TASK-0011/M4's LLM client and prompt assembly
-in `mind/llm/` and `mind/prompt/`, and TASK-0013/M3's persona genesis and firewall in
-`mind/persona/`) and the Fabric mod vendor (`mod/`, TASK-0009/V1) —
+in `mind/llm/` and `mind/prompt/`, TASK-0013/M3's persona genesis and firewall in
+`mind/persona/`, and TASK-0016/M5's deliberation loop in `mind/deliberate/`) and the
+Fabric mod vendor (`mod/`, TASK-0009/V1) —
 [[body-protocol-seam]] cites both. This note's claims were re-verified against `mod/`'s,
-`mind/memory/`'s, `mind/llm/`'s, `mind/prompt/`'s, and `mind/persona/`'s existence in
-this pass (2026-08-28). The `mind/persona/` live-genesis proof
+`mind/memory/`'s, `mind/llm/`'s, `mind/prompt/`'s, `mind/persona/`'s, and
+`mind/deliberate/`'s existence in this pass (2026-08-28). The `mind/persona/` live-genesis proof
 (specs/013-persona-genesis/live-run.md) succeeded in this pass: three real E1 calls on
 Opus 5 produced three validator-accepted personas, written 0444 at
 `mind/run/persona/` and re-bound correctly on a simulated daemon restart. The mod's
