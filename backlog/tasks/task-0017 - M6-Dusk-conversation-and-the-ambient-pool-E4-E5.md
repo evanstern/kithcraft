@@ -4,7 +4,7 @@ title: 'M6 - Dusk conversation and the ambient pool (E4, E5)'
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:20'
+updated_date: '2026-08-28 19:21'
 labels:
   - mind
   - m-0-build
@@ -52,12 +52,18 @@ Spec: specs/017-dusk-conversation
 - [ ] #6 A remark about something specific escalates to a live call rather than drawing from the pool
 - [ ] #7 Design check (tedium): lines do not repeat within a cycle, conversations reach a natural end rather than looping or hitting a turn cap mid-sentence, and the stall-line is used sparingly
 - [ ] #8 Design check (politeness-policing): a villager may resent, grumble and say so, but never lectures, moralizes, or gates anything on the player's conduct
+- [ ] #9 Spec phase: Phase 1 — The dusk exchange (US1)
+- [ ] #10 Spec phase: Phase 2 — Pre-generation (US2)
+- [ ] #11 Spec phase: Phase 3 — The ambient pool (US3)
+- [ ] #12 Spec phase: Phase 4 — Spell-breaker checks, gates, and closure
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 017 stub + link ride this claim commit
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: E4/E5 params fully specified (Sonnet 5 <3s thinking off; Haiku pool); the latency posture is design already done (runbook lane 4)
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
