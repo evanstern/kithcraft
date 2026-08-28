@@ -146,9 +146,17 @@
       received over a real loopback UDS `WireClient` session against a stub
       mind listener (`HandshakeWireClientTest`'s harness, reused). All 4
       green.
-- [ ] T011 Dev-server observation: zombie-kill → grave + bundle + grief hold +
+- [x] T011 Dev-server observation: zombie-kill → grave + bundle + grief hold +
       zero sieges over the window; recorded per the runbook's dev-server-proofs
-      gate (card ACs #2, #4 live halves)
+      gate (card ACs #2, #4 live halves) —
+      `specs/019-death-remains/research/death-observation.md`. Kill forced
+      (`/damage ... minecraft:mob_attack`, not a random zombie kill — same
+      `ALLOW_DEATH`/`AFTER_DEATH` path either way, honestly recorded as
+      forced). Grave sign + belongings chest confirmed placed, grief hold
+      started/released at the configured (shortened, `-Dkithcraft.
+      griefPeriodTicks=1200`) window, zero siege log lines across two full
+      server lifetimes, retired token `b-5` confirmed absent from a fresh
+      restart's boot registry while survivors' tokens persist.
 - [ ] T012 Full gates: gradle build + test green; scope clean
 - [ ] T013 Wiki re-ground: touched-source notes re-verified honestly
       ([[villager-brain-api]] — Mixin surface grows; overview); CAPSULES
