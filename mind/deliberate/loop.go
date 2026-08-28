@@ -147,6 +147,13 @@ func (l *Loop) Run(ctx context.Context, propose Proposer) (Result, error) {
 		if err := l.cfg.Tokens.ValidateTarget(intent.Target); err != nil {
 			return res, err
 		}
+		// FR-004/card AC #3: "the mind must have a why" (§5.2) — an empty
+		// reason is rejected here, the same before-compose posture as the
+		// target check above; llm.ParseIntent itself only requires a
+		// non-empty verb.
+		if intent.Reason == "" {
+			return res, fmt.Errorf("deliberate: intent %q carries no authored reason (§5.2 — the mind must have a why, card AC #3)", intent.Verb)
+		}
 
 		id := fmt.Sprintf("i-%d", l.seq.Add(1))
 		payload, err := l.pending.Compose(id, intent.Verb, intent.Target, intent.Reason, intent.Supersedes)

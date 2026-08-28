@@ -41,14 +41,42 @@
 
 ## Phase 2 — The job-board decision (US2)
 
-- [ ] T005 E3 trigger on `text` percept with `origin: read`; E3 context struct
+- [x] T005 E3 trigger on `text` percept with `origin: read`; E3 context struct
       (board contents, other claims, player relationship, commitments) rendered
       via `mind/prompt` variable suffix (stable prefix untouched)
-- [ ] T006 Claim-or-decline intent with non-empty authored `reason` (card AC #3);
+      — `e3.go`: `TriggerE3` checks `percept_type == "text"` and
+      `provenance.origin == "read"` (§4.7); `E3Context.VariableContext()`
+      renders the four §2.3 fields through `prompt.VariableContext`, never
+      touching `prompt.DeliberationStablePrefix`. `e3_test.go`'s
+      `TestE3Context_StablePrefixByteUntouched` assembles the same stable
+      prefix against two E3Contexts with entirely different board/claims/
+      relationship/commitments content and asserts `Assembled.Stable` is
+      byte-identical (mirrors `prompt.TestAssemble_StablePrefixByteIdentical`).
+- [x] T006 Claim-or-decline intent with non-empty authored `reason` (card AC #3);
       decline reachable, reason cites the villager's own wants/commitments/
       relationship (card AC #4)
-- [ ] T007 Politeness-policing structural check: no compliance gate, cooldown, or
+      — `board_test.go` scripts a `Class: llm.E3` `Loop` with `claim`/
+      `decline` manifest verbs and proves the model's authored reason
+      reaches `Vendor.SendIntent` unaltered for both verbs (decline
+      reachable, no special-cased rejection). Deviation from the "no
+      changes to Phase 1 files" note: `loop.go`'s `Run` gained a
+      three-line check — an intent with an empty `Reason` is now rejected
+      before compose, the same before-compose posture `Tokens.ValidateTarget`
+      already has for targets (`llm.ParseIntent` only requires a non-empty
+      verb, leaving `Reason` unchecked). This generalizes FR-004 ("every
+      intent carries an authored reason") across all classes rather than
+      gating it to E3 only, since the requirement is stated generally and
+      every Phase 1 scripted intent already carried a reason (verified
+      against `loop_test.go` before making the change — no existing test
+      broke). `TestLoop_EmptyReasonIntent_RejectedBeforeCompose` covers it.
+- [x] T007 Politeness-policing structural check: no compliance gate, cooldown, or
       player-conduct-keyed refusal path exists (card AC #9)
+      — `politeness_test.go`'s `TestNoPolitenessPolicingInDeliberationPath`,
+      in `TestNoCompiledInVerbVocabulary`'s style (T002): greps every
+      non-test `.go` file in `mind/deliberate` for
+      compliance/cooldown/conduct/politeness-shaped identifiers. Scope is
+      this package only, matching T002's own precedent for "the
+      deliberation path" this PR owns.
 
 ## Phase 3 — Interrupt and window (US3 + US4)
 
