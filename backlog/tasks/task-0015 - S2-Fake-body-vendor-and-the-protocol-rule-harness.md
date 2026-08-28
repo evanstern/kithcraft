@@ -1,10 +1,10 @@
 ---
 id: TASK-0015
 title: S2 - Fake body vendor and the protocol-rule harness
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-27 21:45'
+updated_date: '2026-08-28 00:20'
 labels:
   - seam
   - m-0-build
@@ -48,10 +48,10 @@ Spec: specs/015-fake-vendor-harness
 - [x] #3 H-6 reproduces the 75% flood and prints the ratio (flooded.memory_count > 3x restricted.memory_count)
 - [x] #4 Design check (minds-are-others): the fake vendor exposes no read API and no method by which a mind can learn world state without acting
 - [x] #5 The fake vendor has no autonomous behaviour and no capability the real vendors lack (section 10.5 scope discipline)
-- [ ] #6 Spec phase: Phase 1 — FakeVendor shape and scope discipline (US2 + US3 groundwork)
-- [ ] #7 Spec phase: Phase 2 — The cheap rules: H-1..H-4 (US1 groundwork)
-- [ ] #8 Spec phase: Phase 3 — The structural rules: H-5 and H-6 (US1 close)
-- [ ] #9 Spec phase: Phase 4 — Canonical end-to-end, gates, wiki, board (US2 close + closure)
+- [x] #6 Spec phase: Phase 1 — FakeVendor shape and scope discipline (US2 + US3 groundwork)
+- [x] #7 Spec phase: Phase 2 — The cheap rules: H-1..H-4 (US1 groundwork)
+- [x] #8 Spec phase: Phase 3 — The structural rules: H-5 and H-6 (US1 close)
+- [x] #9 Spec phase: Phase 4 — Canonical end-to-end, gates, wiki, board (US2 close + closure)
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -72,9 +72,15 @@ AC #4: mind/fakevendor/fakevendor_test.go TestFakeVendor_ExportedSurface_IsExact
 AC #5: no autonomous behaviour proven by TestFakeVendor_Advance_MovesTimeAndNothingElse and TestFakeVendor_DefaultIntentBehaviour_AckRecordWait (advance/emit/intent do nothing beyond the script); no capability beyond the contract proven by TestFakeVendor_ExportedSurface_IsExactlySpec101 (mind/fakevendor/fakevendor_test.go).
 <!-- SECTION:NOTES:END -->
 
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+S2 delivered via PR #18 (merge e194e48, merge commit, pins preserved). mind/fakevendor implements protocol §10.1's FakeVendor exactly, driving the mind through the real seam surface; a reflection API-surface test locks the exported shape (no read API — the minds-are-others structural defence, enforced). H-1..H-6 green, each proven red-when-lifted by live-verified mutation checks; H-6 reproduces the 75% flood at ratio 3.50x (42 vs 12 memories, three bodies, mind-side counts). The §10.2 canonical end-to-end runs against the fake through the real seam — step 5 proven: a told belief cannot become witnessed — closing TASK-0010's deliberately-carried AC #5. Wiki: body-protocol-seam amended (NEEDS-REVIEW) + honestly re-pinned, CAPSULES regenerated, freshness 11/11. Spec-bridge derivation: all 4 phases 10/10 boxes, Done-eligible. ~740k subagent tokens across 4 sonnet dispatches (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
+
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
-- [ ] #3 Spec and Backlog are in sync
+- [x] #1 Tests pass
+- [x] #2 Docs and wiki are updated and pass freshness tests
+- [x] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
