@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"package": "dev.kithcraft.mod.mixin",
+	"compatibilityLevel": "JAVA_21",
+	"mixins": [
+		"VillagerGoalPackagesMixin",
+		"VillagerGossipMixin"
+	],
+	"client": [],
+	"server": [],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"kithcraftPurposes": {
+		"VillagerGoalPackagesMixin": "Suppresses villager breeding (FR-004, card AC #2): drops VillagerMakeLove from VillagerGoalPackages.getIdlePackage's returned behavior list before any Brain is built from it. registerBrainGoals is private and Brain.addActivity is additive-only, so this is the only place a stock vanilla behavior can be omitted (specs/014-augmented-villager/research/brain-26.2.md).",
+		"VillagerGossipMixin": "Suppresses gossip exchange AND, as a direct side effect, iron-golem summoning (FR-004, card AC #2): Villager.gossip(ServerLevel, Villager, long) calls spawnGolemIfNeeded from inside its own body, so cancelling gossip at HEAD covers both targets in one injection -- the Mixin budget lands at 2 overrides, not 3 (brain-26.2.md §5)."
+	}
+}

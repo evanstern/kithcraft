@@ -1,16 +1,27 @@
 package dev.kithcraft.mod;
 
+import dev.kithcraft.mod.brain.DuskPairing;
+import dev.kithcraft.mod.cast.Cast;
+import dev.kithcraft.mod.cast.CastData;
+import dev.kithcraft.mod.cast.CastSeeder;
 import dev.kithcraft.mod.live.BodySession;
+import dev.kithcraft.mod.tokens.TokenRegistryData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Server-side entrypoint (decision-0002: no client jar). T011's live wiring: on each server
@@ -29,10 +40,15 @@ public class KithcraftMod implements ModInitializer {
 	// (worldTime is a small non-negative game-tick count) and wrap to a huge negative value,
 	// which is always < 20 — silently skipping every attach attempt forever.
 	private long lastAttachAttempt = -1000L;
+	private DuskPairing duskPairing;
+	private TokenRegistryData pendingTokens;
+	private BlockPos pendingOrigin;
+	private long lastDuskSetupAttempt = -1000L;
 
 	@Override
 	public void onInitialize() {
 		LOGGER.info("kithcraft mod initialized");
+		ServerLifecycleEvents.SERVER_STARTED.register(this::onServerStarted);
 		ServerTickEvents.END_SERVER_TICK.register(this::onServerTick);
 		// T011 diagnostic: ground truth for whether/where an entity actually loads,
 		// independent of the getEntitiesOfClass scan below (which is returning 0 even after
@@ -40,6 +56,32 @@ public class KithcraftMod implements ModInitializer {
 		// truly never loads or whether the scan itself is the bug).
 		ServerEntityEvents.ENTITY_LOAD.register((entity, level) ->
 			LOGGER.info("[live] ENTITY_LOAD: {} at {}", entity.getClass().getName(), entity.blockPosition()));
+	}
+
+	/** T002 (card AC #6): seed the three-member cast once per world, at the world spawn.
+	 * Idempotent via {@link CastData}'s persisted flag — a restart re-runs this but does not
+	 * re-spawn. */
+	private void onServerStarted(MinecraftServer server) {
+		var level = server.overworld();
+		CastData cast = level.getDataStorage().computeIfAbsent(CastData.TYPE);
+		BlockPos origin = level.getRespawnData().pos();
+		CastSeeder.seedIfNeeded(level, cast, origin);
+
+		// T007 (FR-005, R-7): the shared gathering place + each matched cast member's body
+		// token. NOT built here: at SERVER_STARTED, persisted villagers have not finished
+		// loading yet (their ENTITY_LOAD fires a few ticks later — confirmed live, T009), so
+		// findCastVillagers() would return empty and DuskPairing would never have any seats.
+		// Deferred to onServerTick below, retried until the cast is actually found.
+		pendingTokens = level.getDataStorage().computeIfAbsent(TokenRegistryData.TYPE);
+		pendingOrigin = origin;
+	}
+
+	private static List<Villager> findCastVillagers(ServerLevel level) {
+		AABB huge = new AABB(-1000, -256, -1000, 1000, 256, 1000);
+		Set<String> castNames = Cast.MEMBERS.stream().map(Cast.Member::name).collect(Collectors.toSet());
+		return level.getEntitiesOfClass(Villager.class, huge).stream()
+			.filter(v -> castNames.contains(v.getName().getString()))
+			.toList();
 	}
 
 	private void onServerTick(MinecraftServer server) {
@@ -56,6 +98,23 @@ public class KithcraftMod implements ModInitializer {
 
 	private void onServerTickUnsafe(MinecraftServer server) throws IOException {
 		long worldTime = server.overworld().getGameTime();
+		if (duskPairing == null && pendingTokens != null && worldTime - lastDuskSetupAttempt >= 20) {
+			lastDuskSetupAttempt = worldTime;
+			var castVillagers = findCastVillagers(server.overworld());
+			if (!castVillagers.isEmpty()) {
+				// T011 finding (full-cycle-observation.md, 2026-08-27): re-cover the cast's
+				// actual current chunk footprint every boot, not just where CastSeeder
+				// force-loaded at first spawn — see CastSeeder.keepChunksLoaded's own javadoc
+				// for why a stale/too-tight footprint permanently freezes a villager's Brain
+				// without ever fully unloading it.
+				CastSeeder.keepChunksLoaded(server.overworld(), castVillagers);
+				duskPairing = DuskPairing.setUp(server.overworld(), pendingTokens, pendingOrigin, castVillagers);
+				pendingTokens = null;
+			}
+		}
+		if (duskPairing != null) {
+			duskPairing.tick(worldTime);
+		}
 		if (attached == null) {
 			if (worldTime - lastAttachAttempt < 20) {
 				return;
