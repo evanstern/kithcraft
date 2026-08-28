@@ -1,10 +1,10 @@
 ---
 id: TASK-0013
 title: M3 - Persona genesis and the persona firewall
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-28 18:51'
+updated_date: '2026-08-28 19:05'
 labels:
   - mind
   - m-0-build
@@ -50,10 +50,10 @@ Spec: specs/013-persona-genesis
 - [x] #4 Personas survive a daemon restart and re-bind to the same bodies
 - [x] #5 Each persona is paired with a profession and biome variant so the fiction and the body agree
 - [x] #6 Design check (politeness-policing): the genesis prompt produces no moralizing persona template, and the drift lexicon catches stated moralizing
-- [ ] #7 Spec phase: Phase 1 — Persona type, write-once storage, re-bind (US2)
-- [ ] #8 Spec phase: Phase 2 — Model-free validator (US3 + US4 lexicon half)
-- [ ] #9 Spec phase: Phase 3 — E1 genesis (US1 + US4 prompt half)
-- [ ] #10 Spec phase: Phase 4 — Live genesis, restart proof, gates, closure (US1/US2 live halves)
+- [x] #7 Spec phase: Phase 1 — Persona type, write-once storage, re-bind (US2)
+- [x] #8 Spec phase: Phase 2 — Model-free validator (US3 + US4 lexicon half)
+- [x] #9 Spec phase: Phase 3 — E1 genesis (US1 + US4 prompt half)
+- [x] #10 Spec phase: Phase 4 — Live genesis, restart proof, gates, closure (US1/US2 live halves)
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -62,7 +62,15 @@ Spec: specs/013-persona-genesis
 Dispatch tier (sweep-0007-0022 runbook, lane 3): sonnet — default tier; persona port is decision-0003's cleanest carry, design settled, judgment calls made. Model ID cc/claude-sonnet-5[1m] via sonnet-implementer agent (frontmatter pin). Served model verified per-dispatch from transcript.
 
 ACs #1-#6 proven: #1 live 3x E1 on Opus 5 (live-run.md; unit TestGenesis_ThreeEntries_ThreeE1CallsOnOpus5); #2 persona_external_test.go reflection+AST no-write-path, 0444 O_CREATE|O_EXCL; #3 validate_test.go + no_llm_import_test.go; #4 live TestLiveRestart_LoadsAndBindsRealFiles PASS over real files (unit temp-file test too); #5 TestGenesis_PairingCarriedFromCastEntry + live pairing in files; #6 prompt-content test + moralizing lexicon tests, none tripped live. Host finding: proxy routes by model-ID prefix — ANTHROPIC_MODEL_PREFIX override added in mind/llm/client.go (186a6ba), canonical IDs unchanged.
+
+spec-bridge sync: Phase 1 — Persona type, write-once storage, re-bind (US2): 3/3 · Phase 2 — Model-free validator (US3 + US4 lexicon half): 3/3 · Phase 3 — E1 genesis (US1 + US4 prompt half): 3/3 · Phase 4 — Live genesis, restart proof, gates, closure (US1/US2 live halves): 3/3 — status In Progress → Done
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+All spec tasks complete (Phase 1 — Persona type, write-once storage, re-bind (US2): 3/3 · Phase 2 — Model-free validator (US3 + US4 lexicon half): 3/3 · Phase 3 — E1 genesis (US1 + US4 prompt half): 3/3 · Phase 4 — Live genesis, restart proof, gates, closure (US1/US2 live halves): 3/3). Derived Done by spec-bridge sync.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
