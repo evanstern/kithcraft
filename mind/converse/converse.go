@@ -151,6 +151,16 @@ type Turn struct {
 type Config struct {
 	WorldTime int64
 	MaxTurns  int
+
+	// OpeningSlot, if set, is consulted for a's opening turn (T005/US2):
+	// filled earlier off V3's pair-formation signal (pregen.go), it lets
+	// the first turn serve without a new E4 call (card AC #4). If the fill
+	// isn't ready within OpeningWait (zero: check now, don't wait), the
+	// opening turn falls back to a's normal live stream call (T006) — the
+	// ceiling still holds because the fallback is just an ordinary E4
+	// call, same as any other turn.
+	OpeningSlot *Slot
+	OpeningWait time.Duration
 }
 
 // Exchange runs a dusk conversation between a and b, alternating turns
@@ -171,7 +181,16 @@ func Exchange(ctx context.Context, a, b *Speaker, cfg Config) ([]Turn, error) {
 	var turns []Turn
 	for i := 0; i < max; i++ {
 		s := speakers[i%2]
-		text, latency, err := s.stream(ctx, transcript.String())
+		var text string
+		var latency time.Duration
+		var err error
+		var served bool
+		if i == 0 && cfg.OpeningSlot != nil {
+			text, latency, served = cfg.OpeningSlot.Take(cfg.OpeningWait)
+		}
+		if !served {
+			text, latency, err = s.stream(ctx, transcript.String())
+		}
 		if err != nil {
 			return turns, fmt.Errorf("converse: %s's turn: %w", s.Name, err)
 		}

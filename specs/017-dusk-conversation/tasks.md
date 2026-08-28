@@ -34,11 +34,32 @@
 
 ## Phase 2 — Pre-generation (US2)
 
-- [ ] T005 Pair slot keyed (pairID, day): fill on V3's pair-formation signal,
-      serve at convergence without a new call (card AC #4)
-- [ ] T006 Abort-discard (signal fired, meeting aborted → slot dropped unspoken)
-      and live-stream fallback (slot unfilled at convergence → ceiling still
-      held via streaming; late fill discarded, at-most-one opening spoken)
+- [x] T005 `Slot`/`Pool` (`mind/converse/pregen.go`): a per-pair slot keyed
+      `PairKey{PairID, Day}`; `Pool.Begin` fills off V3's pair-formation
+      signal (modeled as the call the daemon wiring will make — no seam
+      ingest wiring built this phase, per plan.md decision 3); `Exchange`
+      gained `Config.OpeningSlot`/`OpeningWait` so a's opening turn serves
+      from an already-filled slot without a new E4 call (card AC #4)
+      (`TestSlot_ServeAtConvergence`, `TestPool_BeginTakeServesKeyedByPairDay`,
+      `TestExchange_OpeningSlotServesWithoutNewCall`).
+- [x] T006 Abort-discard: `Slot.Discard`/`Pool.Discard` drop a slot unspoken
+      even if its fill is still in flight (`TestSlot_AbortDiscard`,
+      `TestPool_DiscardDropsUnspoken`). Live-stream fallback: an unfilled
+      slot (TASK-0014's measured 1.82-4.96 s signal lead vs nominal ~10 s —
+      first-class, not an edge case) falls back to `Exchange`'s normal live
+      E4 call for the opening turn, ceiling unaffected
+      (`TestExchange_OpeningSlotFallsBackWhenUnfilled`). Race, both orders:
+      `Slot.Take` is a one-shot claim (mutex-guarded `spoken` flag) so a
+      fill that completes after convergence already fell back is discarded,
+      and a fill that completes before convergence serves cleanly
+      (`TestSlot_LiveFallbackDiscardsLateFill`,
+      `TestSlot_ConcurrentFillAndTakeRace` — 25 trials under `-race`).
+      Deviation: `OpeningWait` defaults to a non-blocking check (0), not a
+      timed wait — spending any of the ceiling waiting on a slot that may
+      already be known-unfilled would eat into the budget pre-generation
+      exists to protect; the parameter exists for a caller that wants to
+      wait a bounded amount instead, but Phase 2 exercises the zero-wait
+      default only.
 
 ## Phase 3 — The ambient pool (US3)
 
