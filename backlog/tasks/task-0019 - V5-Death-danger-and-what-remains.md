@@ -4,7 +4,7 @@ title: 'V5 - Death, danger, and what remains'
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:25'
+updated_date: '2026-08-28 19:27'
 labels:
   - vendor
   - m-0-build
@@ -57,12 +57,18 @@ Spec: specs/019-death-remains
 - [ ] #9 The dead body's token is retired and never reissued; the grave or converted mob gets a new body token
 - [ ] #10 Design check (micromanagement): nothing is added to villager self-preservation - no feeding UI, no escort, no vigilance surface
 - [ ] #11 Design check (politeness-policing): no engine guardrail on friendly fire
+- [ ] #12 Spec phase: Phase 1 — Verify before building (US0)
+- [ ] #13 Spec phase: Phase 2 — Suppression and permadeath (US1)
+- [ ] #14 Spec phase: Phase 3 — Remains, grief, tokens (US2 + US3)
+- [ ] #15 Spec phase: Phase 4 — Proofs, gates, and closure (US4)
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 019 stub + link ride this claim commit
+
+tier: sonnet (default) with the plan's NAMED ESCALATION TRIGGER · model cc/claude-sonnet-5[1m] · rubric: R-4/R-5 verification first; if siege suppression point differs from death §1's assumption or needs >1 targeted injection, STOP — operator checkpoint 4, possible opus escalation (runbook lane 4)
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
