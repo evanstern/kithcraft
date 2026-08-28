@@ -138,7 +138,35 @@ survive a daemon restart; all gates green; wiki honest.
 - [ ] T011 Restart/re-bind proof over the real files: reload binds each
       persona to its cast id (AC #4 live half); tick card ACs #1–#6 with
       citing tests/observations
-- [ ] T012 Gates + re-ground: go vet + go test green; wiki notes whose sources
+- [x] T012 Gates + re-ground: go vet + go test green; wiki notes whose sources
       this PR touched re-verified honestly (promptworld-lineage §firewall,
       overview); CAPSULES regenerated if any description changed; freshness
       probe green
+
+**Deviation/blocker (T010, T011 — recorded per plan.md's own instruction,
+not a code judgment call): the live run STOPPED on an auth/billing-shaped
+failure, not on any code defect.** A live-tagged test harness was built
+(`mind/persona/genesis_live_test.go`, `go test -tags=live`) — the smallest
+vehicle that reuses the existing mocked-test scaffolding rather than adding
+a cmd binary. Credentials were exported from the root `.env` into the
+process env (never printed/committed) and the first real E1 call returned
+`404 "No active credentials for provider: anthropic"`. Per the dispatch's
+explicit STOP rule ("if a call fails on auth/billing, STOP and report — do
+not retry into a bill"), the run halted after its one sanctioned retry —
+zero personas were generated, zero files written. Full record, a diagnostic
+lead, and the exact re-run command: specs/013-persona-genesis/live-run.md.
+T010 and T011 stay unchecked; T011's live-tagged restart test
+(`TestLiveRestart_LoadsAndBindsRealFiles`) correctly skips with no real
+files to load, rather than being forced green. This is an
+environment/credentials question for an operator, outside a sonnet-tier
+implementer's scope to resolve by guessing — flagged rather than retried
+further.
+
+**T012's freshness probe, precisely:** `node .../gates/cli.mjs freshness .
+docs/wiki` reports 2 remaining failures, both on
+`docs/wiki/villager-brain-api.md` (staleness + size budget) — pre-existing,
+and none of that note's listed sources (specs/001, specs/012, specs/014)
+appear in this branch's diff (`git diff --name-only origin/main...HEAD`),
+so they are out of this task's scope and left alone. promptworld-lineage.md
+and overview.md, the two notes this branch's `mind/persona/` and
+`specs/013-persona-genesis/` changes actually touch, pass clean.
