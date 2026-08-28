@@ -4,19 +4,33 @@
 
 ## Phase 1 — The dusk exchange (US1)
 
-- [ ] T001 `mind/converse/`: two-mind exchange loop — alternating turns via the
+- [x] T001 `mind/converse/`: two-mind exchange loop — alternating turns via the
       E4 registry config (asserted: Sonnet 5, streaming, effort low, thinking
       off, cached prefix, ~300 max_tokens — card AC #1); speak intents out
       through the seam surface
-- [ ] T002 Per-turn context assembly: transcript-so-far + interlocutor slice
+      (`mind/converse/converse.go`, `TestExchangeUsesE4Config`). Deviation:
+      the intent schema (body-protocol-v0.md §5.2) has no separate content
+      field for a speak's text, so it rides inside `target` alongside `type`
+      (`{"type":"none","text":...}`) — the only place the schema leaves for
+      it; noted in `Speaker.speak`'s doc comment. Target is `type: "none"`
+      (spoken into earshot at the gathering place) rather than a directed
+      `body` target, since a directed target would need a pre-issued token
+      (fakevendor's `targetUnissued` check) this phase has no reason to set
+      up.
+- [x] T002 Per-turn context assembly: transcript-so-far + interlocutor slice
       (own slice, from beliefs) + memory window, rendered in the variable
       suffix; stable prefix byte-untouched (test)
-- [ ] T003 Termination condition: closing-marker convention detected; safety
+      (`Speaker.assemble`, `TestSpeakerAssemble_StablePrefixByteIdentical`).
+- [x] T003 Termination condition: closing-marker convention detected; safety
       bound is config, asserted never to fire in scripted tests (card AC #7
       no-mid-sentence-cap clause)
-- [ ] T004 Scripted dusk exchange against the fake vendor + mock model: multi-
+      (`ClosingMarker`/`DefaultMaxTurns`, `TestExchange_SafetyBoundNeverFires`).
+- [x] T004 Scripted dusk exchange against the fake vendor + mock model: multi-
       turn, about the day/work/player; first-token latency instrumented and
       under the test ceiling (card ACs #2, #3); vet + tests green
+      (`mind/converse/fakevendor_test.go`,
+      `TestDuskExchange_AgainstFakeVendor` — `go vet ./...` and
+      `go test -race ./...` both green in `mind/`).
 
 ## Phase 2 — Pre-generation (US2)
 
