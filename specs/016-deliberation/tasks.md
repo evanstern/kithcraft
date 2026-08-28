@@ -80,13 +80,64 @@
 
 ## Phase 3 — Interrupt and window (US3 + US4)
 
-- [ ] T008 §5.5 interrupt: urgent percept cancels in-flight call (RT-2 context
+- [x] T008 §5.5 interrupt: urgent percept cancels in-flight call (RT-2 context
       cancellation), fires no call of its own, enqueues exactly one follow-up
       deliberation whose context includes it; multiple urgents coalesce to one;
       cancel/complete race tested both orders (card AC #5)
-- [ ] T009 K=10 situated window: top K−2 by salience-halved-per-day decayed
+      — `interrupt.go`: `IsUrgent` reads §2.8's top-level `urgency` field
+      (not `percept_type`); `Interrupt` is a mutex'd state machine
+      (`Register`/`Urgent`/`Drain`) holding no `Proposer`/`Vendor`
+      reference, so no model call can fire from `Urgent` by construction.
+      `Urgent` cancels the registered `context.CancelFunc` (a no-op if the
+      call already completed — Go's own contract) and fires `onEnqueue`
+      at most once per coalescing window; `Drain` atomically hands back
+      every urgent buffered since the last `Drain` and reopens the
+      window, so any urgent arriving between the enqueue signal and the
+      caller actually starting the follow-up still lands in that same
+      follow-up's context (US3 AC #3's coalescing scenario). No changes
+      to `loop.go` — `Run`'s existing `case <-ctx.Done(): return
+      res, ctx.Err()` (Phase 1) is the only cancellation hook needed.
+      `interrupt_test.go` covers both race orders named in this box: cancel
+      wins (`TestInterrupt_CancelsInFlightCall_NoOwnModelCall` — a
+      genuinely blocked `propose` is cancelled, `Run` returns wrapping
+      `context.Canceled`) and completion wins
+      (`TestInterrupt_CompletionWinsRace_StillCoalescesFollowup` — `Deliver`
+      resolves the round first, `Run` finishes normally, and the urgent's
+      later `cancel()` call is exercised as a no-op) — both under `go test
+      -race`, plus `TestInterrupt_CoalescesMultipleUrgentsIntoOneEnqueue`
+      (5 concurrent `Urgent` calls, `onEnqueue` fires exactly once,
+      `Drain` returns all 5) and `TestInterrupt_DrainOpensNewCoalescingWindow`.
+- [x] T009 K=10 situated window: top K−2 by salience-halved-per-day decayed
       weight + 2 seeded serendipity picks from the older half; deterministic
       under seed; graceful under-K degradation (card AC #6)
+      — `window.go`'s `SelectWindow(Snapshot, now, seed)` is the pure
+      function plan.md decision 3 calls for. Deviation: the protocol
+      explicitly forbids a `salience`/`weight`/`importance` field on any
+      percept (body-protocol-v0.md §2.8), so `WindowItem`/`Snapshot` are a
+      new, self-contained mind-side type this file owns rather than a
+      selector over `memory.Store`/`memory.Log` directly (neither exposes
+      enumeration or a salience concept today) — wiring a real store into
+      a `[]WindowItem` snapshot is later-phase work, the same posture
+      tasks.md's Phase 1 note takes toward live trigger wiring. Decay
+      mirrors `mind/memory/beliefs.go`'s `effectiveConfidence` shape
+      (`salience * 0.5^(age/dayLength)`, future-dated `ObservedAt` clamped
+      to age 0) but halves per configurable `DayLength` (mind
+      configuration, `memory.Instrument`'s `dayLength` posture) rather
+      than per a `Config`-keyed half-life. "Older half" is the whole
+      snapshot's oldest half by age (not just the unpicked remainder);
+      serendipity candidates exclude anything already in the top K−2, so
+      duplicates are impossible by construction and serendipity silently
+      yields fewer than 2 (or 0) once the store is small enough that nothing
+      unpicked remains — no flag needed. `window_test.go`: 8 tests including
+      `TestSelectWindow_TopKMinus2ByDecayedWeight`,
+      `TestSelectWindow_SerendipityFromOlderHalf`,
+      `TestSelectWindow_Deterministic` (same seed twice → identical
+      selection), `TestSelectWindow_GracefulUnderK`,
+      `TestSelectWindow_PartialSerendipity_NoPanic` (9 items → exactly 1
+      of 2 serendipity slots fills), `TestSelectWindow_Empty`, and
+      `TestSelectWindow_DecayHalvesPerDayOfAge` (a controlled 3-item
+      weight tie/flip that only holds under exact per-day halving, not
+      just age-monotonic ordering).
 
 ## Phase 4 — Design checks, gates, and closure
 
