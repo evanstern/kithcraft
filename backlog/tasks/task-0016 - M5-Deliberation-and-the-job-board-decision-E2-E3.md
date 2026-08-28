@@ -4,7 +4,7 @@ title: 'M5 - Deliberation and the job-board decision (E2, E3)'
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:14'
+updated_date: '2026-08-28 19:18'
 labels:
   - mind
   - m-0-build
@@ -56,12 +56,18 @@ Spec: specs/016-deliberation
 - [ ] #7 No intent names a target by description: every target is a token the mind was given
 - [ ] #8 Design check (micromanagement): across a scripted evening's postings work gets done without the player re-posting, and refusals are legible as this villager's
 - [ ] #9 Design check (politeness-policing): refusals are grounded in the villager's wants, commitments or relationship, never the player's conduct; no compliance gate, cooldown or lockout exists
+- [ ] #10 Spec phase: Phase 1 — The bounded loop (US1)
+- [ ] #11 Spec phase: Phase 2 — The job-board decision (US2)
+- [ ] #12 Spec phase: Phase 3 — Interrupt and window (US3 + US4)
+- [ ] #13 Spec phase: Phase 4 — Design checks, gates, and closure
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 016 stub + link ride this claim commit
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: toolloop shape ports one-to-one per decision-0003; urgency interrupt and K=10 window written in routing §5.5/§6 — execution against a written spec, no unsettled judgment calls (runbook lane 4)
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
