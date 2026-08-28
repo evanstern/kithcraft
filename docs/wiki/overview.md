@@ -1,12 +1,13 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, and the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, and the first vendor-side Fabric mod code, now including death/remains machinery), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: 186a6ba28f07213cb3de55fbe58147c9b7eb4ea2
+  - specs/019-death-remains/spec.md
+verified_against: 8b87adc9c1d534bab978b2d51b0cf2197e3bdf01
 ---
 
 # Overview
@@ -28,7 +29,13 @@ drift markers at birth, written once at mode 0444 with no post-genesis write pat
 guarded by a model-free validator that rejects stated drift with zero LLM
 involvement — and, as of TASK-0009 (V1), the **first vendor-side code**: a real Fabric
 mod in `mod/` implementing the wire client, `session_open` handshake, capability
-manifest, and token registry ([[body-protocol-seam]]).
+manifest, and token registry ([[body-protocol-seam]]) — since TASK-0019 (V5) the mod
+also carries death/remains machinery: zombie sieges suppressed and zombie-conversion
+cancelled to death-equivalent (two more targeted Mixins, [[villager-brain-api]]), a
+named grave + belongings chest placed at the death site with no villager agency
+required, a configurable grief period holding the dead villager's bed/job-site
+unclaimed, an optional job-board posting, and the dead villager's body token retired
+and never reissued.
 
 ## How it works
 

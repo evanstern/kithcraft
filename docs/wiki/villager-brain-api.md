@@ -9,7 +9,11 @@ sources:
   - specs/014-augmented-villager/research/brain-26.2.md
   - specs/014-augmented-villager/research/pair-observation.md
   - specs/014-augmented-villager/research/full-cycle-observation.md
+  - specs/019-death-remains/research/death-26.2.md
 verified_against: 2b19674267f26b216d22617e2ec0ef1def69eb7e
+size_budget_exempt: pre-existing overage since TASK-0014 (a full symbol re-derivation
+  pass); TASK-0019 adds one short paragraph for its own Mixin-surface facts rather than
+  splitting the note, out of this task's scope
 ---
 
 # Villager brain API (Fabric substrate)
@@ -124,6 +128,23 @@ does not hold uniformly at 26.2; it splits per type:**
   `VillagerGoalPackagesMixin` (`getIdlePackage`, drops `VillagerMakeLove`) and
   `VillagerGossipMixin` (`gossip()`, `HEAD`-cancel) — `MixinConfigTest` and a live dev-server
   run (zero breeding/golem events across every observed run this task) both confirm.
+
+**Mixin surface grows to 4 (TASK-0019/V5, R-4/R-5/R-6).** `specs/019-death-remains/
+research/death-26.2.md` re-derived the death/siege surface against the same pinned 26.2
+jar and added two more targeted injections, landing exactly at decision-0002's ~4-Mixin
+ceiling: `VillageSiegeMixin` (`@Inject(method="tick", at=@At("HEAD"), cancellable=true)`
+on `VillageSiege`, unconditional `ci.cancel()` — the sole per-tick entry point for the
+whole siege state machine, so cancelling it there suppresses sieges regardless of the
+26.2 village-eligibility check, which that research doc found is pure POI-occupancy
+density with no door/population count, and which a 3-villager cast always meets once any
+bed is claimed) and `ZombieConversionMixin` (`@Inject(method=
+"convertVillagerToZombieVillager", at=@At("HEAD"), cancellable=true)` on `Zombie`,
+`cir.setReturnValue(false)` — conversion-cancel, ruled equivalent to death). Death itself
+needed **no new Mixin**: `LiveDeathHandling` hooks Fabric API's already-shipped
+`ServerLivingEntityEvents.ALLOW_DEATH`/`AFTER_DEATH` (from the `fabric-entity-events-v1`
+module this mod already depends on transitively), the same "reach for plain/already-
+shipped API before a Mixin" posture this note's memory-module/POI-type/sensor rows
+already established.
 
 The brief's claim that "Fabric exposes activity/schedule injection into real villager
 brains" is confirmed at the symbol level, not just the shape level: injection is real,
