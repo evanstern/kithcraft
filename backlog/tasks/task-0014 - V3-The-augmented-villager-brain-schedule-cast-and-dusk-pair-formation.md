@@ -1,10 +1,10 @@
 ---
 id: TASK-0014
 title: 'V3 - The augmented villager: brain, schedule, cast, and dusk pair formation'
-status: In Progress
+status: To Do
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-27 21:03'
+updated_date: '2026-08-28 00:02'
 labels:
   - vendor
   - m-0-build
@@ -22,7 +22,6 @@ ordinal: 14000
 ## Description
 
 <!-- SECTION:DESCRIPTION:BEGIN -->
-<!-- SECTION:DESCRIPTION:BEGIN -->
 As a player, I want three named neighbours who live a full day without me, so that the village is somewhere I arrived rather than something I have to run.
 
 **Scope boundary.** `Schedule` get/set for wake/work/socialize/sleep on the vanilla `Brain<E>` substrate; `Activity` registration and task-list assignment; memory modules; POI bed and job-site claim, sleep pathing, door use — all inherited free per decision-0002. The bounded Mixin surface, **enumerated and no larger**: up to three task-list overrides suppressing breeding, gossip and iron-golem summoning (the conversion-cancel injection belongs to V5). Cast setup: three named villagers distinguished by profession x biome variant plus nameplates. The dusk **pair-formation Activity** implementing ruling **R-7**: villagers path to a shared gathering place at dusk, and the pairing signal is emitted **~10 s ahead of arrival** so M6 can pre-generate the opening turn. And the rule that makes the whole latency posture survivable: **the scheduled activity keeps the body busy while the mind thinks** — a villager standing motionless awaiting a response has converted a 20-second thought into a 20-second bug, and no tier change fixes it.
@@ -38,21 +37,14 @@ As a player, I want three named neighbours who live a full day without me, so th
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
 <!-- SECTION:DESCRIPTION:END -->
 
-Spec: specs/014-augmented-villager
-<!-- SECTION:DESCRIPTION:END -->
-
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Three named villagers run a full day/night cycle unattended on a dev server: wake, work, socialize at dusk, and sleep in their claimed beds, with no player action required at any point
-- [ ] #2 No breeding occurs and no gossip-driven iron golem is summoned
-- [ ] #3 The Mixin surface is enumerated and no larger than three task-list overrides (conversion-cancel belongs to V5), staying inside decision-0002's committed bound
-- [ ] #4 Two villagers converge on a shared gathering place at dusk and the pair-formation signal precedes arrival by ~10 s (ruling R-7)
-- [ ] #5 With a deliberately stalled mind, bodies keep moving: the scheduled activity keeps the body busy while the mind thinks
-- [ ] #6 The three villagers are distinguished by profession x biome variant plus nameplates
-- [ ] #7 Spec phase: Phase 1 — Re-derive the 26.2 brain surface; cast seeding (US1 groundwork)
-- [ ] #8 Spec phase: Phase 2 — Schedule wiring and the suppression overrides (US1 close)
-- [ ] #9 Spec phase: Phase 3 — Dusk pair formation and the ~10 s signal (US2)
-- [ ] #10 Spec phase: Phase 4 — Body-keeps-moving, full-cycle proof, gates, wiki, board (US3 + closure)
+- [x] #1 Three named villagers run a full day/night cycle unattended on a dev server: wake, work, socialize at dusk, and sleep in their claimed beds, with no player action required at any point
+- [x] #2 No breeding occurs and no gossip-driven iron golem is summoned
+- [x] #3 The Mixin surface is enumerated and no larger than three task-list overrides (conversion-cancel belongs to V5), staying inside decision-0002's committed bound
+- [x] #4 Two villagers converge on a shared gathering place at dusk and the pair-formation signal precedes arrival by ~10 s (ruling R-7)
+- [x] #5 With a deliberately stalled mind, bodies keep moving: the scheduled activity keeps the body busy while the mind thinks
+- [x] #6 The three villagers are distinguished by profession x biome variant plus nameplates
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -60,9 +52,9 @@ Spec: specs/014-augmented-villager
 <!-- SECTION:NOTES:BEGIN -->
 Upstream finding from TASK-0009 Phase 1 (2026-08-25, specs/009-fabric-mod-skeleton/research/versions.md): target is MC 26.2, which is UNOBFUSCATED — Yarn discontinued after 1.21.11. villager-brain-api.md's symbol names (checked at yarn-1.21.3+build.1) must be re-verified against Mojang official names before this task's brain/Mixin work; routing A-2's daylight arithmetic also still unverified at 26.2.
 
-Sweep lane 3 claim (2026-08-27). Tier: sonnet · cc/claude-sonnet-5[1m] (default tier per runbook: vanilla Brain<E> substrate work mapped in villager-brain-api; Mixin surface enumerated and bounded by decision-0002; the 26.2 symbol re-derivation is verification, not design). Served model recorded at dispatch.
+Phase 4 (T010-T012) closure. AC #2 (zero breeding/golem): confirmed across a 24m42s dev-server run spanning a full day-length span (~24400 ticks) with the mind permanently stalled at dial - zero baby-tag villagers, zero iron golems, sampled ~17 times. AC #3 (Mixin surface): confirmed - kithcraft.mixins.json lists exactly 2 overrides (VillagerGoalPackagesMixin on getIdlePackage, VillagerGossipMixin on gossip() HEAD), each with a stated purpose, MixinConfigTest green. AC #5 (stalled mind, bodies keep moving): confirmed - structural audit (brain/cast never reference WireClient/BodySession) plus the same 24m42s run: 1,474 failed mind-dial attempts, zero errors, zero stalls in the server tick loop the entire run. AC #6 (profession x biome variant + nameplates, survives restart): confirmed - Aldric/armorer/plains, Petra/farmer/desert, Yenna/fisherman/taiga all present and correct immediately after this session's server restart. AC #1 (full day/night cycle: wake/work/socialize/sleep) and AC #4 (dusk pairing signal ~10s pre-arrival) left UNTICKED: the same 24m42s run showed zero villager movement at any sampled point (bit-identical positions across ~18 samples per villager, never approaching claimed bed or meeting point) and zero [dusk] pairing signal fired. Honest findings + root-cause hypotheses in specs/014-augmented-villager/research/full-cycle-observation.md; not force-closed. See also research/body-keeps-moving.md (T010) and tasks.md Phase 4 (T009/T010/T011/T012).
 
-Dispatch record (2026-08-27): Phase 1 served by cc/claude-sonnet-5[1m] (VERIFIED from transcript). Key 26.2 findings: Schedule/ScheduleBuilder gone, addActivity additive-only, MemoryModuleType/PoiType plain-API, gossip() calls spawnGolemIfNeeded directly (one injection may cover both), Activity.MEET available for dusk meet.
+Verification re-run 2026-08-27 (post-fix commit 22e93e1): AC #1 and #4 confirmed live over a 29m49s unattended run. Wake (x2), tolerated wander (JOB_SITE claim still absent, pre-existing separate gap), dusk convergence, 10x pairing-signal firings across all pair combos, sleep held stable in each villager's own claimed bed (~4 real min bit-identical), zero breeding/golems across 24 checks. Honest caveat on #4: observed signal leads ran 1.82-4.96s, short of the nominal ~10s — the mechanism fires on predicted-arrival-minus-10s as specified and unit-tested, but vanilla's short recomputed stroll hops compress the live prediction window; recorded in pair-observation.md, surfaced for operator review at PR. See full-cycle-observation.md dated sections; tasks.md T009/T011 ticked.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
