@@ -56,7 +56,11 @@ Spec: specs/013-persona-genesis
 - [ ] #10 Spec phase: Phase 4 — Live genesis, restart proof, gates, closure (US1/US2 live halves)
 <!-- AC:END -->
 
+## Implementation Notes
 
+<!-- SECTION:NOTES:BEGIN -->
+Dispatch tier (sweep-0007-0022 runbook, lane 3): sonnet — default tier; persona port is decision-0003's cleanest carry, design settled, judgment calls made. Model ID cc/claude-sonnet-5[1m] via sonnet-implementer agent (frontmatter pin). Served model verified per-dispatch from transcript.
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
