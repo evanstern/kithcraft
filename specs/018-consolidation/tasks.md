@@ -99,8 +99,31 @@
 
 ## Phase 4 — Gates and closure
 
-- [ ] T006 Full gates: `go vet` + `go test ./...` green; scope clean
-- [ ] T007 Wiki re-ground: touched-source notes re-verified honestly
+- [x] T006 Full gates: `go vet` + `go test ./...` green; scope clean
+      — both run from `mind/` (the Go module root): `go vet ./...` clean,
+      `go test -count=1 ./...` green across all nine packages
+      (`cmd/minddaemon`, `consolidate`, `fakevendor`, `llm`, `memory`,
+      `persona`, `prompt`, `seam`, `wire`); `git status --short` empty
+      before this phase's own commits.
+- [x] T007 Wiki re-ground: touched-source notes re-verified honestly
       ([[promptworld-lineage]] — consolidation port lands for real; overview);
       CAPSULES regenerated if descriptions changed; freshness green
-- [ ] T008 Card ACs ticked with citing proofs; board/spec synced at PR time
+      — [[body-protocol-seam]] was genuinely STALE (`mind/seam/session.go`
+      changed, T005's archival hook); re-verified against the diff and
+      amended with a new "First implementations" paragraph, plus
+      `mind/seam/ingest.go` and `mind/consolidate/archive.go` added to its
+      sources, then re-pinned. [[promptworld-lineage]] and [[overview]]
+      had unchanged sources (RE-PIN-eligible by the mechanical rule) but
+      were amended anyway per the phase-3 handoff note — the death-carry
+      spike's reuse of I's salience-table number needed an honest
+      re-verification against the "forbidden" ruling (no percept-level
+      salience field is reinstated; the number is mind-side only), and
+      both notes' "what exists" language was stale prose even though
+      their sources hadn't moved — then re-pinned. [[v1-demo]]'s sources
+      were unchanged and its prose needed no amendment: RE-PIN-only,
+      left untouched (nothing to say). CAPSULES.md regenerated (both
+      notes' descriptions changed). Freshness gate green for all four
+      touched notes; [[villager-brain-api]] remains STALE but is
+      pre-existing TASK-0014 debt already inherited from `main` before
+      this branch cut — out of this phase's scope, left untouched.
+- [x] T008 Card ACs ticked with citing proofs; board/spec synced at PR time
