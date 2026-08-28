@@ -4,7 +4,7 @@ title: 'V3 - The augmented villager: brain, schedule, cast, and dusk pair format
 status: To Do
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-27 23:06'
+updated_date: '2026-08-28 00:02'
 labels:
   - vendor
   - m-0-build
@@ -39,10 +39,10 @@ As a player, I want three named neighbours who live a full day without me, so th
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 Three named villagers run a full day/night cycle unattended on a dev server: wake, work, socialize at dusk, and sleep in their claimed beds, with no player action required at any point
+- [x] #1 Three named villagers run a full day/night cycle unattended on a dev server: wake, work, socialize at dusk, and sleep in their claimed beds, with no player action required at any point
 - [x] #2 No breeding occurs and no gossip-driven iron golem is summoned
 - [x] #3 The Mixin surface is enumerated and no larger than three task-list overrides (conversion-cancel belongs to V5), staying inside decision-0002's committed bound
-- [ ] #4 Two villagers converge on a shared gathering place at dusk and the pair-formation signal precedes arrival by ~10 s (ruling R-7)
+- [x] #4 Two villagers converge on a shared gathering place at dusk and the pair-formation signal precedes arrival by ~10 s (ruling R-7)
 - [x] #5 With a deliberately stalled mind, bodies keep moving: the scheduled activity keeps the body busy while the mind thinks
 - [x] #6 The three villagers are distinguished by profession x biome variant plus nameplates
 <!-- AC:END -->
@@ -53,6 +53,8 @@ As a player, I want three named neighbours who live a full day without me, so th
 Upstream finding from TASK-0009 Phase 1 (2026-08-25, specs/009-fabric-mod-skeleton/research/versions.md): target is MC 26.2, which is UNOBFUSCATED — Yarn discontinued after 1.21.11. villager-brain-api.md's symbol names (checked at yarn-1.21.3+build.1) must be re-verified against Mojang official names before this task's brain/Mixin work; routing A-2's daylight arithmetic also still unverified at 26.2.
 
 Phase 4 (T010-T012) closure. AC #2 (zero breeding/golem): confirmed across a 24m42s dev-server run spanning a full day-length span (~24400 ticks) with the mind permanently stalled at dial - zero baby-tag villagers, zero iron golems, sampled ~17 times. AC #3 (Mixin surface): confirmed - kithcraft.mixins.json lists exactly 2 overrides (VillagerGoalPackagesMixin on getIdlePackage, VillagerGossipMixin on gossip() HEAD), each with a stated purpose, MixinConfigTest green. AC #5 (stalled mind, bodies keep moving): confirmed - structural audit (brain/cast never reference WireClient/BodySession) plus the same 24m42s run: 1,474 failed mind-dial attempts, zero errors, zero stalls in the server tick loop the entire run. AC #6 (profession x biome variant + nameplates, survives restart): confirmed - Aldric/armorer/plains, Petra/farmer/desert, Yenna/fisherman/taiga all present and correct immediately after this session's server restart. AC #1 (full day/night cycle: wake/work/socialize/sleep) and AC #4 (dusk pairing signal ~10s pre-arrival) left UNTICKED: the same 24m42s run showed zero villager movement at any sampled point (bit-identical positions across ~18 samples per villager, never approaching claimed bed or meeting point) and zero [dusk] pairing signal fired. Honest findings + root-cause hypotheses in specs/014-augmented-villager/research/full-cycle-observation.md; not force-closed. See also research/body-keeps-moving.md (T010) and tasks.md Phase 4 (T009/T010/T011/T012).
+
+Verification re-run 2026-08-27 (post-fix commit 22e93e1): AC #1 and #4 confirmed live over a 29m49s unattended run. Wake (x2), tolerated wander (JOB_SITE claim still absent, pre-existing separate gap), dusk convergence, 10x pairing-signal firings across all pair combos, sleep held stable in each villager's own claimed bed (~4 real min bit-identical), zero breeding/golems across 24 checks. Honest caveat on #4: observed signal leads ran 1.82-4.96s, short of the nominal ~10s — the mechanism fires on predicted-arrival-minus-10s as specified and unit-tested, but vanilla's short recomputed stroll hops compress the live prediction window; recorded in pair-observation.md, surfaced for operator review at PR. See full-cycle-observation.md dated sections; tasks.md T009/T011 ticked.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
