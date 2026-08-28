@@ -4,7 +4,7 @@ title: M3 - Persona genesis and the persona firewall
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:38'
-updated_date: '2026-08-28 18:07'
+updated_date: '2026-08-28 18:12'
 labels:
   - mind
   - m-0-build
@@ -50,7 +50,13 @@ Spec: specs/013-persona-genesis
 - [ ] #4 Personas survive a daemon restart and re-bind to the same bodies
 - [ ] #5 Each persona is paired with a profession and biome variant so the fiction and the body agree
 - [ ] #6 Design check (politeness-policing): the genesis prompt produces no moralizing persona template, and the drift lexicon catches stated moralizing
+- [ ] #7 Spec phase: Phase 1 — Persona type, write-once storage, re-bind (US2)
+- [ ] #8 Spec phase: Phase 2 — Model-free validator (US3 + US4 lexicon half)
+- [ ] #9 Spec phase: Phase 3 — E1 genesis (US1 + US4 prompt half)
+- [ ] #10 Spec phase: Phase 4 — Live genesis, restart proof, gates, closure (US1/US2 live halves)
 <!-- AC:END -->
+
+
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
