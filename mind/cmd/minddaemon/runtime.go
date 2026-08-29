@@ -44,6 +44,7 @@ type bodyStore struct {
 	log           *memory.Log
 	ledger        *consolidate.Ledger
 	gate          *memory.Gate
+	instrument    *memory.Instrument
 	lastWorldTime int64
 }
 
@@ -163,7 +164,10 @@ func (rt *Runtime) bodyOrOpen(body string) (*bodyStore, error) {
 		log.Close()
 		return nil, err
 	}
-	bs := &bodyStore{log: log, ledger: ledger, gate: memory.NewGate(), lastWorldTime: -1}
+	// TASK-0021 T005 (card AC #5): one Instrument per body, day-length
+	// matching R-1's kept cycle (consolidate.CycleTicks) — the same
+	// villager-day granularity RunNight's own sleep boundary uses.
+	bs := &bodyStore{log: log, ledger: ledger, gate: memory.NewGate(), instrument: memory.NewInstrument(consolidate.CycleTicks), lastWorldTime: -1}
 	rt.bodies[body] = bs
 	return bs, nil
 }
@@ -186,6 +190,8 @@ func (rt *Runtime) HandlePercept(conn seam.Conn, body string, msg map[string]any
 	if admit, _ := bs.gate.Decide(payload); admit {
 		if _, err := bs.log.Append(eventInputFromPercept(worldTime, payload)); err != nil {
 			fmt.Fprintf(os.Stderr, "minddaemon: memory append for body %q: %v\n", body, err)
+		} else {
+			bs.instrument.Record(worldTime)
 		}
 	}
 

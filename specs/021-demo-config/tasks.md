@@ -108,12 +108,75 @@
 
 ## Phase 2 — Knobs and the report (US3 + US4)
 
-- [ ] T004 Config surface: daemon flags/env (socket, run dir, genesis mode);
+- [x] T004 Config surface: daemon flags/env (socket, run dir, genesis mode);
       mod danger-tuning knob (R-6) present + OFF by default; grief knob (R-3)
       verified config; config-not-constant audit test (card ACs #4, #6)
-- [ ] T005 Session-end report: per-class call/token counters (M4 Accounting)
+
+      Done: `mind/cmd/minddaemon/config.go` (new) — `envOr`/`envOrBool`, the
+      env-mirror idiom `main.go`'s `-socket`/`-rundir`/`-genesis` flags now
+      use as their defaults (`MINDDAEMON_SOCKET`/`MINDDAEMON_RUNDIR`/
+      `MINDDAEMON_GENESIS`; an explicit flag still wins — standard Go CLI
+      precedence, not a second config path). `-genesis=false` (FR-007's
+      rehearsal mode) forces the zero-call path unconditionally in
+      `main.go` by nil-ing `rt.Client`/`rt.Digester` after construction,
+      regardless of whether `ANTHROPIC_API_KEY` happens to be set —
+      decoupling "rehearsal" from "key absent" as spec.md's US1 scenario 2
+      asks. `mod/src/main/java/dev/kithcraft/mod/death/DangerTuning.java`
+      (new) is R-6's knob: `Long`/`Boolean.getBoolean("kithcraft.
+      dangerTuning")`, same system-property idiom as `GriefPeriod.
+      configuredTicks()` (R-3, cited: `mod/src/main/java/dev/kithcraft/mod/
+      death/GriefPeriod.java:23`, already config, already tested in
+      `GriefPeriodTest.configOverridableNotAConstant`) — off by default.
+      Smallest defensible lever (death-mechanics.md §6.2 item 5): despawn a
+      newly-spawned hostile landing within `SUPPRESSION_RADIUS` (24
+      blocks) of a cast member, wired into `KithcraftMod`'s already-
+      registered `ServerEntityEvents.ENTITY_LOAD` diagnostic hook — no new
+      Mixin (FR-006's 4-Mixin cap, verified still exactly 4 by
+      `MixinConfigTest`, stays spent where it is), no new event
+      registration. Heavily ponytailed as recorded-take-only: does not
+      touch permadeath or the admitted-causes table, matching §6.2's own
+      "the correct lever is demo-config danger tuning... not a change to
+      the permadeath rules themselves."
+      Tests: `mind/cmd/minddaemon/config_test.go` (new) —
+      `TestEnvOr_ConfigNotConstant`/`TestEnvOrBool_ConfigNotConstant`
+      (env override beats default; unparseable falls back, not a crash).
+      `mod/src/test/java/dev/kithcraft/mod/death/DangerTuningTest.java`
+      (new) — off by default, override-not-constant, and the pure
+      `shouldSuppress` decision table (disabled/out-of-radius/at-the-edge/
+      no-cast-member-loaded). Full suites green: `go test -count=1 ./...`
+      and `./gradlew build test` (175 JUnit tests, 0 failures).
+
+- [x] T005 Session-end report: per-class call/token counters (M4 Accounting)
       + E6-input-tokens instrument (M2), emitted unconditionally on shutdown
       and appended to a run log (card AC #5); zero-call path tested
+
+      Done: `mind/cmd/minddaemon/report.go` (new) — `Runtime.Report(w,
+      runDir)` writes a readable text report (every `llm.E1`..`E6` row,
+      zeroed rather than omitted when `Accounting.Report()` has no entry —
+      unlike Accounting's own doc'd omission, this format fills every
+      class in for readability) plus each seen body's `memory.Instrument`
+      admitted-count-per-villager-day series, sorted for determinism.
+      Written to `w` (stdout in `main.go`) AND appended to
+      `<rundir>/session-report.log`; a file-append failure is reported on
+      `w`, never dropped silently. `main.go`'s `defer rt.Report(os.Stdout,
+      *runDir)` is registered after `defer rt.Close()`, so — deferred LIFO
+      — it runs BEFORE `Close`, capturing final in-memory state ahead of
+      store teardown, on both the SIGINT/SIGTERM path (existing signal
+      handler closes the listener, `serve` returns, `main` unwinds its
+      defers) and a clean exit. `mind/cmd/minddaemon/runtime.go`: each
+      `bodyStore` now also opens a `memory.Instrument` (day length =
+      `consolidate.CycleTicks`, matching RunNight's own sleep-boundary
+      granularity) and `HandlePercept` records into it on every admitted
+      append — closing the gap Phase 1 left (the instrument existed in
+      `mind/memory` since spec 010 but nothing in the daemon called
+      `Record`).
+      Tests: `mind/cmd/minddaemon/report_test.go` (new) —
+      `TestReport_ZeroCallPathEmitsZeroed` (card AC #5's zero-call
+      scenario: fresh runtime, no Client, no bodies — every class row
+      reads `calls=0`, bodies section reads "no bodies seen this
+      session"), `TestReport_IncludesAdmittedInstrumentCounts` (one
+      admitted percept through the real `HandlePercept` path lands "day 0:
+      1 admitted" in the report text).
 
 ## Phase 3 — The documented sequence and the live proof (US1 + US2 live)
 

@@ -16,11 +16,13 @@ import (
 )
 
 func main() {
-	socket := flag.String("socket", "", "path to the UDS socket the daemon listens on")
-	// ponytail: this is the whole config surface Phase 1 needs to run for
-	// real; env/flag knobs for R-3/R-6 and a genesis on/off switch are
-	// TASK-0021 T004 (Phase 2)'s job, not duplicated here.
-	runDir := flag.String("rundir", "run", "directory for persisted state (personas, memory logs, ledgers, archive)")
+	socket := flag.String("socket", envOr("MINDDAEMON_SOCKET", ""), "path to the UDS socket the daemon listens on (env MINDDAEMON_SOCKET)")
+	runDir := flag.String("rundir", envOr("MINDDAEMON_RUNDIR", "run"), "directory for persisted state (personas, memory logs, ledgers, archive) (env MINDDAEMON_RUNDIR)")
+	// FR-007's rehearsal path (spec.md US1 scenario 2): off forces the
+	// zero-call path unconditionally, regardless of whether
+	// ANTHROPIC_API_KEY happens to be exported — the R-3/R-6 mod-side
+	// knobs live in mod/ (system properties), not here.
+	genesis := flag.Bool("genesis", envOrBool("MINDDAEMON_GENESIS", true), "run persona genesis for missing cast members; false forces the zero-call rehearsal path (env MINDDAEMON_GENESIS)")
 	flag.Parse()
 
 	if *socket == "" {
@@ -34,7 +36,11 @@ func main() {
 		os.Exit(1)
 	}
 	defer rt.Close()
+	defer rt.Report(os.Stdout, *runDir)
 
+	if !*genesis {
+		rt.Client, rt.Digester = nil, nil
+	}
 	if err := rt.LoadOrGenesisCast(context.Background()); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

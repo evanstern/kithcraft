@@ -10,6 +10,7 @@ import dev.kithcraft.mod.build.LiveBuildExecution;
 import dev.kithcraft.mod.cast.Cast;
 import dev.kithcraft.mod.cast.CastData;
 import dev.kithcraft.mod.cast.CastSeeder;
+import dev.kithcraft.mod.death.DangerTuning;
 import dev.kithcraft.mod.live.BodySession;
 import dev.kithcraft.mod.live.BodyTokenLookups;
 import dev.kithcraft.mod.live.LiveDeathHandling;
@@ -23,6 +24,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
@@ -74,8 +76,21 @@ public class KithcraftMod implements ModInitializer {
 		// independent of the getEntitiesOfClass scan below (which is returning 0 even after
 		// a confirmed "Summoned new Villager" console line — this narrows whether the entity
 		// truly never loads or whether the scan itself is the bug).
-		ServerEntityEvents.ENTITY_LOAD.register((entity, level) ->
-			LOGGER.info("[live] ENTITY_LOAD: {} at {}", entity.getClass().getName(), entity.blockPosition()));
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			LOGGER.info("[live] ENTITY_LOAD: {} at {}", entity.getClass().getName(), entity.blockPosition());
+			// TASK-0021 T004 (R-6): the danger-tuning lever, off unless the operator opted
+			// in for this take. No new Mixin — this reuses the diagnostic hook already
+			// registered above (see DangerTuning's class doc for the upgrade path).
+			if (entity instanceof Monster hostile && DangerTuning.enabled()) {
+				double distance = findCastVillagers(level).stream()
+					.mapToDouble(hostile::distanceTo)
+					.min().orElse(Double.POSITIVE_INFINITY);
+				if (DangerTuning.shouldSuppress(true, distance)) {
+					LOGGER.info("[danger-tuning] suppressing hostile spawn near cast: {}", hostile.getClass().getSimpleName());
+					hostile.discard();
+				}
+			}
+		});
 	}
 
 	/** T002 (card AC #6): seed the three-member cast once per world, at the world spawn.
