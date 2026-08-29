@@ -228,7 +228,11 @@
       can never start through the current live wiring regardless of
       `Activity.WORK` timing. Full evidence, log excerpts, and the exact
       code citations: `specs/020-job-board/research/board-observation.md`.
-- [ ] T011 Full gates: gradle build + test green; scope clean
+- [x] T011 Full gates: `./gradlew build test` — BUILD SUCCESSFUL, 168 tests,
+      0 failures, 0 errors (unchanged from T009's Phase 3 count — T010 added
+      no source, only `research/board-observation.md` + this file). Scope
+      clean: `git status` shows no untracked/modified files beyond the
+      board/build phase's own committed changes.
 - [ ] T012 Wiki re-ground: touched-source notes re-verified honestly
       (overview — the mod gains the board/build surface; body-protocol-seam
       if seam-facing claims change; villager-brain-api if substrate facts
