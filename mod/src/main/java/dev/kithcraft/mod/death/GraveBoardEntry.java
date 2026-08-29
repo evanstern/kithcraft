@@ -7,12 +7,15 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * T009 (FR-005, card AC #6): the optional "tend &lt;name&gt;'s grave" posting, per plan.md's V4
- * decoupling seam — V4 (the job-board, TASK-0020) is not merged, so this rides the read channel
- * V2 already carries instead of a not-yet-real book block: §4.7's {@code text} percept
- * ({@link Testimony#textContent}), the shape a mind already treats as "something read from an
- * artifact." When V4 merges its board book, the same content rides that channel with no rework
- * — the seam is the text, not the fixture it hangs on.
+ * T009 (FR-005, card AC #6): the optional "tend &lt;name&gt;'s grave" posting. Its content is
+ * §4.7's {@code text} shape ({@link Testimony#textContent}) — "something read from an
+ * artifact" — regardless of what it hangs on.
+ *
+ * <p><b>TASK-0020 T006 closed the seam this class's own doc used to flag:</b> V4's board
+ * ({@code dev.kithcraft.mod.board.Board}) is merged, and {@code
+ * dev.kithcraft.mod.live.LiveDeathHandling} now posts this entry's {@link #content()} text
+ * onto the real board via {@code Board#postNotice} — no longer just composed and logged. This
+ * class itself needed no rework: the seam was always the text, never the fixture it hung on.
  *
  * <p>Takeable or ignorable (design-brief #6: reluctance/grumbling is character, not a bug) —
  * {@link #take()} exists so a survivor CAN claim it; nothing requires it to ever be called.

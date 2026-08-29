@@ -16,8 +16,12 @@ public final class Verbs {
 
     /** The declared verb set (mirrors {@code Handshake.MANIFEST}'s {@code verbs} list) —
      * the single source of truth {@link IntentHandler} checks an incoming intent's {@code
-     * verb} against for §5.3's {@code unknown_verb} refusal (V-4). */
-    public static final Set<String> DECLARED = Set.of("go_to", "speak", "attend", "wait");
+     * verb} against for §5.3's {@code unknown_verb} refusal (V-4). {@code claim} (TASK-0020
+     * T004) is the core four plus one manifest-declared extended verb — the same "extras"
+     * mechanism {@code Handshake.MANIFEST}'s {@code percept_types} already uses, applied to
+     * verbs (plan.md design decision 3): the core floor has nothing shaped like "take this
+     * posting," so it rides §5.5's declared-extras half rather than a protocol change. */
+    public static final Set<String> DECLARED = Set.of("go_to", "speak", "attend", "wait", "claim");
 
     /** One tick's worth of {@code go_to} progress toward a resolved place. {@link
      * IntentHandler} calls {@link Actuator#stepWalk} once per tick until {@link #done()}. */

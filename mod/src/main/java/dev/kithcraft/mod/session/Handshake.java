@@ -22,8 +22,12 @@ import java.util.Map;
  *       r8-hearing-hook.md); every extra here has a composing class in {@code percept/}.
  *   <li>{@code origins} — §2.7's full closed vocabulary (fixed by the protocol, not a vendor
  *       choice).
- *   <li>{@code verbs} — the §5.5 core four only ({@code go_to}, {@code speak}, {@code attend},
- *       {@code wait}); extended verbs (e.g. {@code carry}) are V2's to declare once built.
+ *   <li>{@code verbs} — the §5.5 core four ({@code go_to}, {@code speak}, {@code attend},
+ *       {@code wait}) plus one extended verb this vendor now declares: {@code claim}
+ *       (TASK-0020 T004, US2) — target {@code thing} only, the SAME target shape {@code
+ *       go_to}/{@code speak} already carry for a thing token, no new target type. Extended
+ *       verbs are declared here exactly per §5.5's own split; {@code carry} remains
+ *       undeclared, V2's to add once built.
  *   <li>{@code salient_kinds} — a minimal, world-independent starter vocabulary the augmented
  *       villager's vanilla substrate already makes real (docs/design/entity-implementation-
  *       comparison.md R1.1/R1.2: beds, doors+bells in raid behavior, hostile targeting) plus
@@ -45,12 +49,13 @@ public final class Handshake {
             "self_state", "sound", "told_fact", "text", "change_report"));
         // §2.7's full closed origin vocabulary.
         m.put("origins", List.of("acted", "saw", "heard", "felt", "told", "read"));
-        // §5.5's four core verbs; extended verbs are V2's to declare.
+        // §5.5's four core verbs, plus TASK-0020 T004's one manifest-declared extended verb.
         m.put("verbs", List.of(
             Map.of("verb", "go_to", "targets", List.of("place", "thing", "body")),
             Map.of("verb", "speak", "targets", List.of("body", "person", "none")),
             Map.of("verb", "attend", "targets", List.of("place", "none")),
-            Map.of("verb", "wait", "targets", List.of("none"))));
+            Map.of("verb", "wait", "targets", List.of("none")),
+            Map.of("verb", "claim", "targets", List.of("thing"))));
         // A minimal, world-independent starter vocabulary (§3 AR-2/AR-3: opaque kind
         // tokens, roles + descriptor carry the meaning). Not derived from any world query.
         m.put("salient_kinds", List.of(

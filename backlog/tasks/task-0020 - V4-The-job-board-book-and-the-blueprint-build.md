@@ -1,9 +1,10 @@
 ---
 id: TASK-0020
 title: V4 - The job-board book and the blueprint build
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
+updated_date: '2026-08-29 03:24'
 labels:
   - vendor
   - m-0-build
@@ -40,24 +41,50 @@ As a player, I want to post a blueprint on a board and have a neighbour take it 
 **References.** docs/design/demo-build-plan.md section 3.3 (V4) is the plan of record. Ratified surfaces consumed: docs/design/kithcraft-brief.md (#7 the diegetic order interface; the tedium and micromanagement spell-breakers; the loneliness-cure constraint), docs/design/body-protocol-v0.md (text percept with origin:read, Q-6's thin target shape, AR-4 token resolution), decision-0002 (engine-side resolution on the vanilla substrate).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/020-job-board
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 A diegetic in-world board (book/lectern) accepts a player-written blueprint and is readable by villagers, with other villagers' claims visible on it
-- [ ] #2 A villager walks to the board, reads it, and a text percept with origin:read carrying the blueprint as text crosses the seam
-- [ ] #3 No protocol extension is made: the blueprint rides the read channel per Q-6, not a new structured target shape
-- [ ] #4 A claim becomes visible to the other villagers
-- [ ] #5 The claimed blueprint is built block by block while the player builds alongside, with engine-side placement and material sourcing
-- [ ] #6 Interrupting at dusk leaves a partial build that resumes the next work period
-- [ ] #7 Design check (tedium): posting an order is one diegetic gesture, not a form or a syntax the player must phrase carefully
-- [ ] #8 Design check (micromanagement): once claimed, a build proceeds without the player re-issuing, supervising or hand-feeding materials
-- [ ] #9 Constraint (minds-are-others): the board posts an order, not a command, and no path exists by which the player forces a claim
+- [x] #1 A diegetic in-world board (book/lectern) accepts a player-written blueprint and is readable by villagers, with other villagers' claims visible on it
+- [x] #2 A villager walks to the board, reads it, and a text percept with origin:read carrying the blueprint as text crosses the seam
+- [x] #3 No protocol extension is made: the blueprint rides the read channel per Q-6, not a new structured target shape
+- [x] #4 A claim becomes visible to the other villagers
+- [x] #5 The claimed blueprint is built block by block while the player builds alongside, with engine-side placement and material sourcing
+- [x] #6 Interrupting at dusk leaves a partial build that resumes the next work period
+- [x] #7 Design check (tedium): posting an order is one diegetic gesture, not a form or a syntax the player must phrase carefully
+- [x] #8 Design check (micromanagement): once claimed, a build proceeds without the player re-issuing, supervising or hand-feeding materials
+- [x] #9 Constraint (minds-are-others): the board posts an order, not a command, and no path exists by which the player forces a claim
+- [x] #10 Spec phase: Phase 1 — The board and the read (US1)
+- [x] #11 Spec phase: Phase 2 — The claim (US2)
+- [x] #12 Spec phase: Phase 3 — The build (US3 + US4)
+- [x] #13 Spec phase: Phase 4 — The beat, gates, and closure
 <!-- AC:END -->
+
+
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4 tail; M5 dependency merged as PR #22); spec 020 stub + link ride this claim commit
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: the board rides Q-6's read channel with no protocol extension; build execution is deliberately the thinnest possible system (runbook lane 4 tail; M5 dependency satisfied by PR #22)
+<!-- SECTION:NOTES:END -->
+
+## Comments
+
+<!-- COMMENTS:BEGIN -->
+author: phase4-closer
+created: 2026-08-29 03:22
+---
+Phase 4 (T010-T013) complete via sonnet closer dispatch. AC#1 (board accepts free-text posting, readable, claims visible): BoardTest (5 tests, T001) + live -- book planted via /data merge, persisted through two dev-server restarts, read repeatedly (specs/020-job-board/research/board-observation.md sec1-2). AC#2 (villager reads, text percept origin:read crosses seam): BoardReadTrackerTest/BoardReadProtocolTest (T002) + board-observation.md sec2 -- "[board] Aldric/Petra reads the board" fired live, repeatedly, both villagers, percept_type=text/origin=read. AC#3 (no protocol extension): BoardReadProtocolTest (T002, 2 tests) + BoardClaimProtocolTest (T004, 3 tests) -- structural zero-extension proof, content/envelope keys identical to sec4.7's pre-existing shape. AC#4 (claim visible to other villagers): Board.readableContent() unconditionally concatenates claims after text (Board.java:97-103); BoardTest's tryClaim/postNotice tests. Live: a claim persisted from the genesis session and every subsequent live read this closer session pulled from the same readableContent() call, so the claim line necessarily rode along. AC#5 (built block by block, engine-side placement + material sourcing): unit-proven -- BlueprintParserTest (6), PlacementTest (5), BuildEngineTest (5). Live NOT observed: board-observation.md sec4 identifies the exact root cause (LiveBuildExecution.findClaimant checks DuskPairing's per-cast seat tokens, but a live claim is always submitted under BodySession's separate generic attach token -- two token namespaces that structurally never match, so build cannot start through today's live wiring regardless of Activity.WORK timing). Live half deferred to I2 (TASK-0022), the same honest pattern TASK-0019's AC#5/#8 used. AC#6 (dusk interrupt, resumes next work period): unit-proven -- BuildEngineTest's interrupt/resume tests (T009). Live NOT observed -- no build ever started this pass (AC#5's root cause); live half deferred to I2 alongside AC#5. AC#7 (design check, tedium): BoardSetup accepts either an unsigned book-and-quill or a signed written book, no signing/syntax required; BlueprintParser.parse -- any non-blank text parses to generous defaults (T007). AC#8 (design check, micromanagement): StructuralAbsenceTest#noManualBuildProgressPath (T008) -- BuildEngine.advance has exactly one call site in the whole mod. AC#9 (constraint, minds-are-others): StructuralAbsenceTest#noForceClaimPath (T006) -- Board.tryClaim is package-private and called from exactly one place. DoD#1 (tests pass): ./gradlew build test -- 168 tests, 0 failures, 0 errors (T011). DoD#2 (wiki/freshness): overview.md + body-protocol-seam.md re-grounded, freshness gate green -- 11/11 notes fresh (T012). DoD#3 (spec/backlog sync) deliberately left unticked, reserved for the orchestrator at PR/merge time per TASK-0019's own precedent -- no PR has been opened yet. Full evidence: specs/020-job-board/research/board-observation.md, specs/020-job-board/tasks.md (T010-T013).
+---
+<!-- COMMENTS:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
+- [x] #1 Tests pass
+- [x] #2 Docs and wiki are updated and pass freshness tests
 - [ ] #3 Spec and Backlog are in sync
 <!-- DOD:END -->

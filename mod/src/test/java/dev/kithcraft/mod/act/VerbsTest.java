@@ -12,8 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class VerbsTest {
 
     @Test
-    void declaredVerbsAreExactlyTheSection55Core() {
-        assertEquals(Set.of("go_to", "speak", "attend", "wait"), Verbs.DECLARED);
+    void declaredVerbsAreTheSection55CorePlusTask0020sClaimExtension() {
+        assertEquals(Set.of("go_to", "speak", "attend", "wait", "claim"), Verbs.DECLARED);
     }
 
     @Test

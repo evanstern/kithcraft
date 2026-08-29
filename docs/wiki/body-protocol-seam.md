@@ -25,7 +25,7 @@ sources:
   - mind/seam/ingest.go
   - mind/consolidate/archive.go
 size_budget_exempt: pre-existing since TASK-0009/0012 (one synthesis note tracking the seam, wire, and every vendor landing across TASK-0007..0015); a summary-style split is a separate task, out of TASK-0015's scope
-verified_against: eda461376e0bce9bce286137a8295aeb98315e0a
+verified_against: 6055fd0fd5b3949d0e65e99ab009eb1c675cc0c2
 ---
 
 # Body-protocol seam
@@ -185,6 +185,23 @@ point — consistent with this note's "durable memory belongs to the mind" invar
 with "the vendor never persists, ranks, or weights a mind's memories": archival is
 mind-side state consulted at the seam, not a new vendor-visible surface.
 
+TASK-0020 (V4) then exercised §5.5's manifest-declared-extras half for the first time:
+`mod/.../session/Handshake.MANIFEST`'s `verbs` list grew from the core four to five —
+`claim` (target `thing` only, the same target shape `go_to`/`speak` already carry for a thing
+token, no new target type) sits alongside `go_to`/`speak`/`attend`/`wait` as a declared
+extended verb, not a sixth core-floor addition; the core four this note's "what v0 binds"
+section names are unchanged and still every vendor's mandatory floor. `mod/.../act/
+ClaimRegistry.java` is the new seam (mirrors `TargetResolution.Ground`/`Verbs.Actuator`'s own
+shape); `mod/.../board/BoardClaims.java` is its real implementation, threaded into
+`IntentHandler` alongside the four core verbs' `LiveActuator`, so a `claim` intent drives the
+identical intent → intent_ack → one `act_result` percept surface this note already describes
+— no protocol-shape change, confirmed structurally by `specs/020-job-board/tasks.md` T004's
+`BoardClaimProtocolTest` (target carries no key beyond `type`/`thing_id`, resolves through the
+unmodified `TargetResolution.resolve`) and reconfirmed live in
+`specs/020-job-board/research/board-observation.md` (a claim intent against the manifest's
+declared `claim` verb round-tripped `intent_ack{accepted:true}` → `act_result{outcome:
+"completed"}` end to end against the real dev server).
+
 Both harnesses this note described (`seam/go-roundtrip`, `seam/java-roundtrip`) still
 exist as throwaway, spec-facing proof, independent of either real implementation; the Java
 one was rebuilt on the same Gson-decode/custom-encode split once TASK-0009 introduced
@@ -264,3 +281,10 @@ registration onto a villager entity (turning a fired vanilla `GameEvent` into an
 `specs/012-vendor-conformance/research/verb-observation.md`, not a blocker. Transport (Q-1) is
 closed — but decision-0004 is **proposed**, not accepted: the operator ratifies at the
 TASK-0007 PR, and merge is the ratification act per the decision-0001/0002/0003 precedent.
+
+**Re-pinned 2026-08-28 (TASK-0020 Phase 4, T012):** flagged NEEDS-REVIEW because the manifest
+gained its fifth verb via §5.5's declared-extras half — the manifest claims this note makes
+(core four vs. declared extras, L-7 byte-identical-across-bodies-and-worlds) were re-verified
+directly against `Handshake.MANIFEST`'s current source and hold exactly as described; the only
+change needed was the "First implementations" paragraph above documenting that `claim` now
+occupies that previously-theoretical extras slot. Nothing else in this note's prose changed.

@@ -1,5 +1,6 @@
 package dev.kithcraft.mod;
 
+import dev.kithcraft.mod.act.ClaimRegistry;
 import dev.kithcraft.mod.act.IntentHandler;
 import dev.kithcraft.mod.act.TargetResolution;
 import dev.kithcraft.mod.act.Verbs;
@@ -91,7 +92,9 @@ class LeakPassTest {
         List<Object> sent = new ArrayList<>();
         Place place = new Place("pl-1", "the well");
         TargetResolution.Ground ground = new TargetResolution.Ground() {
-            @Override public boolean isIssued(String token) { return "pl-1".equals(token); }
+            @Override public boolean isIssued(String token) {
+                return "pl-1".equals(token) || "th-board".equals(token) || "th-other".equals(token);
+            }
             @Override public Optional<Place> placeFor(String token) {
                 return "pl-1".equals(token) ? Optional.of(place) : Optional.empty();
             }
@@ -104,7 +107,20 @@ class LeakPassTest {
             @Override public void speak(String body, Map<String, Object> target, String text) {}
             @Override public void attend(String body, Place p) {}
         };
-        IntentHandler handler = new IntentHandler(new PerceptEmitter(sent::add, "s-1"), ground, actuator, "s-1", "b-eda");
+        // T004: a claim verb's every act_result outcome (completed/blocked/not_capable), for
+        // the same exhaustive leak coverage this test already gives the core four verbs.
+        boolean[] claimedOnce = {false};
+        ClaimRegistry claims = (claimantBody, thingToken) -> {
+            if (!"th-board".equals(thingToken)) {
+                return ClaimRegistry.Outcome.UNKNOWN_POSTING;
+            }
+            if (claimedOnce[0]) {
+                return ClaimRegistry.Outcome.ALREADY_CLAIMED;
+            }
+            claimedOnce[0] = true;
+            return ClaimRegistry.Outcome.CLAIMED;
+        };
+        IntentHandler handler = new IntentHandler(new PerceptEmitter(sent::add, "s-1"), ground, actuator, claims, "s-1", "b-eda");
 
         List<Object> envelopes = new ArrayList<>();
         envelopes.add(handler.handle(Map.of("intent_id", "i-1", "verb", "go_to",
@@ -126,6 +142,15 @@ class LeakPassTest {
             "target", Map.of("type", "place", "place", "pl-1")), 107L);
         envelopes.add(gone);
         handler.tick(108L); // resolves i-8's target_gone
+
+        // T004: claim's three act_result outcomes — completed, blocked (a second claimant),
+        // not_capable (an issued token this registry doesn't recognize as a posting).
+        envelopes.add(handler.handle(Map.of("intent_id", "i-9", "verb", "claim",
+            "target", Map.of("type", "thing", "thing_id", "th-board"), "reason", "it's my trade"), 109L));
+        envelopes.add(handler.handle(Map.of("intent_id", "i-10", "verb", "claim",
+            "target", Map.of("type", "thing", "thing_id", "th-board"), "reason", "I wanted it too"), 110L));
+        envelopes.add(handler.handle(Map.of("intent_id", "i-11", "verb", "claim",
+            "target", Map.of("type", "thing", "thing_id", "th-other"), "reason", "wrong thing"), 111L));
 
         envelopes.addAll(sent);
         return envelopes;

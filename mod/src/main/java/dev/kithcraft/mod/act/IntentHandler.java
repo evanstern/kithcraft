@@ -22,6 +22,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * table has none), so a {@code wait} intent is one beat's worth of "did nothing, on purpose"
  * (ponytail: add a duration convention if/when the protocol grows one; a mind re-issues
  * {@code wait} to keep waiting, same as Hearth's own worked sketch, §9.2).
+ *
+ * <p>TASK-0020 T004 (US2): {@code claim} is a fifth verb, also inline-completing, resolved
+ * through {@link ClaimRegistry} rather than {@link Verbs.Actuator} — claiming is board-side
+ * bookkeeping, not a world-facing act. It is declared via §5.5's extended-verb mechanism
+ * (manifest-declared, {@link dev.kithcraft.mod.session.Handshake}), not the core floor: none
+ * of {@code go_to}/{@code speak}/{@code attend}/{@code wait} fits "take this posting."
  */
 public final class IntentHandler {
 
@@ -32,6 +38,7 @@ public final class IntentHandler {
     private final PerceptEmitter emitter;
     private final TargetResolution.Ground ground;
     private final Verbs.Actuator actuator;
+    private final ClaimRegistry claims;
     private final String session;
     private final String body;
     private final Map<String, Pending> pendingWalks = new LinkedHashMap<>();
@@ -42,10 +49,11 @@ public final class IntentHandler {
     private final AtomicLong ackSeq = new AtomicLong();
 
     public IntentHandler(PerceptEmitter emitter, TargetResolution.Ground ground,
-            Verbs.Actuator actuator, String session, String body) {
+            Verbs.Actuator actuator, ClaimRegistry claims, String session, String body) {
         this.emitter = Objects.requireNonNull(emitter, "emitter");
         this.ground = Objects.requireNonNull(ground, "ground");
         this.actuator = Objects.requireNonNull(actuator, "actuator");
+        this.claims = Objects.requireNonNull(claims, "claims");
         this.session = Objects.requireNonNull(session, "session");
         this.body = Objects.requireNonNull(body, "body");
     }
@@ -98,6 +106,21 @@ public final class IntentHandler {
                     "looked around", worldTime);
             }
             case "wait" -> emitResult(intentId, verb, null, "completed", null, reason, "waited", worldTime);
+            case "claim" -> {
+                // T004 (AR-4): the mind named a token in a percept it was shown (the board's
+                // own thing token, riding provenance.source on every read — Testimony's §4.7
+                // shape); this is the engine resolving it. No new target field: "thing" is
+                // the SAME shape go_to/speak already parse (TargetResolution).
+                String thingToken = targetMap == null ? null : (String) targetMap.get("thing_id");
+                switch (claims.claim(body, thingToken)) {
+                    case CLAIMED -> emitResult(intentId, verb, null, "completed", null, reason,
+                        "claimed it", worldTime);
+                    case ALREADY_CLAIMED -> emitResult(intentId, verb, null, "failed", "blocked",
+                        reason, "someone else already claimed it", worldTime);
+                    case UNKNOWN_POSTING -> emitResult(intentId, verb, null, "failed", "not_capable",
+                        reason, "that isn't a postable thing", worldTime);
+                }
+            }
             default -> throw new AssertionError("unreachable: " + verb + " is in Verbs.DECLARED");
         }
         return ack;

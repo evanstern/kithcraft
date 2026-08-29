@@ -1,11 +1,19 @@
 package dev.kithcraft.mod;
 
+import dev.kithcraft.mod.board.BoardData;
+import dev.kithcraft.mod.board.BoardSetup;
+import dev.kithcraft.mod.board.BoardVisit;
 import dev.kithcraft.mod.brain.DuskPairing;
+import dev.kithcraft.mod.build.BuildData;
+import dev.kithcraft.mod.build.BuildSetup;
+import dev.kithcraft.mod.build.LiveBuildExecution;
 import dev.kithcraft.mod.cast.Cast;
 import dev.kithcraft.mod.cast.CastData;
 import dev.kithcraft.mod.cast.CastSeeder;
 import dev.kithcraft.mod.live.BodySession;
 import dev.kithcraft.mod.live.LiveDeathHandling;
+import dev.kithcraft.mod.percept.Place;
+import dev.kithcraft.mod.tokens.TokenRegistry;
 import dev.kithcraft.mod.tokens.TokenRegistryData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -46,6 +54,12 @@ public class KithcraftMod implements ModInitializer {
 	private BlockPos pendingOrigin;
 	private long lastDuskSetupAttempt = -1000L;
 	private LiveDeathHandling deathHandling;
+	private BoardData boardData;
+	private BlockPos boardPos;
+	private String boardThingToken;
+	private BoardVisit boardVisit;
+	private long lastBoardReadAttempt = -1000L;
+	private LiveBuildExecution buildExecution;
 
 	@Override
 	public void onInitialize() {
@@ -80,10 +94,29 @@ public class KithcraftMod implements ModInitializer {
 		// retired token's absence here after a restart is directly observable in the log.
 		LOGGER.info("[live] token registry live entries at boot: {}", pendingTokens.liveEntries());
 
+		// TASK-0020 T001/T002: the board's designated lectern, placed now (unlike DuskPairing's
+		// bell, this needs no matched cast villagers, so it does not have to wait for
+		// onServerTick). Tokens issued once per server start (TokenRegistry never reuses one),
+		// same as DuskPairing's gathering-place token. Built before LiveDeathHandling below —
+		// T006 threads boardData into it so a grave posting can ride the real board.
+		boardData = level.getDataStorage().computeIfAbsent(BoardData.TYPE);
+		boardPos = BoardSetup.placeBoard(level, origin);
+		boardThingToken = pendingTokens.issue(TokenRegistry.TokenType.THING, "the job board");
+		String boardPlaceToken = pendingTokens.issue(TokenRegistry.TokenType.PLACE, "the job board");
+		boardVisit = new BoardVisit(
+			boardPos, boardThingToken, new Place(boardPlaceToken, "the job board"), boardData.board());
+
+		// TASK-0020 T008/T009: the build's fixed site + persisted cursor. One global site
+		// (BuildSetup's own doc: the board models one posting at a time, so at most one
+		// claim/build is ever in progress).
+		BuildData buildData = level.getDataStorage().computeIfAbsent(BuildData.TYPE);
+		BlockPos buildSite = BuildSetup.siteOrigin(origin);
+		buildExecution = new LiveBuildExecution(buildSite, boardData.board(), buildData);
+
 		// T007-T009: registers the Fabric API death hooks (no new Mixin — see
 		// LiveDeathHandling's class doc). One registration per server start; the supplier
 		// reads this.duskPairing lazily since it isn't set up until a later tick.
-		deathHandling = LiveDeathHandling.register(pendingTokens, () -> duskPairing);
+		deathHandling = LiveDeathHandling.register(pendingTokens, () -> duskPairing, boardData);
 	}
 
 	private static List<Villager> findCastVillagers(ServerLevel level) {
@@ -128,6 +161,22 @@ public class KithcraftMod implements ModInitializer {
 		if (deathHandling != null) {
 			deathHandling.tick(server.overworld(), worldTime);
 		}
+		if (boardVisit != null && worldTime - lastBoardReadAttempt >= 20) {
+			// TASK-0020 T001/T002: re-read the lectern's book at most once/sec (same throttle
+			// DuskPairing's own setup retry uses) rather than every tick — the book only
+			// changes when a player edits it.
+			lastBoardReadAttempt = worldTime;
+			BoardSetup.readBookInto(server.overworld(), boardPos, boardData.board());
+			boardData.markDirty();
+			boardVisit.tick(worldTime, findCastVillagers(server.overworld()),
+				duskPairing == null ? uuid -> java.util.Optional.empty() : duskPairing::bodyTokenFor);
+		}
+		if (buildExecution != null) {
+			// TASK-0020 T008/T009: gated entirely on the claimant's own Activity.WORK state
+			// inside LiveBuildExecution/BuildEngine — no separate interrupt/resume call here.
+			buildExecution.tick(server.overworld(), findCastVillagers(server.overworld()),
+				duskPairing == null ? uuid -> java.util.Optional.empty() : duskPairing::bodyTokenFor);
+		}
 		if (attached == null) {
 			if (worldTime - lastAttachAttempt < 20) {
 				return;
@@ -144,7 +193,7 @@ public class KithcraftMod implements ModInitializer {
 				return;
 			}
 			try {
-				attached = BodySession.open(server, villager);
+				attached = BodySession.open(server, villager, boardData.board(), boardThingToken);
 				LOGGER.info("[live] attached to villager {}", villager.getStringUUID());
 			} catch (IOException e) {
 				LOGGER.warn("[live] mind dial failed, will retry: {}", e.toString());

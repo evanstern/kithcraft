@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
@@ -16,6 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  * source tree, same philosophy V2/V3 used for their no-Mixin/no-salience claims (the mod
  * source is the ground truth, not a doc's promise), so a future addition trips this test rather
  * than landing silently.
+ *
+ * <p>TASK-0020 T006 (spec.md User Story 2 AC #2, card AC #9) reuses this same style for a
+ * different mod: no force-claim path exists anywhere in the mod source.
  */
 class StructuralAbsenceTest {
 
@@ -63,5 +67,32 @@ class StructuralAbsenceTest {
         Pattern forbidden = Pattern.compile("(?i)friendly.?fire");
         assertFalse(forbidden.matcher(allMainSource()).find(),
             "card AC #11: no friendly-fire guardrail may exist in mod source");
+    }
+
+    /** TASK-0020 T006 (card AC #9): checked as call-site cardinality rather than a
+     * forbidden-word grep — {@code dev.kithcraft.mod.board.Board#tryClaim} (the only place a
+     * claim is ever registered) is called from exactly one place in the whole mod source:
+     * {@code BoardClaims}, resolving a real claim intent (T004). A second call site anywhere
+     * — a command handler, an admin API, anything player-triggered — would be a force-claim
+     * path and trips this test rather than landing silently. */
+    @Test
+    void noForceClaimPath() throws IOException {
+        long callSites = Pattern.compile("\\.tryClaim\\(").matcher(allMainSource()).results().count();
+        assertEquals(1L, callSites,
+            "card AC #9: Board.tryClaim must be called from exactly one place in the mod — "
+                + "the engine's own claim-intent resolution (BoardClaims), never a forced/player path");
+    }
+
+    /** TASK-0020 T009 (card ACs #5, #8): the build's only driver is the tick-gated engine
+     * step — checked as call-site cardinality, this file's own T006 style: {@code
+     * BuildEngine.advance} is called from exactly one place in the whole mod source ({@code
+     * LiveBuildExecution}), so a re-issue/supervise/hand-feed path — a command handler, an
+     * admin API, anything player-triggered — would trip this test rather than land silently. */
+    @Test
+    void noManualBuildProgressPath() throws IOException {
+        long callSites = Pattern.compile("BuildEngine\\.advance\\(").matcher(allMainSource()).results().count();
+        assertEquals(1L, callSites,
+            "card ACs #5/#8: BuildEngine.advance must be called from exactly one place in the mod — "
+                + "the tick-gated build execution (LiveBuildExecution), never a player-triggered path");
     }
 }

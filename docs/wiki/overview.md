@@ -1,13 +1,14 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, its bounded E2/E3 deliberation loop, its E6 nightly consolidation and R-9 archival, and the first vendor-side Fabric mod code now including death/remains machinery), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, PDLC machinery, the mind daemon with event-sourced memory, persona firewall, bounded deliberation loop, nightly consolidation and archival, and the first vendor-side Fabric mod code now including death/remains and job-board/blueprint-build machinery), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
   - specs/019-death-remains/spec.md
-verified_against: 07f69ed7bb6b86e2d7a184b25631a835cfb4c0b5
+  - specs/020-job-board/spec.md
+verified_against: 6055fd0fd5b3949d0e65e99ab009eb1c675cc0c2
 ---
 
 # Overview
@@ -51,7 +52,15 @@ cancelled to death-equivalent (two more targeted Mixins, [[villager-brain-api]])
 named grave + belongings chest placed at the death site with no villager agency
 required, a configurable grief period holding the dead villager's bed/job-site
 unclaimed, an optional job-board posting, and the dead villager's body token retired
-and never reissued.
+and never reissued. Since TASK-0020 (V4) the mod also carries a job-board/blueprint-build
+surface: a fixed-position lectern accepting any free-text posting (no form, no syntax), a
+read cycle riding `Activity.MEET` exactly as V5's dusk pairing already does, a `claim` verb
+added to the manifest via §5.5's declared-extras half ([[body-protocol-seam]]) so a mind
+claims a posting with its own authored reason, a tiny deterministic blueprint parser
+(shape/size/material, heavily ponytailed), and block-by-block placement on a tick budget
+during `Activity.WORK` with schedule/danger interrupt-resume via a persisted cursor — no new
+Mixin (the whole surface is plain-JDK/vanilla-API). V5's grave posting now rides this same
+board for real, closing the seam that task's own doc had flagged as pending.
 
 ## How it works
 
@@ -106,3 +115,12 @@ Opus 5 produced three validator-accepted personas, written 0444 at
 Yarn-mapped brain-API surface ([[villager-brain-api]]) is flagged, not yet
 re-derived, against MC 26.2's official mappings — that re-derivation is V3's
 (TASK-0014) scoped work.
+
+**Re-verified 2026-08-28 (TASK-0020 Phase 4, T012):** the job-board/blueprint-build paragraph
+above is new; everything else re-confirmed still true against current code. TASK-0020's own
+live dev-server pass (`specs/020-job-board/research/board-observation.md`) proved posting,
+reading, and claiming live (the claim proof also reconfirmed persistence across a server
+restart) but did NOT reach a live build placement — a token-namespace mismatch in the current
+single-body live-attach wiring (`LiveBuildExecution`'s claimant lookup vs. `BodySession`'s
+generic attach token) makes build structurally unreachable through that path today, unrelated
+to schedule timing; the live half of build/interrupt/resume is deferred to I2 (TASK-0022).
