@@ -1,6 +1,6 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, PDLC machinery, the mind daemon with event-sourced memory, persona firewall, bounded deliberation loop, nightly consolidation and archival, and the first vendor-side Fabric mod code now including death/remains and job-board/blueprint-build machinery), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, PDLC machinery, the mind daemon now with a real runtime loop bringing up a demo-ready world, event-sourced memory, persona firewall, bounded deliberation loop, nightly consolidation and archival, and the first vendor-side Fabric mod code now including death/remains and job-board/blueprint-build machinery), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
@@ -8,7 +8,8 @@ sources:
   - CLAUDE.md
   - specs/019-death-remains/spec.md
   - specs/020-job-board/spec.md
-verified_against: 6055fd0fd5b3949d0e65e99ab009eb1c675cc0c2
+  - specs/021-demo-config/spec.md
+verified_against: f9fcec3161774a64dec94e6a469be84dda7e2395
 ---
 
 # Overview
@@ -60,7 +61,12 @@ claims a posting with its own authored reason, a tiny deterministic blueprint pa
 (shape/size/material, heavily ponytailed), and block-by-block placement on a tick budget
 during `Activity.WORK` with schedule/danger interrupt-resume via a persisted cursor — no new
 Mixin (the whole surface is plain-JDK/vanilla-API). V5's grave posting now rides this same
-board for real, closing the seam that task's own doc had flagged as pending.
+board for real, closing the seam that task's own doc had flagged as pending. Since
+TASK-0021 (I1) `mind/cmd/minddaemon/` gained a real runtime loop — persona load-or-genesis
+at start, a listener consulting the Archive hook on `session_open` (closing TASK-0018's
+named daemon-wiring deferral for that hook specifically), sleep-triggered `RunNight`, and
+an unconditional session-end report — and the demo now has its documented bring-up:
+`docs/design/demo-runbook.md`, one file, both start orders, R-1/R-3/R-6 as ruling/config.
 
 ## How it works
 
@@ -124,3 +130,22 @@ restart) but did NOT reach a live build placement — a token-namespace mismatch
 single-body live-attach wiring (`LiveBuildExecution`'s claimant lookup vs. `BodySession`'s
 generic attach token) makes build structurally unreachable through that path today, unrelated
 to schedule timing; the live half of build/interrupt/resume is deferred to I2 (TASK-0022).
+
+**Re-verified 2026-08-29 (TASK-0021 Phase 4):** the TASK-0021 (I1) sentence above is new;
+everything else re-confirmed still true against current code. Three things worth being
+precise about, because "the daemon becomes runnable-for-real" is easy to overstate: (1) the
+daemon-wiring deferral this note's previous pass named above ("the daemon's live wiring of
+V3's pair-formation signal, and a live E6 digest call are unproven here by design") is only
+**partly** closed — I1 wired the Archive hook and the sleep-triggered `RunNight` path
+structurally (both proven end-to-end against scripted/mocked models), but the live E6 digest
+call, the real first-token ceiling, and `mind/converse/`'s dusk-exchange wiring remain
+unproven live; that is still I2's evening run. (2) TASK-0020's token-namespace finding two
+paragraphs above is now fixed (`BodyTokenLookups.combine`, TASK-0021 T003) — build's live
+half is unblocked at the lookup layer, though a live re-observation of block placement itself
+is still I2's job, not re-derived here. (3) I1's own live proof
+(`specs/021-demo-config/research/bringup-observation.md`) made zero API calls and proved
+mind-restart independence (T-4) through a scripted `seamtest.DialUnix` double against the
+live daemon, not through the live mod's own reconnect path — the live mod's `Continuity.java`
+always sends `firstSession()` and mints a fresh body token per attach today, and its
+`self_state`-only heartbeat produced zero admissible memories across the observation window;
+both are flagged there as follow-ups, not fixed in this phase.

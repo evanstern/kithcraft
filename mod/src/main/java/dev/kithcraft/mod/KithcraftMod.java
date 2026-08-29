@@ -10,7 +10,9 @@ import dev.kithcraft.mod.build.LiveBuildExecution;
 import dev.kithcraft.mod.cast.Cast;
 import dev.kithcraft.mod.cast.CastData;
 import dev.kithcraft.mod.cast.CastSeeder;
+import dev.kithcraft.mod.death.DangerTuning;
 import dev.kithcraft.mod.live.BodySession;
+import dev.kithcraft.mod.live.BodyTokenLookups;
 import dev.kithcraft.mod.live.LiveDeathHandling;
 import dev.kithcraft.mod.percept.Place;
 import dev.kithcraft.mod.tokens.TokenRegistry;
@@ -22,6 +24,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.npc.villager.Villager;
 import net.minecraft.world.phys.AABB;
 import org.slf4j.Logger;
@@ -29,7 +32,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -70,8 +76,21 @@ public class KithcraftMod implements ModInitializer {
 		// independent of the getEntitiesOfClass scan below (which is returning 0 even after
 		// a confirmed "Summoned new Villager" console line — this narrows whether the entity
 		// truly never loads or whether the scan itself is the bug).
-		ServerEntityEvents.ENTITY_LOAD.register((entity, level) ->
-			LOGGER.info("[live] ENTITY_LOAD: {} at {}", entity.getClass().getName(), entity.blockPosition()));
+		ServerEntityEvents.ENTITY_LOAD.register((entity, level) -> {
+			LOGGER.info("[live] ENTITY_LOAD: {} at {}", entity.getClass().getName(), entity.blockPosition());
+			// TASK-0021 T004 (R-6): the danger-tuning lever, off unless the operator opted
+			// in for this take. No new Mixin — this reuses the diagnostic hook already
+			// registered above (see DangerTuning's class doc for the upgrade path).
+			if (entity instanceof Monster hostile && DangerTuning.enabled()) {
+				double distance = findCastVillagers(level).stream()
+					.mapToDouble(hostile::distanceTo)
+					.min().orElse(Double.POSITIVE_INFINITY);
+				if (DangerTuning.shouldSuppress(true, distance)) {
+					LOGGER.info("[danger-tuning] suppressing hostile spawn near cast: {}", hostile.getClass().getSimpleName());
+					hostile.discard();
+				}
+			}
+		});
 	}
 
 	/** T002 (card AC #6): seed the three-member cast once per world, at the world spawn.
@@ -119,6 +138,19 @@ public class KithcraftMod implements ModInitializer {
 		deathHandling = LiveDeathHandling.register(pendingTokens, () -> duskPairing, boardData);
 	}
 
+	/** TASK-0021 T003: the merged lookup {@code boardVisit}/{@code buildExecution} both consult
+	 * — {@code duskPairing}'s seat tokens first, falling back to the single live-attached
+	 * {@link BodySession}'s own token, so a live claim's body can actually be found by {@code
+	 * LiveBuildExecution#findClaimant} (see {@link BodyTokenLookups}' class doc for why both
+	 * namespaces are needed). */
+	private Function<UUID, Optional<String>> bodyTokenLookup() {
+		Function<UUID, Optional<String>> seatTokens =
+			duskPairing == null ? uuid -> Optional.empty() : duskPairing::bodyTokenFor;
+		Function<UUID, Optional<String>> liveAttached = uuid ->
+			attached != null && uuid.equals(attached.villagerId()) ? Optional.of(attached.body()) : Optional.empty();
+		return BodyTokenLookups.combine(seatTokens, liveAttached);
+	}
+
 	private static List<Villager> findCastVillagers(ServerLevel level) {
 		AABB huge = new AABB(-1000, -256, -1000, 1000, 256, 1000);
 		Set<String> castNames = Cast.MEMBERS.stream().map(Cast.Member::name).collect(Collectors.toSet());
@@ -161,6 +193,7 @@ public class KithcraftMod implements ModInitializer {
 		if (deathHandling != null) {
 			deathHandling.tick(server.overworld(), worldTime);
 		}
+		Function<UUID, Optional<String>> bodyTokenLookup = bodyTokenLookup();
 		if (boardVisit != null && worldTime - lastBoardReadAttempt >= 20) {
 			// TASK-0020 T001/T002: re-read the lectern's book at most once/sec (same throttle
 			// DuskPairing's own setup retry uses) rather than every tick — the book only
@@ -168,14 +201,12 @@ public class KithcraftMod implements ModInitializer {
 			lastBoardReadAttempt = worldTime;
 			BoardSetup.readBookInto(server.overworld(), boardPos, boardData.board());
 			boardData.markDirty();
-			boardVisit.tick(worldTime, findCastVillagers(server.overworld()),
-				duskPairing == null ? uuid -> java.util.Optional.empty() : duskPairing::bodyTokenFor);
+			boardVisit.tick(worldTime, findCastVillagers(server.overworld()), bodyTokenLookup);
 		}
 		if (buildExecution != null) {
 			// TASK-0020 T008/T009: gated entirely on the claimant's own Activity.WORK state
 			// inside LiveBuildExecution/BuildEngine — no separate interrupt/resume call here.
-			buildExecution.tick(server.overworld(), findCastVillagers(server.overworld()),
-				duskPairing == null ? uuid -> java.util.Optional.empty() : duskPairing::bodyTokenFor);
+			buildExecution.tick(server.overworld(), findCastVillagers(server.overworld()), bodyTokenLookup);
 		}
 		if (attached == null) {
 			if (worldTime - lastAttachAttempt < 20) {

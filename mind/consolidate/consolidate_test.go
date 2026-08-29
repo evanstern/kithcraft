@@ -328,3 +328,28 @@ func TestLedger_WatermarkEmpty(t *testing.T) {
 		t.Error("Watermark() ok = true on a fresh ledger, want false")
 	}
 }
+
+// TestSleepTriggered is TASK-0021 T002's unit half: a cycle-boundary
+// crossing fires once per CycleTicks, never on the first sighting, and
+// never within the same cycle.
+func TestSleepTriggered(t *testing.T) {
+	cases := []struct {
+		name      string
+		prev, cur int64
+		wantTrig  bool
+	}{
+		{"first sighting never triggers", -1, 100, false},
+		{"same cycle, no crossing", 100, 200, false},
+		{"crosses one boundary", CycleTicks - 1, CycleTicks + 1, true},
+		{"exactly on the boundary", CycleTicks - 1, CycleTicks, true},
+		{"stays within the next cycle", CycleTicks, CycleTicks + 500, false},
+		{"crosses two boundaries at once (a long gap)", 0, 2*CycleTicks + 1, true},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := SleepTriggered(c.prev, c.cur); got != c.wantTrig {
+				t.Errorf("SleepTriggered(%d, %d) = %v, want %v", c.prev, c.cur, got, c.wantTrig)
+			}
+		})
+	}
+}

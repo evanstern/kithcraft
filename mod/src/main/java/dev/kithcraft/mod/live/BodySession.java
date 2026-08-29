@@ -35,20 +35,42 @@ import java.util.UUID;
  * per-body multiplexing beyond what one connection already gives for free. Ceiling: fine
  * for a one-body dev-server proof; a real config surface and multi-body attach loop are
  * later work once more than one body vendor session needs managing at once.
+ *
+ * <p>TASK-0021 T003: {@link #villagerId()}/{@link #body()} expose the (UUID, body token) pair
+ * this session actually attached to, so {@code KithcraftMod} can fold it into the same {@code
+ * Function<UUID, Optional<String>>} lookup {@code DuskPairing#bodyTokenFor} already provides —
+ * see {@link BodyTokenLookups} for why: {@code LiveBuildExecution#findClaimant} was consulting
+ * only {@code DuskPairing}'s seat tokens, a disjoint namespace from the token a live claim
+ * actually carries (this class's own {@code ground.issueBody} call above), so a live claim's
+ * body could never be found (specs/020-job-board/research/board-observation.md §4).
  */
 public final class BodySession {
     private static final Logger LOGGER = KithcraftMod.LOGGER;
     private static final long HEARTBEAT_INTERVAL_TICKS = 100; // ~5s at 20 TPS
 
+    private final UUID villagerId;
     private final String body;
     private final PerceptEmitter emitter;
     private final IntentHandler intents;
     private long lastHeartbeat = Long.MIN_VALUE;
 
-    private BodySession(String body, PerceptEmitter emitter, IntentHandler intents) {
+    private BodySession(UUID villagerId, String body, PerceptEmitter emitter, IntentHandler intents) {
+        this.villagerId = villagerId;
         this.body = body;
         this.emitter = emitter;
         this.intents = intents;
+    }
+
+    /** The villager entity this session is attached to — the UUID half of the (UUID, body
+     * token) pair a {@code bodyTokenLookup} resolves (T003). */
+    public UUID villagerId() {
+        return villagerId;
+    }
+
+    /** This session's own body token — the SAME token a live claim intent from this villager
+     * actually carries (T003; see class javadoc). */
+    public String body() {
+        return body;
     }
 
     /** Dials the mind daemon, sends {@code session_open} for {@code villager}, and starts a
@@ -83,7 +105,7 @@ public final class BodySession {
         reader.setDaemon(true);
         reader.start();
 
-        return new BodySession(bodyToken, emitter, handler);
+        return new BodySession(villager.getUUID(), bodyToken, emitter, handler);
     }
 
     @SuppressWarnings("unchecked")

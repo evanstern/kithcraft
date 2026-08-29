@@ -52,6 +52,27 @@ func (d ClientDigester) Digest(ctx context.Context, a prompt.Assembled) (string,
 	return msg.Content[0].Text, truncated, nil
 }
 
+// CycleTicks is one day/night cycle's length in world-time ticks — R-1's
+// ruling (docs/design/demo-runbook.md): the vanilla daylight cycle is kept
+// unmodified, 24,000 ticks per cycle, nine cycles across a representative
+// ~3-hour demo (docs/design/llm-routing-and-budget.md §A-2). A ruling, not
+// a knob (plan.md design decision 4) — deliberately a constant, not a flag.
+const CycleTicks int64 = 24000
+
+// SleepTriggered is TASK-0021 T002's sleep signal: whether world_time
+// advancing from prev to cur crossed a CycleTicks boundary, derived purely
+// from world_time already carried on every seam message — no new percept
+// type, no wall clock, no protocol extension (FR-006; TASK-0018's own
+// deviation note recorded this wiring as deferred, closed here). prev < 0
+// means "no prior sighting for this body" and never triggers, since a
+// session's first observed message cannot itself be a crossing.
+func SleepTriggered(prev, cur int64) bool {
+	if prev < 0 {
+		return false
+	}
+	return cur/CycleTicks > prev/CycleTicks
+}
+
 // RunNight is T001's sleep-event trigger, invoked once per villager sleep
 // event with worldTime taken from that event — never from a wall clock.
 // It selects the admitted buffer since the ledger's watermark (T002: the

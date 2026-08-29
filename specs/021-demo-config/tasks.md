@@ -1,0 +1,314 @@
+# Tasks: Demo configuration and the two run targets (I1)
+
+**Spec dir**: `specs/021-demo-config` · **Branch**: `task-0021-demo-config`
+
+## Phase 1 — The daemon runtime loop (US1 machinery + US2 machinery)
+
+- [x] T001 `cmd/minddaemon` real runtime: open M2 log + M7 ledger/archive per
+      villager; persona load-or-genesis at start (M3's Load/Genesis; resume
+      partial genesis; clear failure when key absent); listener serving
+      sessions with the Archive hook consulted on session_open (closes
+      TASK-0018's named daemon-wiring deferral)
+
+      Done: `mind/cmd/minddaemon/runtime.go` (new) — `Runtime` assembles
+      already-tested packages: `NewRuntime` opens the shared `consolidate.
+      Archive` under `<rundir>/villagers` eagerly (Client/Digester wired
+      from `ANTHROPIC_API_KEY` alone, nil together in its absence — the
+      zero-call rehearsal path); `LoadOrGenesisCast` calls `persona.Load`
+      per demo cast id (`persona.DemoCast()`, promoted to an exported
+      function in `mind/persona/persona.go` so main.go and the package's
+      own tests share one source of truth — `persona_external_test.go`'s
+      want-list extended for it, read-only precedent per Validate's own
+      TASK-0013 addition), genesis-resumes only the missing ids via
+      `persona.Genesis`+`WriteOnce`, and fails loudly naming the missing
+      ids when `ANTHROPIC_API_KEY` is unset and genesis is actually needed
+      — no partial cast is ever written. `bodyOrOpen` lazily opens each
+      body's `memory.Log`/`consolidate.Ledger` (keyed by the session's own
+      body token — mind identity == body token, matching `consolidate/
+      archive.go`'s existing ponytail convention; persona CastID and body
+      token are deliberately disjoint namespaces in this build, see T003).
+      `HandlePercept` (wired as `Ingester.OnPercept` in `main.go`) runs
+      `memory.Gate.Decide` and appends admitted percepts to that body's log
+      — real memory admission, not the skeleton's intent-emitting hook
+      (which stays test-only in e2e_test.go; M5 still owns deliberation).
+      `main.go` wires `ing.Archived = rt.Archive.IsArchived` (closes
+      TASK-0018's named deferral) and a `-rundir` flag (ponytail: further
+      config surface — env vars, R-3/R-6 knobs, a genesis on/off switch —
+      is T004/Phase 2's job, not duplicated here).
+      Tests: `mind/cmd/minddaemon/runtime_test.go` (new) —
+      `TestNewRuntime_OpensArchiveUnderRunDir`,
+      `TestLoadOrGenesisCast_NoKeyAndMissingPersonas_ClearFailure` (zero
+      network calls: no httptest server even started),
+      `TestLoadOrGenesisCast_ResumesPartialGenesis` (two of three personas
+      pre-seeded; asserts exactly 1 E1 hit and that the pre-seeded persona
+      was re-bound via Load, not touched by genesis).
+
+- [x] T002 Sleep-trigger wiring: RunNight invoked off the session's sleep
+      signal on world_time; no-marker retry semantics reachable end-to-end
+      (mock-model test through the daemon loop)
+
+      Done: no wire-level "sleep" message exists (body-protocol-v0.md has
+      no such percept_type, and FR-006 forbids adding one), so the sleep
+      signal is derived purely from world_time already carried on every
+      seam message — `consolidate.SleepTriggered(prev, cur)` (new,
+      `mind/consolidate/cycle.go`) plus `consolidate.CycleTicks = 24000`
+      (R-1's ruling: the kept vanilla daylight cycle, a constant not a
+      knob per plan.md design decision 4). `Runtime.HandlePercept` tracks
+      each body's last-observed world_time and calls `consolidate.RunNight`
+      when a cycle boundary crosses, with an empty `prompt.
+      ConsolidationStablePrefix{}` (ponytail: persona text belongs once a
+      body-to-persona identity layer exists — M5 — the empty prefix still
+      exercises the real E6 call/parse/ledger path end to end). A nil
+      Digester (no key) logs and skips rather than panicking.
+      Tests: `TestSleepTriggered` (`mind/consolidate/consolidate_test.go`,
+      table-driven boundary-crossing unit proof) and
+      `TestSleepTriggerEndToEnd_NoMarkerOnFailureThenRetrySucceeds`
+      (`mind/cmd/minddaemon/runtime_test.go`) — a real listener/Ingester/
+      HandlePercept path, scripted Digester (no SDK, no network): the
+      first cycle crossing's Digest call fails and lands no ledger record
+      (buffer preserved), the second crossing's Digest call succeeds and
+      lands one record whose window covers both crossings — the
+      no-marker-on-failure retry semantics proven end-to-end through the
+      daemon loop, not by calling RunNight directly.
+
+- [x] T003 TASK-0020's token-namespace finding: fix findClaimant/BodySession
+      token mismatch here if it is glue-sized, else record the explicit
+      hand-off to I2 with the observation cited — orchestrator-visible either
+      way
+
+      Call: FIXED here — glue-sized, exactly the option board-observation.md
+      §4 itself named ("findClaimant also consulting the live attach-token
+      registry, or claims carrying the seat token"). Root cause: `Live
+      BuildExecution.tick`/`BoardVisit.tick` both take a single `Function
+      <UUID, Optional<String>>` body-token lookup, but `KithcraftMod` only
+      ever wired `duskPairing::bodyTokenFor` (the dusk-gathering SEAT-token
+      namespace) into it — a live claim's body instead carries `BodySession`
+      's own `ground.issueBody` token, a disjoint namespace `findClaimant`'s
+      `equals` check could never match.
+      Fix: `mod/src/main/java/dev/kithcraft/mod/live/BodyTokenLookups.java`
+      (new) — a pure `combine(primary, secondary)` over `Function<UUID,
+      Optional<String>>`, no Minecraft type involved. `BodySession` now
+      exposes `villagerId()`/`body()` (the UUID it attached to and its own
+      body token). `KithcraftMod.bodyTokenLookup()` (new private method)
+      combines `duskPairing::bodyTokenFor` with a lookup over the single
+      live-attached `BodySession`, and both `boardVisit.tick`/
+      `buildExecution.tick` call sites now consume that one combined
+      lookup instead of `duskPairing::bodyTokenFor` alone. No new Mixin, no
+      protocol change — three files touched, all existing surfaces.
+      Test: `mod/src/test/java/dev/kithcraft/mod/live/
+      BodyTokenLookupsTest.java` (new, plain JUnit, no Minecraft bootstrap)
+      — proves the fallback fires exactly when the seat-token namespace
+      has no answer, including the named bug shape verbatim: a UUID the
+      seat-token lookup never registered is still found through the
+      live-attach lookup.
+      Scope note: this fixes the LOOKUP gap only — whether a live build
+      then actually places blocks still also needs `Activity.WORK` timing
+      to cooperate (board-observation.md §4's other open question) and a
+      live re-observation is Phase 3/T007's job, not re-derived here.
+
+## Phase 2 — Knobs and the report (US3 + US4)
+
+- [x] T004 Config surface: daemon flags/env (socket, run dir, genesis mode);
+      mod danger-tuning knob (R-6) present + OFF by default; grief knob (R-3)
+      verified config; config-not-constant audit test (card ACs #4, #6)
+
+      Done: `mind/cmd/minddaemon/config.go` (new) — `envOr`/`envOrBool`, the
+      env-mirror idiom `main.go`'s `-socket`/`-rundir`/`-genesis` flags now
+      use as their defaults (`MINDDAEMON_SOCKET`/`MINDDAEMON_RUNDIR`/
+      `MINDDAEMON_GENESIS`; an explicit flag still wins — standard Go CLI
+      precedence, not a second config path). `-genesis=false` (FR-007's
+      rehearsal mode) forces the zero-call path unconditionally in
+      `main.go` by nil-ing `rt.Client`/`rt.Digester` after construction,
+      regardless of whether `ANTHROPIC_API_KEY` happens to be set —
+      decoupling "rehearsal" from "key absent" as spec.md's US1 scenario 2
+      asks. `mod/src/main/java/dev/kithcraft/mod/death/DangerTuning.java`
+      (new) is R-6's knob: `Long`/`Boolean.getBoolean("kithcraft.
+      dangerTuning")`, same system-property idiom as `GriefPeriod.
+      configuredTicks()` (R-3, cited: `mod/src/main/java/dev/kithcraft/mod/
+      death/GriefPeriod.java:23`, already config, already tested in
+      `GriefPeriodTest.configOverridableNotAConstant`) — off by default.
+      Smallest defensible lever (death-mechanics.md §6.2 item 5): despawn a
+      newly-spawned hostile landing within `SUPPRESSION_RADIUS` (24
+      blocks) of a cast member, wired into `KithcraftMod`'s already-
+      registered `ServerEntityEvents.ENTITY_LOAD` diagnostic hook — no new
+      Mixin (FR-006's 4-Mixin cap, verified still exactly 4 by
+      `MixinConfigTest`, stays spent where it is), no new event
+      registration. Heavily ponytailed as recorded-take-only: does not
+      touch permadeath or the admitted-causes table, matching §6.2's own
+      "the correct lever is demo-config danger tuning... not a change to
+      the permadeath rules themselves."
+      Tests: `mind/cmd/minddaemon/config_test.go` (new) —
+      `TestEnvOr_ConfigNotConstant`/`TestEnvOrBool_ConfigNotConstant`
+      (env override beats default; unparseable falls back, not a crash).
+      `mod/src/test/java/dev/kithcraft/mod/death/DangerTuningTest.java`
+      (new) — off by default, override-not-constant, and the pure
+      `shouldSuppress` decision table (disabled/out-of-radius/at-the-edge/
+      no-cast-member-loaded). Full suites green: `go test -count=1 ./...`
+      and `./gradlew build test` (175 JUnit tests, 0 failures).
+
+- [x] T005 Session-end report: per-class call/token counters (M4 Accounting)
+      + E6-input-tokens instrument (M2), emitted unconditionally on shutdown
+      and appended to a run log (card AC #5); zero-call path tested
+
+      Done: `mind/cmd/minddaemon/report.go` (new) — `Runtime.Report(w,
+      runDir)` writes a readable text report (every `llm.E1`..`E6` row,
+      zeroed rather than omitted when `Accounting.Report()` has no entry —
+      unlike Accounting's own doc'd omission, this format fills every
+      class in for readability) plus each seen body's `memory.Instrument`
+      admitted-count-per-villager-day series, sorted for determinism.
+      Written to `w` (stdout in `main.go`) AND appended to
+      `<rundir>/session-report.log`; a file-append failure is reported on
+      `w`, never dropped silently. `main.go`'s `defer rt.Report(os.Stdout,
+      *runDir)` is registered after `defer rt.Close()`, so — deferred LIFO
+      — it runs BEFORE `Close`, capturing final in-memory state ahead of
+      store teardown, on both the SIGINT/SIGTERM path (existing signal
+      handler closes the listener, `serve` returns, `main` unwinds its
+      defers) and a clean exit. `mind/cmd/minddaemon/runtime.go`: each
+      `bodyStore` now also opens a `memory.Instrument` (day length =
+      `consolidate.CycleTicks`, matching RunNight's own sleep-boundary
+      granularity) and `HandlePercept` records into it on every admitted
+      append — closing the gap Phase 1 left (the instrument existed in
+      `mind/memory` since spec 010 but nothing in the daemon called
+      `Record`).
+      Tests: `mind/cmd/minddaemon/report_test.go` (new) —
+      `TestReport_ZeroCallPathEmitsZeroed` (card AC #5's zero-call
+      scenario: fresh runtime, no Client, no bodies — every class row
+      reads `calls=0`, bodies section reads "no bodies seen this
+      session"), `TestReport_IncludesAdmittedInstrumentCounts` (one
+      admitted percept through the real `HandlePercept` path lands "day 0:
+      1 admitted" in the report text).
+
+## Phase 3 — The documented sequence and the live proof (US1 + US2 live)
+
+- [x] T006 docs/design/demo-runbook.md: prerequisites (JDK/Gradle, Go, key),
+      the one ordered command sequence, both start orders documented, R-1
+      recorded as a ruling (nine cycles, 27 consolidations), rehearsal
+      (zero-call) path documented (card ACs #1, #3)
+
+      Done: `docs/design/demo-runbook.md` (new) — prereqs (JDK 25, Go 1.26+,
+      Gradle wrapper checked in, `ANTHROPIC_API_KEY` only for real genesis);
+      build (`go build -o minddaemon ./cmd/minddaemon`, `./gradlew build`);
+      first-time run-dir setup (`mkdir -p mind/run mod/run`, `eula.txt`) —
+      needed because the daemon's `listen()` does not create the socket's
+      parent dir on a fresh checkout, found by dry-running order A in T007
+      before this section was written; both start orders (§3, daemon-first
+      and server-first, joined at `mod/run/kithcraft.sock` via the mod's own
+      `kithcraft.socket` default so no `-D` override is needed); rehearsal
+      mode (§4, `-genesis=false`/`MINDDAEMON_GENESIS=0`, decoupled from key
+      presence); R-1 recorded as a ruling not a knob (§5, `consolidate.
+      CycleTicks=24000`, nine day/night cycles across ~3h, 27 consolidations
+      for the 3-villager cast, citing `llm-routing-and-budget.md` §7.1/A-2);
+      R-3/R-6 knobs with defaults and R-6's recorded-take-only caveat (§5,
+      `JAVA_TOOL_OPTIONS` idiom for both, since Loom's `runServer` does not
+      forward `-D` flags — the proven pattern from `specs/019-death-remains`);
+      session-report.log location (§6, `<rundir>/session-report.log`, always
+      emitted incl. zero-call). §0's unattended-run note
+      (`pause-when-empty-seconds=-1`) folded in from T007's live dry run —
+      see there for why.
+
+- [x] T007 Live bring-up observation (research/bringup-observation.md):
+      sequence followed verbatim, three personas seeded/bound (live genesis
+      or persisted re-bind, recorded which); daemon killed + restarted
+      mid-session — memories survive, gap reported not backfilled (card
+      AC #2); honest not-observed records where live proof falls short
+
+      Done: `specs/021-demo-config/research/bringup-observation.md` (new).
+      Runbook followed verbatim, zero API calls throughout (no
+      `ANTHROPIC_API_KEY` exported this session). §2: both rehearsal
+      sub-cases proven live — no-personas/`-genesis=false` fails loudly
+      naming the missing ids (Edge Cases row); stub personas (TASK-0013's
+      live-run files were absent from this fresh worktree — gitignored,
+      confirmed absent in the root checkout too — so this run hand-seeded
+      stub JSON matching `persona.DemoCast()`, the documented fallback)
+      re-bind via `Load` with zero calls. §3: both start orders exercised,
+      server + daemon up with a session attached (mod log `"[live] attached
+      to villager ..."`, daemon log `"listening on ..."`). §4 (the headline
+      check, card AC #2/T-4): driven via a scripted `mind/seamtest.DialUnix`
+      double (the same test double `TestEndToEnd_PerceptsInIntentsOut`
+      already uses, thrown away before this commit — see §5 for why the
+      live mod's own session couldn't carry this half) against the live
+      daemon socket: one memory admitted pre-kill (`world_time=100`), daemon
+      SIGTERM'd (session-report.log gained `obs-body-1 day 0: 1 admitted`,
+      socket file removed per `listen()`'s own doc), daemon restarted
+      against the same rundir, the SAME body token reconnected
+      (`HandleConnection`'s "matched by body token alone" claim, confirmed
+      live) and admitted a second memory (`world_time=5000`) — the log file
+      holds both records with the 4900-tick gap plainly visible and nothing
+      synthetic in between (M1's continuity rule, proven structural, not
+      just claimed). §5 (honest not-observed): the live mod's `self_state`
+      heartbeat produced zero body-store opens across ~2m40s of continuous
+      ticking spanning the kill+restart (structurally unadmittable per
+      `admission.go`'s rules — no subject, background urgency — and
+      possibly never reaching the daemon at all, not distinguished here);
+      the mod never logged detecting the outage or reattaching either,
+      checked again post-graceful-shutdown to rule out log buffering.
+      Root-caused as out of this phase's scope (docs+observation only, no
+      code changes) and flagged for a dedicated follow-up; `Continuity.java`
+      read (not exercised) to note today's live wiring always sends
+      `firstSession()` and mints a fresh body token per attach regardless,
+      per its own doc, pending the token registry named there.
+
+## Phase 4 — Gates and closure
+
+- [x] T008 Full gates: go vet + go test ./... green; gradle build + test
+      green; scope clean
+
+      Done: `go vet ./...` clean, `go test -count=1 ./...` green (11
+      packages, `mind/seamtest` has no test files by design). `./gradlew
+      build test --rerun-tasks` green: 175 JUnit tests, 0 failures, 0
+      errors (`mod/build/test-results/test/*.xml`). `git status --porcelain`
+      empty before this phase's own edits — scope clean.
+- [x] T009 Wiki re-ground: touched-source notes re-verified honestly
+      (overview — the daemon becomes runnable-for-real; body-protocol-seam
+      if session wiring changes seam claims; promptworld-lineage if the
+      daemon-wiring deferral note needs closing); CAPSULES regenerated if
+      descriptions changed; freshness green
+
+      Done: four notes cite sources this branch's phases touched
+      (`grep -l "mind/\|cmd/minddaemon\|demo-runbook" docs/wiki/*.md`) —
+      checked all four. **overview.md** (re-pinned): none of its own cited
+      sources (README/brief/CLAUDE.md/spec.md files) changed on disk, but
+      its prose narrates each landed task by number, so it gained a
+      TASK-0021 paragraph (daemon runtime loop real, demo-runbook.md
+      exists) plus a "Re-verified 2026-08-29" addendum being precise about
+      what's still NOT closed: the live E6 digest call, the first-token
+      ceiling, and `mind/converse/` wiring remain I2's (only the Archive
+      hook and the sleep-triggered `RunNight` structural wiring are proven here);
+      TASK-0020's token-namespace finding is now fixed (T003); I1's own
+      restart-independence proof used a scripted `seamtest` double against
+      the live daemon, not the live mod's own reconnect path — flagged, not
+      claimed closed. `description:` updated to match; `specs/021-demo-
+      config/spec.md` added to `sources:`. **body-protocol-seam.md**
+      (re-pinned): its one touched source, `BodySession.java`, gained
+      `villagerId()`/`body()` accessors (T003) — re-verified as mod-internal
+      glue, no seam/wire claim changed; one paragraph added saying so.
+      **promptworld-lineage.md** and **v1-demo.md**: source diff empty
+      (`git log <verified_against>..HEAD -- <sources>`), no claim
+      contradicted by this branch's phases — checked, left unpinned (the
+      "daemon-wiring deferral" text the dispatch expected to find here
+      actually lives in overview.md, not promptworld-lineage.md; verified
+      by grep before concluding no edit was needed). CAPSULES.md
+      regenerated (`grounding-wiki` v0.57.0 `scripts/capsules.mjs`,
+      overview.md's `description:` changed). Freshness gate green
+      (`gates/freshness.mjs --root .`, exit 0, both v0.57.0 and v0.58.0
+      copies agree).
+
+- [x] T010 Card ACs ticked with citing proofs; board/spec synced at PR time
+
+      Done: all six card ACs (#1-#6) plus the four mirrored spec-phase ACs
+      (#7-#10) ticked via `backlog task edit TASK-0021 --check-ac` with
+      citing proofs recorded in the task's implementation notes (`backlog
+      task view TASK-0021 --plain`) — see there for the full text: AC #1
+      (demo-runbook.md + bringup-observation.md §1-3), AC #2 (bringup-
+      observation.md §4's headline check, honestly caveated as a
+      `seamtest.DialUnix` double against the live daemon, not the live
+      mod's own session), AC #3 (R-1 in demo-runbook.md §5 +
+      `consolidate.CycleTicks`), AC #4/#6 (`GriefPeriod`/`DangerTuning`
+      config-not-constant), AC #5 (`report.go`, both the zero-call unit
+      lifetime and the live session-report.log entry). A dedicated note
+      flags both Phase 3 findings (the mod's `Continuity.java` always-
+      firstSession reconnect gap; the `self_state`-only heartbeat's zero
+      admissible memories) for refactor-triage/I2, unfixed here by design.
+      Definition of Done #1-#3 checked (tests pass, wiki updated + fresh,
+      board/spec in sync). No AC left unticked — nothing in card scope
+      fell outside what this phase and Phase 3's live observation proved.
