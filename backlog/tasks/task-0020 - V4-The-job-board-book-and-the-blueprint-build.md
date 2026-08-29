@@ -1,10 +1,10 @@
 ---
 id: TASK-0020
 title: V4 - The job-board book and the blueprint build
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:40'
-updated_date: '2026-08-29 03:24'
+updated_date: '2026-08-29 03:25'
 labels:
   - vendor
   - m-0-build
@@ -62,8 +62,6 @@ Spec: specs/020-job-board
 - [x] #13 Spec phase: Phase 4 — The beat, gates, and closure
 <!-- AC:END -->
 
-
-
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
@@ -81,6 +79,12 @@ created: 2026-08-29 03:22
 Phase 4 (T010-T013) complete via sonnet closer dispatch. AC#1 (board accepts free-text posting, readable, claims visible): BoardTest (5 tests, T001) + live -- book planted via /data merge, persisted through two dev-server restarts, read repeatedly (specs/020-job-board/research/board-observation.md sec1-2). AC#2 (villager reads, text percept origin:read crosses seam): BoardReadTrackerTest/BoardReadProtocolTest (T002) + board-observation.md sec2 -- "[board] Aldric/Petra reads the board" fired live, repeatedly, both villagers, percept_type=text/origin=read. AC#3 (no protocol extension): BoardReadProtocolTest (T002, 2 tests) + BoardClaimProtocolTest (T004, 3 tests) -- structural zero-extension proof, content/envelope keys identical to sec4.7's pre-existing shape. AC#4 (claim visible to other villagers): Board.readableContent() unconditionally concatenates claims after text (Board.java:97-103); BoardTest's tryClaim/postNotice tests. Live: a claim persisted from the genesis session and every subsequent live read this closer session pulled from the same readableContent() call, so the claim line necessarily rode along. AC#5 (built block by block, engine-side placement + material sourcing): unit-proven -- BlueprintParserTest (6), PlacementTest (5), BuildEngineTest (5). Live NOT observed: board-observation.md sec4 identifies the exact root cause (LiveBuildExecution.findClaimant checks DuskPairing's per-cast seat tokens, but a live claim is always submitted under BodySession's separate generic attach token -- two token namespaces that structurally never match, so build cannot start through today's live wiring regardless of Activity.WORK timing). Live half deferred to I2 (TASK-0022), the same honest pattern TASK-0019's AC#5/#8 used. AC#6 (dusk interrupt, resumes next work period): unit-proven -- BuildEngineTest's interrupt/resume tests (T009). Live NOT observed -- no build ever started this pass (AC#5's root cause); live half deferred to I2 alongside AC#5. AC#7 (design check, tedium): BoardSetup accepts either an unsigned book-and-quill or a signed written book, no signing/syntax required; BlueprintParser.parse -- any non-blank text parses to generous defaults (T007). AC#8 (design check, micromanagement): StructuralAbsenceTest#noManualBuildProgressPath (T008) -- BuildEngine.advance has exactly one call site in the whole mod. AC#9 (constraint, minds-are-others): StructuralAbsenceTest#noForceClaimPath (T006) -- Board.tryClaim is package-private and called from exactly one place. DoD#1 (tests pass): ./gradlew build test -- 168 tests, 0 failures, 0 errors (T011). DoD#2 (wiki/freshness): overview.md + body-protocol-seam.md re-grounded, freshness gate green -- 11/11 notes fresh (T012). DoD#3 (spec/backlog sync) deliberately left unticked, reserved for the orchestrator at PR/merge time per TASK-0019's own precedent -- no PR has been opened yet. Full evidence: specs/020-job-board/research/board-observation.md, specs/020-job-board/tasks.md (T010-T013).
 ---
 <!-- COMMENTS:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+V4 delivered via PR #25 (merge f8deeb1, merge commit, pins preserved). The demo's centrepiece kept whole: diegetic lectern board (free text = valid blueprint, no form/syntax), read cycle riding Activity.MEET with zero new Activity/Mixin (surface stays 4), read percept through V2's existing emitters with structural zero-protocol-extension proofs on both the percept and the claim intent's target; claim verb via the manifest's declared-extras mechanism (L-7 holds), AR-4 board-token targets, first-accepted-claim-wins, no-force-claim structural proof; V5's tend-grave seam genuinely closed. Build: 4x4 deterministic blueprint parser (ponytailed fidelity floor), Activity.WORK-gated block placement, creative-provision sourcing (recorded), unified dusk/PANIC interrupt with SavedData cursor + blueprint snapshot. Live observation (research/board-observation.md): post/read/claim OBSERVED including claim persistence and first-accepted-wins across restart; build placement NOT observed with precise root cause documented for I2 — LiveBuildExecution.findClaimant matches DuskPairing seat tokens while live claims ride BodySession's generic attach token (disjoint namespaces, never match). 168 tests green. Spec-bridge derivation: 4 phases 13/13, Done-eligible. ~1.6M subagent tokens across 7 sonnet dispatches incl. two stopped idle-loopers (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
