@@ -1,9 +1,10 @@
 ---
 id: TASK-0020
 title: V4 - The job-board book and the blueprint build
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
+updated_date: '2026-08-29 02:04'
 labels:
   - vendor
   - m-0-build
@@ -40,6 +41,8 @@ As a player, I want to post a blueprint on a board and have a neighbour take it 
 **References.** docs/design/demo-build-plan.md section 3.3 (V4) is the plan of record. Ratified surfaces consumed: docs/design/kithcraft-brief.md (#7 the diegetic order interface; the tedium and micromanagement spell-breakers; the loneliness-cure constraint), docs/design/body-protocol-v0.md (text percept with origin:read, Q-6's thin target shape, AR-4 token resolution), decision-0002 (engine-side resolution on the vanilla substrate).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/020-job-board
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -54,6 +57,12 @@ As a player, I want to post a blueprint on a board and have a neighbour take it 
 - [ ] #8 Design check (micromanagement): once claimed, a build proceeds without the player re-issuing, supervising or hand-feeding materials
 - [ ] #9 Constraint (minds-are-others): the board posts an order, not a command, and no path exists by which the player forces a claim
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4 tail; M5 dependency merged as PR #22); spec 020 stub + link ride this claim commit
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
