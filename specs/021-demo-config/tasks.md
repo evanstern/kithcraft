@@ -250,11 +250,47 @@
 
 ## Phase 4 — Gates and closure
 
-- [ ] T008 Full gates: go vet + go test ./... green; gradle build + test
+- [x] T008 Full gates: go vet + go test ./... green; gradle build + test
       green; scope clean
-- [ ] T009 Wiki re-ground: touched-source notes re-verified honestly
+
+      Done: `go vet ./...` clean, `go test -count=1 ./...` green (11
+      packages, `mind/seamtest` has no test files by design). `./gradlew
+      build test --rerun-tasks` green: 175 JUnit tests, 0 failures, 0
+      errors (`mod/build/test-results/test/*.xml`). `git status --porcelain`
+      empty before this phase's own edits — scope clean.
+- [x] T009 Wiki re-ground: touched-source notes re-verified honestly
       (overview — the daemon becomes runnable-for-real; body-protocol-seam
       if session wiring changes seam claims; promptworld-lineage if the
       daemon-wiring deferral note needs closing); CAPSULES regenerated if
       descriptions changed; freshness green
-- [ ] T010 Card ACs ticked with citing proofs; board/spec synced at PR time
+
+      Done: four notes cite sources this branch's phases touched
+      (`grep -l "mind/\|cmd/minddaemon\|demo-runbook" docs/wiki/*.md`) —
+      checked all four. **overview.md** (re-pinned): none of its own cited
+      sources (README/brief/CLAUDE.md/spec.md files) changed on disk, but
+      its prose narrates each landed task by number, so it gained a
+      TASK-0021 paragraph (daemon runtime loop real, demo-runbook.md
+      exists) plus a "Re-verified 2026-08-29" addendum being precise about
+      what's still NOT closed: the live E6 digest call, the first-token
+      ceiling, and `mind/converse/` wiring remain I2's (only the Archive
+      hook and the sleep-triggered `RunNight` structural wiring are proven here);
+      TASK-0020's token-namespace finding is now fixed (T003); I1's own
+      restart-independence proof used a scripted `seamtest` double against
+      the live daemon, not the live mod's own reconnect path — flagged, not
+      claimed closed. `description:` updated to match; `specs/021-demo-
+      config/spec.md` added to `sources:`. **body-protocol-seam.md**
+      (re-pinned): its one touched source, `BodySession.java`, gained
+      `villagerId()`/`body()` accessors (T003) — re-verified as mod-internal
+      glue, no seam/wire claim changed; one paragraph added saying so.
+      **promptworld-lineage.md** and **v1-demo.md**: source diff empty
+      (`git log <verified_against>..HEAD -- <sources>`), no claim
+      contradicted by this branch's phases — checked, left unpinned (the
+      "daemon-wiring deferral" text the dispatch expected to find here
+      actually lives in overview.md, not promptworld-lineage.md; verified
+      by grep before concluding no edit was needed). CAPSULES.md
+      regenerated (`grounding-wiki` v0.57.0 `scripts/capsules.mjs`,
+      overview.md's `description:` changed). Freshness gate green
+      (`gates/freshness.mjs --root .`, exit 0, both v0.57.0 and v0.58.0
+      copies agree).
+
+- [x] T010 Card ACs ticked with citing proofs; board/spec synced at PR time

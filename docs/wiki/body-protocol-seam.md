@@ -25,7 +25,7 @@ sources:
   - mind/seam/ingest.go
   - mind/consolidate/archive.go
 size_budget_exempt: pre-existing since TASK-0009/0012 (one synthesis note tracking the seam, wire, and every vendor landing across TASK-0007..0015); a summary-style split is a separate task, out of TASK-0015's scope
-verified_against: 6055fd0fd5b3949d0e65e99ab009eb1c675cc0c2
+verified_against: f9fcec3161774a64dec94e6a469be84dda7e2395
 ---
 
 # Body-protocol seam
@@ -288,3 +288,12 @@ gained its fifth verb via §5.5's declared-extras half — the manifest claims t
 directly against `Handshake.MANIFEST`'s current source and hold exactly as described; the only
 change needed was the "First implementations" paragraph above documenting that `claim` now
 occupies that previously-theoretical extras slot. Nothing else in this note's prose changed.
+
+**Re-verified 2026-08-29 (TASK-0021 Phase 4, T003):** `mod/.../live/BodySession.java` — a
+source this note cites — gained two accessors, `villagerId()`/`body()`, so `KithcraftMod`
+could fold this class's own attach token into `LiveBuildExecution`'s claimant lookup
+(`BodyTokenLookups.combine`, fixing TASK-0020's token-namespace finding). This is a
+mod-internal integration fix, not a seam or wire change: no percept type, verb, or manifest
+field moved. This note's claim about `BodySession` above ("the minimal live wiring proving
+this on a dev server... no Mixin — plain API only") was re-checked against the current file
+and holds unchanged; nothing else in this note's prose changed.
