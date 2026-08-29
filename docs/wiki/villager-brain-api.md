@@ -10,7 +10,7 @@ sources:
   - specs/014-augmented-villager/research/pair-observation.md
   - specs/014-augmented-villager/research/full-cycle-observation.md
   - specs/019-death-remains/research/death-26.2.md
-verified_against: 2b19674267f26b216d22617e2ec0ef1def69eb7e
+verified_against: 79258fcab38b4bdce0044996eb89bf450e4f2ce0
 size_budget_exempt: pre-existing overage since TASK-0014 (a full symbol re-derivation
   pass); TASK-0019 adds one short paragraph for its own Mixin-surface facts rather than
   splitting the note, out of this task's scope
@@ -188,3 +188,17 @@ else changed. The open question this page now flags but does not resolve — whe
 24000-tick real-time window is actually guaranteed to cross every `Activity` at 26.2 — is
 Phase 4's own honest non-closure, not a regression in the symbol facts above; see
 `specs/014-augmented-villager/research/full-cycle-observation.md`.
+
+**Chunk-ticket trap (2026-08-27, TASK-0014 zero-movement root cause — NEEDS-REVIEW fold-in
+at this re-pin):** a forced chunk's ticket level propagates outward by Chebyshev distance
+(`ChunkMap.FORCED_TICKET_LEVEL = ENTITY_TICKING`; javap-verified against the pinned 26.2
+jar), so the ring one chunk beyond any forced set sits at `BLOCK_TICKING` — loaded, blocks
+tick, entity NBT queryable and even jittering, but **Brain/goal-selector AI never advances**.
+A villager that wanders one chunk past the forced footprint freezes permanently, restart
+after restart, indistinguishable from "hasn't decided to move" without a cross-check
+(`/forceload query` + bit-identical `Pos` across sessions is the diagnostic). Anyone driving
+schedule observation or keeping a cast alive must force-load from *actual current* positions
+with margin, re-applied per boot (`CastSeeder.keepChunksLoaded`, 3-chunk margin), never from
+spawn-time positions once. The 29m49s post-fix verification run closed TASK-0014's live
+proofs on exactly this mechanism; full evidence:
+`specs/014-augmented-villager/research/full-cycle-observation.md` (2026-08-27 sections).

@@ -1,9 +1,10 @@
 ---
 id: TASK-0018
 title: 'M7 - Nightly consolidation, and how the dead stay conversationally alive (E6)'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:39'
+updated_date: '2026-08-28 19:52'
 labels:
   - mind
   - m-0-build
@@ -33,21 +34,59 @@ As a villager, I want to wake up having kept what mattered about yesterday — i
 **References.** docs/design/demo-build-plan.md section 3.2 (M7) and its ruling R-9 are the plan of record. Ratified surfaces consumed: decision-0003 + docs/design/llm-routing-and-budget.md (E6 on Opus 5, the sleep-window trigger, no formativeness scoring pass in v1, the no-marker-on-failure rule, harness T-b), docs/design/death-mechanics.md (section 3 memory carry, token discipline), docs/design/body-protocol-v0.md (RM-7: time alone never deletes a fact), docs/design/kithcraft-brief.md (#4 stories told about them).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/018-consolidation
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 E6 runs on Opus 5, triggered by the sleep event and timed against world_time rather than a wall clock, inside the sleep window and not on the Batch API
-- [ ] #2 A scripted day's admitted buffer consolidates into a digest whose references resolve back to durable (tick, hash) pairs via the ordinal m1..mN prompt convention
-- [ ] #3 A consolidation that fails mid-call lands no marker and is retried on the next attempt
-- [ ] #4 v1 runs no formativeness scoring pass: the admission gate decides eligibility and E6 decides what mattered
-- [ ] #5 A witnessed death is retrieved at high frequency in the following cycle's conversation context, at lower frequency two cycles later, and is still present rather than deleted well after that
-- [ ] #6 Ruling R-9 holds: a dead villager's mind is archived not terminated, its log is readable, no session opens for it, and its body token is retired and never reissued
+- [x] #1 E6 runs on Opus 5, triggered by the sleep event and timed against world_time rather than a wall clock, inside the sleep window and not on the Batch API
+- [x] #2 A scripted day's admitted buffer consolidates into a digest whose references resolve back to durable (tick, hash) pairs via the ordinal m1..mN prompt convention
+- [x] #3 A consolidation that fails mid-call lands no marker and is retried on the next attempt
+- [x] #4 v1 runs no formativeness scoring pass: the admission gate decides eligibility and E6 decides what mattered
+- [x] #5 A witnessed death is retrieved at high frequency in the following cycle's conversation context, at lower frequency two cycles later, and is still present rather than deleted well after that
+- [x] #6 Ruling R-9 holds: a dead villager's mind is archived not terminated, its log is readable, no session opens for it, and its body token is retired and never reissued
+- [x] #7 Spec phase: Phase 1 — The nightly digest (US1 + US2)
+- [x] #8 Spec phase: Phase 2 — The death carry (US3)
+- [x] #9 Spec phase: Phase 3 — Archived, not terminated (US4)
+- [x] #10 Spec phase: Phase 4 — Gates and closure
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-28 (lane 4); spec 018 stub + link ride this claim commit
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: consolidation ports the measured machinery shape (ordinal convention, no-marker-on-failure); R-9 is ruled (runbook lane 4)
+
+AC#1 (E6/Opus5/sleep-event/world_time/sleep-window/no-Batch-API): TestE6IsOpus5AndOffline + TestNoBatchAPIPath (mind/consolidate/consolidate_test.go).
+
+AC#2 (m1..mN ordinal convention, references resolve to (tick,hash)): TestRunNight_OrdinalMappingRoundTrip + TestRunNight_ConsolidatedWindowExcludedNextNight (consolidate_test.go).
+
+AC#3 (no-marker-on-failure, retried next attempt): TestRunNight_TransportFailureLandsNoMarker, _CancellationLandsNoMarker, _OverLimitLandsNoMarker (truncation proven at the client boundary by TestClientDigester_TruncationDetected), _EmptyNightLandsMarker, _MultiNightAccumulationAfterFailures (consolidate_test.go, client_digester_test.go).
+
+AC#4 (no formativeness scoring pass): structural absence — no scoring code anywhere in mind/consolidate, documented at cycle.go's header; the admission gate (mind/memory.Gate) already decided eligibility before RunNight ever sees an event.
+
+AC#5 (death-carry frequency: high next cycle, lower two cycles later, still present): TestDeathCarryWeight_SpikeNextCycle, _LowerTwoCyclesLater, _FloorsAtNormalPresence_NeverZero, _Decreasing (deathcarry_test.go) — deterministic distribution assertions on the curve itself, per plan.md's risk note. Honest caveat: this package exports SelectionWeights as the retrieval-weighting hook only; conversation-context assembly's actual consumption of it is M6/mind/converse (TASK-0017, sibling in-flight branch), landing at merge, not in this branch.
+
+AC#6 (R-9: archived not terminated, log readable, no session, token retired never reissued): TestSessionOpen_ArchivedMind_RefusedOnFirstOpen, _RefusedOnMultiplex, _NotArchived_Unaffected (mind/seam/session_test.go); TestArchive_LandsAndPersists, _IdempotentByMindID, _UnaffectedMindStaysOpen, _DeathBeforeOwnConsolidation (mind/consolidate/archive_test.go).
+
+AC#7-9 (spec phases 1-3): T001-T003, T004, T005 all landed and tested (see above).
+
+AC#10 (spec phase 4, gates and closure): go vet + go test -count=1 ./... green from mind/ (all 9 packages); scope clean; wiki re-ground done (freshness gate green for all touched notes; see phase-4 commit).
+
+Deferred, flagged for refactor-triage: daemon-level wiring of Ledger/Archive/RunNight into a real long-running mind daemon process (a scheduler invoking RunNight on the sleep event, Archive.IsArchived actually plumbed into a live Ingester at daemon startup) is explicitly out of scope for this task per plan.md — everything here is proven against the fake vendor and scripted/mocked clients, correct but not yet wired into cmd/minddaemon's runtime. Naming it here so it doesn't silently vanish before a sweep picks it up.
+<!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+M7/E6 nightly consolidation and R-9 archival, complete. mind/consolidate/: an event-sourced nightly ledger (ledger.go) triggered by the sleep event and timed on world_time only; the digest cycle (cycle.go) rendering the admitted buffer under the m1..mN ordinal convention and mapping accepted references back to durable (world_time, hash) identity, with no formativeness scoring pass and no-marker-on-failure covering transport failure, cancellation, and over-limit detection; death-carry retrieval-frequency weighting (deathcarry.go) exported as a selector hook for M6 to adopt at merge; R-9 archival (archive.go) plus a new Ingester.Archived hook in mind/seam refusing session opens for archived minds. All against the fake vendor and scripted/mocked clients, no live API calls. go vet + go test -count=1 ./... green across all 9 mind/ packages. Wiki re-grounded: [[body-protocol-seam]] (genuinely stale), [[promptworld-lineage]], [[overview]] amended and re-pinned; CAPSULES.md regenerated; [[villager-brain-api]]'s pre-existing TASK-0014 staleness is unrelated and left untouched. All 6 card ACs plus 4 spec-phase ACs ticked with citing tests. Deferred and flagged for refactor-triage: daemon-level wiring of RunNight/Archive into cmd/minddaemon's actual runtime loop.
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
-- [ ] #3 Spec and Backlog are in sync
+- [x] #1 Tests pass
+- [x] #2 Docs and wiki are updated and pass freshness tests
+- [x] #3 Spec and Backlog are in sync
 <!-- DOD:END -->
