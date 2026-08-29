@@ -1,9 +1,10 @@
 ---
 id: TASK-0021
 title: I1 - Demo configuration and the two run targets
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
+updated_date: '2026-08-29 03:25'
 labels:
   - integration
   - m-0-build
@@ -35,6 +36,8 @@ As an operator, I want one documented sequence that brings up a demo-ready world
 **References.** docs/design/demo-build-plan.md section 3.4 (I1) and its rulings R-1, R-3, R-6 are the plan of record. Ratified surfaces consumed: decision-0003 + docs/design/llm-routing-and-budget.md (T-4 mind-restart independence, section 7.1 the nine-dusk question, the per-class instrumentation), docs/design/death-mechanics.md (section 6.2's grief-period and danger-tuning open items), decision-0001 (Fabric server-side mod, two artifacts).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/021-demo-config
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -46,6 +49,12 @@ As an operator, I want one documented sequence that brings up a demo-ready world
 - [ ] #5 Per-class call/token counters and the E6-input-tokens instrument report at session end
 - [ ] #6 Every knob above is config, not a constant in code
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-29 (lane 5; deps M3/M7/V3/V5 all merged); spec 021 stub + link ride this claim commit
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
