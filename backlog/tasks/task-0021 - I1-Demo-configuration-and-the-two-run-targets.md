@@ -1,10 +1,10 @@
 ---
 id: TASK-0021
 title: I1 - Demo configuration and the two run targets
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:40'
-updated_date: '2026-08-29 04:16'
+updated_date: '2026-08-29 04:18'
 labels:
   - integration
   - m-0-build
@@ -73,6 +73,12 @@ AC #5: mind/cmd/minddaemon/report.go Runtime.Report — every llm.E1..E6 row emi
 
 Refactor-triage/I2 flags (Phase 3 findings, not fixed in this phase): (1) the live mod's Continuity.java always sends firstSession() and mints a fresh body token per attach regardless of a prior session, per its own doc — the mind-restart-independence mechanism (AC #2) is proven daemon-side and via a test double, not yet through the live mod's own reconnect path. (2) the live mod's self_state-only heartbeat produced zero body-store opens across ~2m40s of continuous ticking spanning the kill+restart in bringup-observation.md §5 — structurally unadmittable per admission.go's rules (no subject, background urgency), and whether self_state percepts even reach the daemon at all was not distinguished in this pass. Both are docs+observation findings only, no code changed for either.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+I1 delivered via PR #26 (merge 10f5fbb, merge commit, pins preserved). The daemon became a real assembled runtime: per-body M2 log + M7 ledger/archive, persona load-or-genesis with partial resume, Archived hook wired (closing TASK-0018's deferral), sleep from world_time crossings with no-marker retry proven end-to-end; TASK-0020's token-namespace finding fixed as glue (BodyTokenLookups). Config: env-mirrored daemon flags, -genesis=false rehearsal mode, R-6 danger knob OFF by default (no new Mixin, surface stays 4), R-3 verified, config-not-constant audits; unconditional session-end report (counters + E6-input instrument). docs/design/demo-runbook.md is the operator bring-up I2 follows (R-1 recorded as ruling). Live observation: rehearsal zero-call both sub-cases, both start orders, RESTART INDEPENDENCE CONFIRMED (memory pre-kill, SIGTERM, restart, same-token reconnect, gap reported not backfilled). Honest flags for refactor-triage/I2: mod-side reconnect identity gap (Continuity.java firstSession() + fresh token per attach); self_state-only heartbeat admits nothing. Spec-bridge derivation: 4 phases 10/10, Done-eligible. ~826k subagent tokens across 4 sonnet dispatches (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
