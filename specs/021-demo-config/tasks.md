@@ -180,15 +180,73 @@
 
 ## Phase 3 — The documented sequence and the live proof (US1 + US2 live)
 
-- [ ] T006 docs/design/demo-runbook.md: prerequisites (JDK/Gradle, Go, key),
+- [x] T006 docs/design/demo-runbook.md: prerequisites (JDK/Gradle, Go, key),
       the one ordered command sequence, both start orders documented, R-1
       recorded as a ruling (nine cycles, 27 consolidations), rehearsal
       (zero-call) path documented (card ACs #1, #3)
-- [ ] T007 Live bring-up observation (research/bringup-observation.md):
+
+      Done: `docs/design/demo-runbook.md` (new) — prereqs (JDK 25, Go 1.26+,
+      Gradle wrapper checked in, `ANTHROPIC_API_KEY` only for real genesis);
+      build (`go build -o minddaemon ./cmd/minddaemon`, `./gradlew build`);
+      first-time run-dir setup (`mkdir -p mind/run mod/run`, `eula.txt`) —
+      needed because the daemon's `listen()` does not create the socket's
+      parent dir on a fresh checkout, found by dry-running order A in T007
+      before this section was written; both start orders (§3, daemon-first
+      and server-first, joined at `mod/run/kithcraft.sock` via the mod's own
+      `kithcraft.socket` default so no `-D` override is needed); rehearsal
+      mode (§4, `-genesis=false`/`MINDDAEMON_GENESIS=0`, decoupled from key
+      presence); R-1 recorded as a ruling not a knob (§5, `consolidate.
+      CycleTicks=24000`, nine day/night cycles across ~3h, 27 consolidations
+      for the 3-villager cast, citing `llm-routing-and-budget.md` §7.1/A-2);
+      R-3/R-6 knobs with defaults and R-6's recorded-take-only caveat (§5,
+      `JAVA_TOOL_OPTIONS` idiom for both, since Loom's `runServer` does not
+      forward `-D` flags — the proven pattern from `specs/019-death-remains`);
+      session-report.log location (§6, `<rundir>/session-report.log`, always
+      emitted incl. zero-call). §0's unattended-run note
+      (`pause-when-empty-seconds=-1`) folded in from T007's live dry run —
+      see there for why.
+
+- [x] T007 Live bring-up observation (research/bringup-observation.md):
       sequence followed verbatim, three personas seeded/bound (live genesis
       or persisted re-bind, recorded which); daemon killed + restarted
       mid-session — memories survive, gap reported not backfilled (card
       AC #2); honest not-observed records where live proof falls short
+
+      Done: `specs/021-demo-config/research/bringup-observation.md` (new).
+      Runbook followed verbatim, zero API calls throughout (no
+      `ANTHROPIC_API_KEY` exported this session). §2: both rehearsal
+      sub-cases proven live — no-personas/`-genesis=false` fails loudly
+      naming the missing ids (Edge Cases row); stub personas (TASK-0013's
+      live-run files were absent from this fresh worktree — gitignored,
+      confirmed absent in the root checkout too — so this run hand-seeded
+      stub JSON matching `persona.DemoCast()`, the documented fallback)
+      re-bind via `Load` with zero calls. §3: both start orders exercised,
+      server + daemon up with a session attached (mod log `"[live] attached
+      to villager ..."`, daemon log `"listening on ..."`). §4 (the headline
+      check, card AC #2/T-4): driven via a scripted `mind/seamtest.DialUnix`
+      double (the same test double `TestEndToEnd_PerceptsInIntentsOut`
+      already uses, thrown away before this commit — see §5 for why the
+      live mod's own session couldn't carry this half) against the live
+      daemon socket: one memory admitted pre-kill (`world_time=100`), daemon
+      SIGTERM'd (session-report.log gained `obs-body-1 day 0: 1 admitted`,
+      socket file removed per `listen()`'s own doc), daemon restarted
+      against the same rundir, the SAME body token reconnected
+      (`HandleConnection`'s "matched by body token alone" claim, confirmed
+      live) and admitted a second memory (`world_time=5000`) — the log file
+      holds both records with the 4900-tick gap plainly visible and nothing
+      synthetic in between (M1's continuity rule, proven structural, not
+      just claimed). §5 (honest not-observed): the live mod's `self_state`
+      heartbeat produced zero body-store opens across ~2m40s of continuous
+      ticking spanning the kill+restart (structurally unadmittable per
+      `admission.go`'s rules — no subject, background urgency — and
+      possibly never reaching the daemon at all, not distinguished here);
+      the mod never logged detecting the outage or reattaching either,
+      checked again post-graceful-shutdown to rule out log buffering.
+      Root-caused as out of this phase's scope (docs+observation only, no
+      code changes) and flagged for a dedicated follow-up; `Continuity.java`
+      read (not exercised) to note today's live wiring always sends
+      `firstSession()` and mints a fresh body token per attach regardless,
+      per its own doc, pending the token registry named there.
 
 ## Phase 4 — Gates and closure
 
