@@ -10,7 +10,7 @@ sources:
   - specs/014-augmented-villager/research/pair-observation.md
   - specs/014-augmented-villager/research/full-cycle-observation.md
   - specs/019-death-remains/research/death-26.2.md
-verified_against: 79258fcab38b4bdce0044996eb89bf450e4f2ce0
+verified_against: d10c8d2a00bb65da920529d0edba3a6e456b6a58
 size_budget_exempt: pre-existing overage since TASK-0014 (a full symbol re-derivation
   pass); TASK-0019 adds one short paragraph for its own Mixin-surface facts rather than
   splitting the note, out of this task's scope
