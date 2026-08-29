@@ -1,13 +1,13 @@
 ---
 name: promptworld-lineage
-description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall, ported for real in mind/persona/ TASK-0013; toolloop's REQUEST/FACT/gate shape ported for real in mind/deliberate/ TASK-0016); code does not (sim, executor, governor, guardian; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language; Go rebuild, old packages kept as source material. Load before importing I code or for mind-architecture questions.
+description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall; persona TASK-0013, toolloop's REQUEST/FACT/gate shape TASK-0016, and nightly consolidation TASK-0018 all now ported for real); code does not (sim, executor, governor, guardian; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language; Go rebuild, old packages kept as source material. Load before importing I code or for mind-architecture questions.
 kind: concept
 sources:
   - docs/design/kithcraft-brief.md
   - specs/004-mind-daemon-routing/research/daemon-assessment.md
   - docs/design/llm-routing-and-budget.md
   - backlog/decisions/decision-0003 - Mind-daemon-language-Go-rebuilt-behind-the-seam.md
-verified_against: b179249bae7e1cc3e14c8833bdcc743fc7687d54
+verified_against: b05139e3d24f441351d5aa43df5c33b044d25245
 ---
 
 # Promptworld lineage
@@ -85,6 +85,23 @@ deliberation, the §5.5 urgency interrupt, and the K=10 situated memory window (
 serendipity picks from the older half — the mind-side formativeness this note's "what
 dies" section already flagged as new design, since I's world-side salience table cannot
 exist under the seam) all sit above that loop. See specs/016-deliberation.
+
+**Update (TASK-0018, 2026-08-28): the nightly-digestion heritage is also ported for
+real.** `mind/consolidate/` lands the machinery *shape* the doctrine list above names —
+an event-sourced nightly ledger (`ledger.go`, M2's append-only-log-plus-reducer idiom
+applied to a night record), the ordinal `m1..mN` prompt convention (memories have no
+stable IDs, so the convention *is* the identity mechanism, mapping accepted references
+back to durable `(world_time, hash)` pairs), and the no-marker-on-failure rule (a
+transport failure, cancellation, or over-limit response lands nothing; the night
+retries). This is doctrine ported as shape, same posture as persona above — no I code
+imported. One further wrinkle worth naming because it touches the "forbidden" item two
+paragraphs below: the death-carry weighting spike (`deathcarry.go`) reuses I's old
+salience table's number for a witnessed death ("witnessed death — 10★",
+death-mechanics.md §3) as its next-cycle multiplier. This does not reinstate the
+forbidden thing — no `salience`/`importance`/`weight` field exists on any percept, and
+the number is consumed entirely mind-side, as one input to a read-time retrieval-weight
+function over already-admitted memories, never as a world-side annotation. See
+specs/018-consolidation.
 
 Two findings worth carrying, because they change how the doctrine list above should be read:
 

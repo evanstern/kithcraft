@@ -68,6 +68,10 @@ func HandleConnection(conn Conn, ing *Ingester) error {
 		refuse(conn, first, "unsupported_version")
 		return fmt.Errorf("seam: unsupported protocol version %q", first["protocol"])
 	}
+	if ing.Archived != nil && ing.Archived(str(first["body"])) {
+		refuse(conn, first, "archived_mind")
+		return fmt.Errorf("seam: session_open refused for archived mind %q (ruling R-9)", first["body"])
+	}
 
 	pl := payloadOf(first)
 	capsBytes, err := wire.EncodeCanonical(pl["capabilities"])
@@ -94,6 +98,10 @@ func HandleConnection(conn Conn, ing *Ingester) error {
 
 		switch str(msg["message"]) {
 		case "session_open":
+			if ing.Archived != nil && ing.Archived(body) {
+				refuse(conn, msg, "archived_mind")
+				return fmt.Errorf("seam: session_open refused for archived mind %q (ruling R-9)", body)
+			}
 			if mismatch := m.diff(msg); mismatch != "" {
 				refuse(conn, msg, mismatch)
 				return fmt.Errorf("seam: %s", mismatch)

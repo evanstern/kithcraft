@@ -22,8 +22,10 @@ sources:
   - mind/memory/provenance.go
   - mind/memory/admission.go
   - mind/fakevendor/fakevendor.go
+  - mind/seam/ingest.go
+  - mind/consolidate/archive.go
 size_budget_exempt: pre-existing since TASK-0009/0012 (one synthesis note tracking the seam, wire, and every vendor landing across TASK-0007..0015); a summary-style split is a separate task, out of TASK-0015's scope
-verified_against: 6d91864a4f3905279d228d8e2ff0d43592ba2904
+verified_against: eda461376e0bce9bce286137a8295aeb98315e0a
 ---
 
 # Body-protocol seam
@@ -169,6 +171,19 @@ findings, including exactly what the live dev-server run did and did not observe
 `specs/012-vendor-conformance/research/verb-observation.md`. Brain/schedule work (Fabric's
 `Brain<E>` beyond plain `Mob` movement/look) remains open, now V3's (TASK-0014) — see
 [[villager-brain-api]] for the MC 26.2 symbol renames V2 additionally verified in passing.
+
+TASK-0018 (M7, ruling R-9) then added the seam's one archival hook: `Ingester.Archived`
+(`mind/seam/ingest.go`, a nil-by-default `func(body string) bool`, mirroring the
+existing `OnPercept` hook idiom) is consulted in `HandleConnection`
+(`mind/seam/session.go`) on both a connection's first `session_open` and every later
+multiplexed one, refusing with the same `session_close`/`reason:error`,
+`detail:"archived_mind"` shape the manifest-mismatch refusal above already uses. A real
+daemon wires it to `mind/consolidate.Archive.IsArchived` (`archive.go`, an append-only
+JSONL registry keyed by mind identity, replay-then-append like `mind/memory`'s own
+stores); `mind/seam` itself carries no archival state or policy, only the refusal
+point — consistent with this note's "durable memory belongs to the mind" invariant and
+with "the vendor never persists, ranks, or weights a mind's memories": archival is
+mind-side state consulted at the seam, not a new vendor-visible surface.
 
 Both harnesses this note described (`seam/go-roundtrip`, `seam/java-roundtrip`) still
 exist as throwaway, spec-facing proof, independent of either real implementation; the Java

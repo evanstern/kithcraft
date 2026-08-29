@@ -159,6 +159,72 @@ func TestNegotiation_UnsupportedVersion_RefusesFailClosed(t *testing.T) {
 	}
 }
 
+// TestSessionOpen_ArchivedMind_RefusedOnFirstOpen is specs/018-consolidation
+// T005 / ruling R-9: the very first session_open on a connection is
+// refused, fail-closed, when Ingester.Archived reports the named body is
+// an archived mind — the same session_close/reason:error shape the
+// version and manifest refusals already use.
+func TestSessionOpen_ArchivedMind_RefusedOnFirstOpen(t *testing.T) {
+	ing := NewIngester()
+	ing.Archived = func(body string) bool { return body == "b-dead" }
+	conn := newFakeConn()
+	done := runWithIngester(conn, ing)
+	conn.script(sessionOpen("b-dead", nil))
+
+	if err := waitDone(t, done); err == nil {
+		t.Fatal("expected an error for an archived mind's session_open")
+	}
+	out := conn.out()
+	if len(out) != 1 || out[0]["message"] != "session_close" {
+		t.Fatalf("expected exactly one session_close refusal, got %#v", out)
+	}
+	pl := out[0]["payload"].(map[string]any)
+	if pl["reason"] != "error" || pl["detail"] != "archived_mind" {
+		t.Fatalf("refusal payload = %#v, want reason:error detail:archived_mind", pl)
+	}
+}
+
+// TestSessionOpen_ArchivedMind_RefusedOnMultiplex proves the same refusal
+// fires for a later, multiplexed session_open on an already-open
+// connection — an archived body can never attach, first frame or not.
+func TestSessionOpen_ArchivedMind_RefusedOnMultiplex(t *testing.T) {
+	ing := NewIngester()
+	ing.Archived = func(body string) bool { return body == "b-dead" }
+	conn := newFakeConn()
+	done := runWithIngester(conn, ing)
+	conn.script(sessionOpen("b-1", nil))
+	conn.script(sessionOpen("b-dead", nil))
+
+	if err := waitDone(t, done); err == nil {
+		t.Fatal("expected an error for an archived mind's multiplexed session_open")
+	}
+	out := conn.out()
+	if len(out) != 1 || out[0]["message"] != "session_close" {
+		t.Fatalf("expected exactly one session_close refusal, got %#v", out)
+	}
+	pl := out[0]["payload"].(map[string]any)
+	if pl["detail"] != "archived_mind" {
+		t.Fatalf("refusal detail = %v, want archived_mind", pl["detail"])
+	}
+}
+
+// TestSessionOpen_NotArchived_Unaffected proves a nil Archived hook (the
+// zero-value Ingester) and a non-archived body both behave exactly as
+// before T005 — archival's absence changes nothing.
+func TestSessionOpen_NotArchived_Unaffected(t *testing.T) {
+	conn := newFakeConn()
+	done := run(conn) // NewIngester()'s zero-value Archived is nil
+	conn.script(sessionOpen("b-1", nil))
+	conn.closeStream()
+
+	if err := waitDone(t, done); err != nil {
+		t.Fatalf("HandleConnection returned an error with no Archived hook set: %v", err)
+	}
+	if out := conn.out(); len(out) != 0 {
+		t.Fatalf("expected no refusal, got %#v", out)
+	}
+}
+
 // TestSessionOpen_Multiplex_SameManifestAttachesSecondBody proves several
 // bodies multiplex onto one connection when every session_open carries the
 // same session/time_unit/capabilities (seam-wire-v0.md §1.3).

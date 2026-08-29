@@ -60,6 +60,14 @@ type Ingester struct {
 	// no real deliberation here or anywhere in this daemon (M5 replaces
 	// this whole mechanism). Nil is the safe, do-nothing default.
 	OnPercept func(conn Conn, body string, msg map[string]any)
+
+	// Archived, if set, reports whether body names an archived mind
+	// (specs/018-consolidation T005, ruling R-9): a true here refuses the
+	// session_open naming it, the same session_close/reason:error shape
+	// HandleConnection already uses for a manifest mismatch. Nil (the
+	// default) never refuses — Ingester itself has no notion of
+	// archival; a real daemon wires *consolidate.Archive.IsArchived here.
+	Archived func(body string) bool
 }
 
 // NewIngester returns an empty Ingester ready to use.
