@@ -82,4 +82,17 @@ class StructuralAbsenceTest {
             "card AC #9: Board.tryClaim must be called from exactly one place in the mod — "
                 + "the engine's own claim-intent resolution (BoardClaims), never a forced/player path");
     }
+
+    /** TASK-0020 T009 (card ACs #5, #8): the build's only driver is the tick-gated engine
+     * step — checked as call-site cardinality, this file's own T006 style: {@code
+     * BuildEngine.advance} is called from exactly one place in the whole mod source ({@code
+     * LiveBuildExecution}), so a re-issue/supervise/hand-feed path — a command handler, an
+     * admin API, anything player-triggered — would trip this test rather than land silently. */
+    @Test
+    void noManualBuildProgressPath() throws IOException {
+        long callSites = Pattern.compile("BuildEngine\\.advance\\(").matcher(allMainSource()).results().count();
+        assertEquals(1L, callSites,
+            "card ACs #5/#8: BuildEngine.advance must be called from exactly one place in the mod — "
+                + "the tick-gated build execution (LiveBuildExecution), never a player-triggered path");
+    }
 }

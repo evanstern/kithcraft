@@ -4,6 +4,9 @@ import dev.kithcraft.mod.board.BoardData;
 import dev.kithcraft.mod.board.BoardSetup;
 import dev.kithcraft.mod.board.BoardVisit;
 import dev.kithcraft.mod.brain.DuskPairing;
+import dev.kithcraft.mod.build.BuildData;
+import dev.kithcraft.mod.build.BuildSetup;
+import dev.kithcraft.mod.build.LiveBuildExecution;
 import dev.kithcraft.mod.cast.Cast;
 import dev.kithcraft.mod.cast.CastData;
 import dev.kithcraft.mod.cast.CastSeeder;
@@ -56,6 +59,7 @@ public class KithcraftMod implements ModInitializer {
 	private String boardThingToken;
 	private BoardVisit boardVisit;
 	private long lastBoardReadAttempt = -1000L;
+	private LiveBuildExecution buildExecution;
 
 	@Override
 	public void onInitialize() {
@@ -101,6 +105,13 @@ public class KithcraftMod implements ModInitializer {
 		String boardPlaceToken = pendingTokens.issue(TokenRegistry.TokenType.PLACE, "the job board");
 		boardVisit = new BoardVisit(
 			boardPos, boardThingToken, new Place(boardPlaceToken, "the job board"), boardData.board());
+
+		// TASK-0020 T008/T009: the build's fixed site + persisted cursor. One global site
+		// (BuildSetup's own doc: the board models one posting at a time, so at most one
+		// claim/build is ever in progress).
+		BuildData buildData = level.getDataStorage().computeIfAbsent(BuildData.TYPE);
+		BlockPos buildSite = BuildSetup.siteOrigin(origin);
+		buildExecution = new LiveBuildExecution(buildSite, boardData.board(), buildData);
 
 		// T007-T009: registers the Fabric API death hooks (no new Mixin — see
 		// LiveDeathHandling's class doc). One registration per server start; the supplier
@@ -158,6 +169,12 @@ public class KithcraftMod implements ModInitializer {
 			BoardSetup.readBookInto(server.overworld(), boardPos, boardData.board());
 			boardData.markDirty();
 			boardVisit.tick(worldTime, findCastVillagers(server.overworld()),
+				duskPairing == null ? uuid -> java.util.Optional.empty() : duskPairing::bodyTokenFor);
+		}
+		if (buildExecution != null) {
+			// TASK-0020 T008/T009: gated entirely on the claimant's own Activity.WORK state
+			// inside LiveBuildExecution/BuildEngine — no separate interrupt/resume call here.
+			buildExecution.tick(server.overworld(), findCastVillagers(server.overworld()),
 				duskPairing == null ? uuid -> java.util.Optional.empty() : duskPairing::bodyTokenFor);
 		}
 		if (attached == null) {
