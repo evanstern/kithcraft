@@ -213,9 +213,21 @@
 
 ## Phase 4 — The beat, gates, and closure
 
-- [ ] T010 Live dev-server observation: post → read → claim → build → dusk
+- [x] T010 Live dev-server observation: post → read → claim → build → dusk
       interrupt → resume, recorded in research/board-observation.md with
-      honest not-observed records (card ACs #2, #5, #6 live halves)
+      honest not-observed records (card ACs #2, #5, #6 live halves).
+      **Post/read/claim confirmed live** (book persisted across two restarts;
+      board reads fired repeatedly for Aldric and Petra; a claim completed
+      live in the prior session and this session reconfirmed its persistence
+      + first-accepted-wins across a restart). **Build placement/interrupt/
+      resume NOT observed** — root cause identified, not just timed out:
+      `LiveBuildExecution.findClaimant` resolves the claimant against
+      `DuskPairing`'s own per-cast seat-token map, but a live claim is always
+      submitted under `BodySession`'s separate generic single-attach token —
+      two disjoint token namespaces that structurally never match, so build
+      can never start through the current live wiring regardless of
+      `Activity.WORK` timing. Full evidence, log excerpts, and the exact
+      code citations: `specs/020-job-board/research/board-observation.md`.
 - [ ] T011 Full gates: gradle build + test green; scope clean
 - [ ] T012 Wiki re-ground: touched-source notes re-verified honestly
       (overview — the mod gains the board/build surface; body-protocol-seam
