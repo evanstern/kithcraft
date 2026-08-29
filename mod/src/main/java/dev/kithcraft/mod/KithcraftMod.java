@@ -1,11 +1,16 @@
 package dev.kithcraft.mod;
 
+import dev.kithcraft.mod.board.BoardData;
+import dev.kithcraft.mod.board.BoardSetup;
+import dev.kithcraft.mod.board.BoardVisit;
 import dev.kithcraft.mod.brain.DuskPairing;
 import dev.kithcraft.mod.cast.Cast;
 import dev.kithcraft.mod.cast.CastData;
 import dev.kithcraft.mod.cast.CastSeeder;
 import dev.kithcraft.mod.live.BodySession;
 import dev.kithcraft.mod.live.LiveDeathHandling;
+import dev.kithcraft.mod.percept.Place;
+import dev.kithcraft.mod.tokens.TokenRegistry;
 import dev.kithcraft.mod.tokens.TokenRegistryData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -46,6 +51,10 @@ public class KithcraftMod implements ModInitializer {
 	private BlockPos pendingOrigin;
 	private long lastDuskSetupAttempt = -1000L;
 	private LiveDeathHandling deathHandling;
+	private BoardData boardData;
+	private BlockPos boardPos;
+	private BoardVisit boardVisit;
+	private long lastBoardReadAttempt = -1000L;
 
 	@Override
 	public void onInitialize() {
@@ -84,6 +93,17 @@ public class KithcraftMod implements ModInitializer {
 		// LiveDeathHandling's class doc). One registration per server start; the supplier
 		// reads this.duskPairing lazily since it isn't set up until a later tick.
 		deathHandling = LiveDeathHandling.register(pendingTokens, () -> duskPairing);
+
+		// TASK-0020 T001/T002: the board's designated lectern, placed now (unlike DuskPairing's
+		// bell, this needs no matched cast villagers, so it does not have to wait for
+		// onServerTick). Tokens issued once per server start (TokenRegistry never reuses one),
+		// same as DuskPairing's gathering-place token.
+		boardData = level.getDataStorage().computeIfAbsent(BoardData.TYPE);
+		boardPos = BoardSetup.placeBoard(level, origin);
+		String boardThingToken = pendingTokens.issue(TokenRegistry.TokenType.THING, "the job board");
+		String boardPlaceToken = pendingTokens.issue(TokenRegistry.TokenType.PLACE, "the job board");
+		boardVisit = new BoardVisit(
+			boardPos, boardThingToken, new Place(boardPlaceToken, "the job board"), boardData.board());
 	}
 
 	private static List<Villager> findCastVillagers(ServerLevel level) {
@@ -127,6 +147,16 @@ public class KithcraftMod implements ModInitializer {
 		}
 		if (deathHandling != null) {
 			deathHandling.tick(server.overworld(), worldTime);
+		}
+		if (boardVisit != null && worldTime - lastBoardReadAttempt >= 20) {
+			// TASK-0020 T001/T002: re-read the lectern's book at most once/sec (same throttle
+			// DuskPairing's own setup retry uses) rather than every tick — the book only
+			// changes when a player edits it.
+			lastBoardReadAttempt = worldTime;
+			BoardSetup.readBookInto(server.overworld(), boardPos, boardData.board());
+			boardData.markDirty();
+			boardVisit.tick(worldTime, findCastVillagers(server.overworld()),
+				duskPairing == null ? uuid -> java.util.Optional.empty() : duskPairing::bodyTokenFor);
 		}
 		if (attached == null) {
 			if (worldTime - lastAttachAttempt < 20) {
