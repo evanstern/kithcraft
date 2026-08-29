@@ -1,9 +1,10 @@
 ---
 id: TASK-0022
 title: 'I2 - The evening: run it, measure it, check it against the brief'
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
+updated_date: '2026-08-29 04:18'
 labels:
   - integration
   - m-0-build
@@ -46,6 +47,8 @@ As an operator, I want a full evening run judged against every beat and every sp
 **References.** docs/design/demo-build-plan.md sections 3.4 (I2), 4 (coverage map) and 5 (constraints and spell-breakers) are the plan of record. Ratified surfaces consumed: docs/design/kithcraft-brief.md (the v1-demo beats and the three spell-breakers), decision-0003 + docs/design/llm-routing-and-budget.md (the A-n assumptions, the cost baseline and ~$20 ceiling, the E4 latency ceiling, the E6 upgrade trigger).
 
 **Suggested tier: `sonnet` (next sweep's runbook decides).**
+
+Spec: specs/022-the-evening
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -57,6 +60,12 @@ As an operator, I want a full evening run judged against every beat and every sp
 - [ ] #5 Where a check fails, the finding is written down with the task that owns the fix - the run is allowed to find problems but not to fail silently
 - [ ] #6 The dusk that landed best is recorded for the highlight cut
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-29 (lane 5 final; all fifteen deps merged); spec 022 stub + link ride this claim commit. OPERATOR CHECKPOINT 5: the evening itself is operator-run (~3h, player present) — the sweep prepares and stops
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
