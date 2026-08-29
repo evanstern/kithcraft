@@ -233,8 +233,25 @@
       no source, only `research/board-observation.md` + this file). Scope
       clean: `git status` shows no untracked/modified files beyond the
       board/build phase's own committed changes.
-- [ ] T012 Wiki re-ground: touched-source notes re-verified honestly
-      (overview — the mod gains the board/build surface; body-protocol-seam
-      if seam-facing claims change; villager-brain-api if substrate facts
-      grow); CAPSULES regenerated if descriptions changed; freshness green
+- [x] T012 Wiki re-ground: touched-source notes re-verified honestly.
+      `overview.md` — added the job-board/blueprint-build paragraph (mirrors
+      V5's own death/remains paragraph), added `specs/020-job-board/spec.md`
+      to sources, re-pinned to HEAD. `body-protocol-seam.md` — NEEDS-REVIEW
+      resolved: re-verified `Handshake.MANIFEST`'s claims against current
+      source (core four unchanged, `claim` now occupies §5.5's declared-
+      extras slot exactly as described), added a "First implementations"
+      paragraph documenting it, re-pinned to HEAD. `villager-brain-api.md`
+      — no new vanilla-substrate facts emerged this pass (the live-run
+      finding was about the mod's own token wiring, not the `Brain<E>`
+      substrate), left untouched per the dispatch's own "only if" condition.
+      `promptworld-lineage.md`'s description was already over the 500-char
+      capsule budget pre-existing (unrelated to this task's sources) —
+      trimmed it too since it was the sole remaining freshness-gate
+      blocker; no source/verified_against change, wording only.
+      `CAPSULES.md` regenerated (`scripts/capsules.mjs`, only `overview`'s
+      capsule line actually changed). Freshness gate: `gates/cli.mjs
+      freshness` → `OK: 11 note(s) fresh against their pinned sources`
+      (exit 0); two pre-existing size_budget_exempt overage warnings
+      (`body-protocol-seam.md`, `villager-brain-api.md`) are non-blocking
+      by design, unchanged from before this pass.
 - [ ] T013 Card ACs ticked with citing proofs; board/spec synced at PR time

@@ -1,6 +1,6 @@
 ---
 name: promptworld-lineage
-description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall; persona TASK-0013, toolloop's REQUEST/FACT/gate shape TASK-0016, and nightly consolidation TASK-0018 all now ported for real); code does not (sim, executor, governor, guardian; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language; Go rebuild, old packages kept as source material. Load before importing I code or for mind-architecture questions.
+description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall; persona, toolloop's REQUEST/FACT/gate shape, and nightly consolidation all now ported for real); code does not (sim, executor, governor, guardian; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language. Load before importing I code or for mind-architecture questions.
 kind: concept
 sources:
   - docs/design/kithcraft-brief.md
