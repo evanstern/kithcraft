@@ -4,7 +4,7 @@ title: 'I2 - The evening: run it, measure it, check it against the brief'
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
-updated_date: '2026-08-29 04:18'
+updated_date: '2026-08-29 04:20'
 labels:
   - integration
   - m-0-build
@@ -59,12 +59,17 @@ Spec: specs/022-the-evening
 - [ ] #4 Each A-n assumption is annotated with its measured value: calls per class, tokens per call, total cost against the ~ ceiling, E4 first-token latency against the 3 s ceiling, E6 input tokens per villager-cycle against the ~80/day assumption and ~150 upgrade trigger
 - [ ] #5 Where a check fails, the finding is written down with the task that owns the fix - the run is allowed to find problems but not to fail silently
 - [ ] #6 The dusk that landed best is recorded for the highlight cut
+- [ ] #7 Spec phase: Phase 1 — Stage the run kit (sweep)
+- [ ] #8 Spec phase: Phase 2 — The evening (OPERATOR — runbook checkpoint 5)
+- [ ] #9 Spec phase: Phase 3 — Write-up and close (sweep, post-run)
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 claimed by sweep-0007-0022 orchestrator 2026-08-29 (lane 5 final; all fifteen deps merged); spec 022 stub + link ride this claim commit. OPERATOR CHECKPOINT 5: the evening itself is operator-run (~3h, player present) — the sweep prepares and stops
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: run the checklist, measure the A-n numbers; judgment about what the findings mean returns to the operator (runbook lane 5). Phase 2 is the operator's run — checkpoint 5
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
