@@ -4,7 +4,7 @@ title: V4 - The job-board book and the blueprint build
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
-updated_date: '2026-08-29 03:22'
+updated_date: '2026-08-29 03:24'
 labels:
   - vendor
   - m-0-build
@@ -56,11 +56,13 @@ Spec: specs/020-job-board
 - [x] #7 Design check (tedium): posting an order is one diegetic gesture, not a form or a syntax the player must phrase carefully
 - [x] #8 Design check (micromanagement): once claimed, a build proceeds without the player re-issuing, supervising or hand-feeding materials
 - [x] #9 Constraint (minds-are-others): the board posts an order, not a command, and no path exists by which the player forces a claim
-- [ ] #10 Spec phase: Phase 1 — The board and the read (US1)
-- [ ] #11 Spec phase: Phase 2 — The claim (US2)
-- [ ] #12 Spec phase: Phase 3 — The build (US3 + US4)
-- [ ] #13 Spec phase: Phase 4 — The beat, gates, and closure
+- [x] #10 Spec phase: Phase 1 — The board and the read (US1)
+- [x] #11 Spec phase: Phase 2 — The claim (US2)
+- [x] #12 Spec phase: Phase 3 — The build (US3 + US4)
+- [x] #13 Spec phase: Phase 4 — The beat, gates, and closure
 <!-- AC:END -->
+
+
 
 ## Implementation Notes
 
