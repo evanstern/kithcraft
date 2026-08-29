@@ -1,7 +1,10 @@
 package dev.kithcraft.mod.live;
 
 import dev.kithcraft.mod.KithcraftMod;
+import dev.kithcraft.mod.act.ClaimRegistry;
 import dev.kithcraft.mod.act.IntentHandler;
+import dev.kithcraft.mod.board.Board;
+import dev.kithcraft.mod.board.BoardClaims;
 import dev.kithcraft.mod.percept.PerceptEmitter;
 import dev.kithcraft.mod.percept.SelfState;
 import dev.kithcraft.mod.session.Continuity;
@@ -23,6 +26,9 @@ import java.util.UUID;
  * of card AC #1's live half) and real intents in (decoded and driven through {@link
  * IntentHandler} against a {@link LiveActuator}, proving AC #6 live). Single-body scope
  * deliberately: T011 is a dev-server *proof*, not the multi-body session manager V3 needs.
+ *
+ * <p>TASK-0020 T004: also wires the body's {@link ClaimRegistry} to the real {@link Board}
+ * via {@link BoardClaims}, so a claim intent this body sends registers for real.
  *
  * <p>ponytail: the socket path is a bare system property ({@code kithcraft.socket}, default
  * {@code kithcraft.sock} relative to the server's run directory) — no config file, no
@@ -48,8 +54,10 @@ public final class BodySession {
     /** Dials the mind daemon, sends {@code session_open} for {@code villager}, and starts a
      * background reader that drives incoming {@code intent} messages through {@link
      * IntentHandler}. Throws if the dial fails (e.g. no mind daemon listening yet) — the
-     * caller retries on a later tick. */
-    public static BodySession open(MinecraftServer server, Villager villager) throws IOException {
+     * caller retries on a later tick. {@code board}/{@code boardThingToken} thread T004's
+     * claim wiring through to this body's {@link IntentHandler} (see class javadoc). */
+    public static BodySession open(MinecraftServer server, Villager villager, Board board,
+            String boardThingToken) throws IOException {
         String socketPath = System.getProperty("kithcraft.socket", "kithcraft.sock");
         WireClient client = new WireClient(Path.of(socketPath));
         client.dial();
@@ -68,7 +76,8 @@ public final class BodySession {
 
         PerceptEmitter emitter = PerceptEmitter.overWireClient(client, sessionId);
         LiveActuator actuator = new LiveActuator(villager, ground);
-        IntentHandler handler = new IntentHandler(emitter, ground, actuator, sessionId, bodyToken);
+        ClaimRegistry claims = new BoardClaims(board, boardThingToken, tokens::resolve);
+        IntentHandler handler = new IntentHandler(emitter, ground, actuator, claims, sessionId, bodyToken);
 
         Thread reader = new Thread(() -> readLoop(client, handler), "kithcraft-live-reader");
         reader.setDaemon(true);

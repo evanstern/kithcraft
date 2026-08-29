@@ -1,6 +1,7 @@
 package dev.kithcraft.mod.live;
 
 import dev.kithcraft.mod.KithcraftMod;
+import dev.kithcraft.mod.board.BoardData;
 import dev.kithcraft.mod.brain.DuskPairing;
 import dev.kithcraft.mod.death.GraveBoardEntry;
 import dev.kithcraft.mod.death.GravePlacement;
@@ -51,12 +52,13 @@ import java.util.function.Supplier;
  * PoiManager} ticket — so those {@code GlobalPos} values are still readable here, which is what
  * makes the grief-period re-claim (T008) possible without a Mixin either.
  *
- * <p>ponytail: percept content (the grave sighting, the belongings thing, the board posting) is
- * composed and logged here exactly the way {@code DuskPairing} logs {@code PairingSignal}
- * content — not yet pushed over a live {@code WireClient} session. Multiplexing percepts across
- * more than one attached body is {@code BodySession}'s already-flagged single-body ceiling, not
- * new scope this class should carry; T010 (Phase 4) is where percept-channel delivery gets its
- * live proof.
+ * <p>ponytail: the grave sighting and belongings-thing percept content is composed and logged
+ * here exactly the way {@code DuskPairing} logs {@code PairingSignal} content — not yet pushed
+ * over a live {@code WireClient} session. Multiplexing percepts across more than one attached
+ * body is {@code BodySession}'s already-flagged single-body ceiling, not new scope this class
+ * should carry; T010 (Phase 4) is where percept-channel delivery gets its live proof. The board
+ * posting itself is the exception (TASK-0020 T006): it rides the real, persisted {@code Board}
+ * for real, not just a log line — the next board read genuinely carries it.
  */
 public final class LiveDeathHandling {
     private static final Logger LOGGER = KithcraftMod.LOGGER;
@@ -65,20 +67,25 @@ public final class LiveDeathHandling {
 
     private final TokenRegistryData tokens;
     private final Supplier<DuskPairing> duskPairing;
+    private final BoardData boardData;
     private final Map<UUID, List<ItemStack>> pendingCapture = new ConcurrentHashMap<>();
     private final List<PendingHold> holds = new ArrayList<>();
 
     private record PendingHold(BlockPos pos, GriefPeriod.Hold hold) {
     }
 
-    private LiveDeathHandling(TokenRegistryData tokens, Supplier<DuskPairing> duskPairing) {
+    private LiveDeathHandling(TokenRegistryData tokens, Supplier<DuskPairing> duskPairing, BoardData boardData) {
         this.tokens = tokens;
         this.duskPairing = duskPairing;
+        this.boardData = boardData;
     }
 
-    /** Registers the Fabric API death hooks once per server start. */
-    public static LiveDeathHandling register(TokenRegistryData tokens, Supplier<DuskPairing> duskPairing) {
-        LiveDeathHandling handling = new LiveDeathHandling(tokens, duskPairing);
+    /** Registers the Fabric API death hooks once per server start. {@code boardData} is
+     * TASK-0020 T006's seam closure: the grave posting this class composes on death now
+     * rides {@code boardData}'s real {@code Board} instead of only being logged. */
+    public static LiveDeathHandling register(
+            TokenRegistryData tokens, Supplier<DuskPairing> duskPairing, BoardData boardData) {
+        LiveDeathHandling handling = new LiveDeathHandling(tokens, duskPairing, boardData);
         ServerLivingEntityEvents.ALLOW_DEATH.register(handling::onAllowDeath);
         ServerLivingEntityEvents.AFTER_DEATH.register(handling::onAfterDeath);
         return handling;
@@ -134,6 +141,10 @@ public final class LiveDeathHandling {
         LOGGER.info("[death] grave sighting content: {}", graveThing);
 
         GraveBoardEntry posting = new GraveBoardEntry(name, new Place(gravePlaceToken, name + "'s grave"));
+        // TASK-0020 T006: closes V5's decoupling seam — this posting rides the real board
+        // (dev.kithcraft.mod.board.Board#postNotice) instead of only being logged.
+        boardData.board().postNotice((String) posting.content().get("text"));
+        boardData.markDirty();
         LOGGER.info("[death] board posting composed: {}", posting.content());
     }
 

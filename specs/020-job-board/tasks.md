@@ -40,16 +40,91 @@
 
 ## Phase 2 — The claim (US2)
 
-- [ ] T004 Claim registration engine-side from a claim intent (AR-4
+- [x] T004 Claim registration engine-side from a claim intent (AR-4
       token resolution; verb via manifest floor or declared extras — L-7
-      holds); claim appears in board content (card AC #4)
-- [ ] T005 M5-real claim driving in tests: mind/deliberate's E3 loop (merged)
+      holds); claim appears in board content (card AC #4).
+      **Verb mechanism: declared-extras, not the manifest floor** — none of the
+      core four (`go_to`/`speak`/`attend`/`wait`) fits "take this posting", so
+      `claim` rides §5.5's manifest-declared-extras half exactly like V2's
+      `percept_types` floor+5 already does (plan.md decision 3).
+      `Handshake.MANIFEST`'s `verbs` list gains one static entry
+      (`{"verb":"claim","targets":["thing"]}`) — still a plain constant, L-7
+      unaffected (`p5ManifestIsVendorInvariantNotWorldDescribing` still green).
+      **AR-4 token resolution**: the claim intent's target is
+      `{"type":"thing","thing_id":<the board's own thing token>}` — the SAME
+      token every read percept already carries in `provenance.source` (T002's
+      `BoardVisit`); no new token type minted, no new target field
+      (`dev.kithcraft.mod.act.TargetResolution` untouched — the pre-existing
+      `"thing"` case already parses it). `dev.kithcraft.mod.act.ClaimRegistry`
+      is the new seam (mirrors `TargetResolution.Ground`/`Verbs.Actuator`);
+      `dev.kithcraft.mod.board.BoardClaims` is its real, `Board`-backed
+      implementation, threaded into `IntentHandler` via `BodySession`.
+      `Board.tryClaim` (package-private — see T006) implements first-accepted-
+      claim-wins and appends the claim line `Board.recordClaim` already carries
+      (Phase 1's hook, now actually called). Proof: `BoardClaimTest` (2),
+      `IntentHandlerTest`'s two new claim tests, `BoardTest`'s five new
+      `tryClaim`/`postNotice` tests.
+      **Structural zero-protocol-extension, extended per Phase 1's own note**:
+      `BoardClaimProtocolTest` (3 tests) proves the claim target carries no key
+      beyond `type`/`thing_id`, resolves through the unmodified
+      `TargetResolution.resolve`, and that `claim`'s declared target set is
+      exactly `["thing"]` — no new target type.
+- [x] T005 M5-real claim driving in tests: mind/deliberate's E3 loop (merged)
       produces the claim intent against the fake vendor in a cross-language
       fixture or an M5-shaped scripted intent with the shape asserted —
-      record which honestly (card AC #9 context)
-- [ ] T006 Structural absence: no force-claim path anywhere (card AC #9);
+      record which honestly (card AC #9 context).
+      **Recorded honestly: M5-shaped scripted intent, not a generated
+      cross-language fixture.** mind/deliberate has no fixture-export path —
+      its own tests (`mind/deliberate/board_test.go`) script raw JSON inline;
+      building a Go→Java fixture pipeline was judged out of this phase's
+      scope (a design decision, not a mechanical one — flagging rather than
+      guessing). Instead `BoardClaimTest.m5ShapedClaimIntent` composes the
+      exact payload shape `mind/seam/intents.go`'s `Pending.Compose` produces
+      (`intent_id, verb, target, reason, supersedes, not_after`) from an
+      `Intent` decoded by `mind/llm/structured.go`'s `llm.ParseIntent`
+      (`verb, target, reason, supersedes` — no other field exists to add
+      one), and copies the verb, target, and reason text **verbatim** from
+      `mind/deliberate/board_test.go`'s own
+      `TestLoop_E3ClaimIntent_CarriesAuthoredReason` (`{"verb":"claim",
+      "target":{"type":"thing","thing_id":"th-post-1"},"reason":"Building
+      shelters is exactly my trade..."}`) so a future reader can diff this
+      Java test against the real Go test directly. Drives the real engine
+      pipeline end to end (`IntentHandler` → `BoardClaims` → `Board`), not a
+      Board-only unit test, and asserts the mind's authored `reason` is
+      echoed unaltered on the `act_result` (§5.2).
+- [x] T006 Structural absence: no force-claim path anywhere (card AC #9);
       V5's tend-grave posting seam closed — GraveBoardEntry rides this board
-      for real
+      for real.
+      **No force-claim path**: `dev.kithcraft.mod.death.StructuralAbsenceTest`
+      gains `noForceClaimPath` (V5's own grep-over-source style, extended
+      rather than duplicated into a new file) — checked as call-site
+      cardinality rather than a forbidden-word grep: `Board.tryClaim` is
+      called from exactly one place in the whole mod source (`BoardClaims`).
+      `Board.tryClaim` itself is package-private, so this is also a
+      compile-time guarantee, not only a regression test.
+      **V5 seam closed for real**: `Board.postNotice` (new, delegates to the
+      same `recordClaim` line-append `Board` already had) is called from
+      `LiveDeathHandling.handleDeath` with `GraveBoardEntry#content()`'s text
+      — a grave posting now actually lands on the persisted `Board`, not only
+      a log line. Required threading `BoardData` into
+      `LiveDeathHandling.register` (reordered ahead of it in
+      `KithcraftMod.onServerStarted`, since board setup now has to exist
+      first) and persisting `Board`'s new `claimedBy` field
+      (`BoardData`'s codec gains `claimed_by`). Proof:
+      `BoardTest.postNoticeRidesTheSameReadableContentAsAClaim`;
+      `GraveBoardEntryTest` unchanged (the class's own `content()`/`take()`
+      contract didn't change, only who calls it).
+
+      **Deviation**: T005's own honest fixture-vs-scripted-intent call above
+      is the one recorded deviation from the phase's stated menu of options.
+      Everything else in T004/T006 landed as designed with no plan.md
+      deviation.
+
+      **Gates**: `./gradlew test` — 151 tests, 0 failures (13 new since
+      Phase 1's 138: `BoardClaimProtocolTest` 3, `BoardClaimTest` 2,
+      `BoardTest` +5, `IntentHandlerTest` +2, `StructuralAbsenceTest` +1).
+      Mixin surface unchanged (no new Mixin this phase — `ClaimRegistry`/
+      `BoardClaims`/`Board.tryClaim` are all plain-JDK/vanilla-API classes).
 
 ## Phase 3 — The build (US3 + US4)
 

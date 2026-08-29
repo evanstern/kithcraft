@@ -53,6 +53,7 @@ public class KithcraftMod implements ModInitializer {
 	private LiveDeathHandling deathHandling;
 	private BoardData boardData;
 	private BlockPos boardPos;
+	private String boardThingToken;
 	private BoardVisit boardVisit;
 	private long lastBoardReadAttempt = -1000L;
 
@@ -89,21 +90,22 @@ public class KithcraftMod implements ModInitializer {
 		// retired token's absence here after a restart is directly observable in the log.
 		LOGGER.info("[live] token registry live entries at boot: {}", pendingTokens.liveEntries());
 
-		// T007-T009: registers the Fabric API death hooks (no new Mixin — see
-		// LiveDeathHandling's class doc). One registration per server start; the supplier
-		// reads this.duskPairing lazily since it isn't set up until a later tick.
-		deathHandling = LiveDeathHandling.register(pendingTokens, () -> duskPairing);
-
 		// TASK-0020 T001/T002: the board's designated lectern, placed now (unlike DuskPairing's
 		// bell, this needs no matched cast villagers, so it does not have to wait for
 		// onServerTick). Tokens issued once per server start (TokenRegistry never reuses one),
-		// same as DuskPairing's gathering-place token.
+		// same as DuskPairing's gathering-place token. Built before LiveDeathHandling below —
+		// T006 threads boardData into it so a grave posting can ride the real board.
 		boardData = level.getDataStorage().computeIfAbsent(BoardData.TYPE);
 		boardPos = BoardSetup.placeBoard(level, origin);
-		String boardThingToken = pendingTokens.issue(TokenRegistry.TokenType.THING, "the job board");
+		boardThingToken = pendingTokens.issue(TokenRegistry.TokenType.THING, "the job board");
 		String boardPlaceToken = pendingTokens.issue(TokenRegistry.TokenType.PLACE, "the job board");
 		boardVisit = new BoardVisit(
 			boardPos, boardThingToken, new Place(boardPlaceToken, "the job board"), boardData.board());
+
+		// T007-T009: registers the Fabric API death hooks (no new Mixin — see
+		// LiveDeathHandling's class doc). One registration per server start; the supplier
+		// reads this.duskPairing lazily since it isn't set up until a later tick.
+		deathHandling = LiveDeathHandling.register(pendingTokens, () -> duskPairing, boardData);
 	}
 
 	private static List<Villager> findCastVillagers(ServerLevel level) {
@@ -174,7 +176,7 @@ public class KithcraftMod implements ModInitializer {
 				return;
 			}
 			try {
-				attached = BodySession.open(server, villager);
+				attached = BodySession.open(server, villager, boardData.board(), boardThingToken);
 				LOGGER.info("[live] attached to villager {}", villager.getStringUUID());
 			} catch (IOException e) {
 				LOGGER.warn("[live] mind dial failed, will retry: {}", e.toString());

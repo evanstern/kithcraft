@@ -17,7 +17,8 @@ public final class BoardData extends SavedData {
 
     private static final Codec<Board.Snapshot> SNAPSHOT_CODEC = RecordCodecBuilder.create(i -> i.group(
         Codec.STRING.fieldOf("text").forGetter(Board.Snapshot::text),
-        Codec.STRING.listOf().fieldOf("claims").forGetter(Board.Snapshot::claims)
+        Codec.STRING.listOf().fieldOf("claims").forGetter(Board.Snapshot::claims),
+        Codec.STRING.fieldOf("claimed_by").forGetter(Board.Snapshot::claimedBy)
     ).apply(i, Board.Snapshot::new));
 
     public static final Codec<BoardData> CODEC = SNAPSHOT_CODEC.xmap(BoardData::new, BoardData::snapshot);
