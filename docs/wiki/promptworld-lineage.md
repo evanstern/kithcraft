@@ -1,6 +1,6 @@
 ---
 name: promptworld-lineage
-description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall; persona and consolidation now ported for real, TASK-0013/0018); code does not (sim, executor, governor, guardian; 62% of non-test lines). Decision-0003: Go rebuild, old packages kept as source material. Load before importing I code or for mind-architecture questions.
+description: What Kithcraft inherits from promptworld I, and what it discards — doctrine transfers (event-sourced memory, reflex/planner split, salience/consolidation, epistemic hygiene, persona firewall; persona TASK-0013, toolloop's REQUEST/FACT/gate shape TASK-0016, and nightly consolidation TASK-0018 all now ported for real); code does not (sim, executor, governor, guardian; 62% of non-test lines). Decision-0003: the daemon does not survive the seam in any language; Go rebuild, old packages kept as source material. Load before importing I code or for mind-architecture questions.
 kind: concept
 sources:
   - docs/design/kithcraft-brief.md
@@ -75,6 +75,16 @@ reflection test), and a model-free validator (anchor echo + drift lexicon, inclu
 an authored cast-wide moralizing lexicon that vetoes the politeness-policing
 spell-breaker at birth) that provably imports no `llm` code. See
 specs/013-persona-genesis.
+
+**Update (TASK-0016, 2026-08-28): `toolloop` graduates from source material too.**
+`mind/deliberate/` ports its REQUEST/FACT/gate *shape* (never its promptworld-I code,
+decision-0003 is unchanged on that point) onto `intent`/`intent_ack`/`act_result`: a
+composed intent is the REQUEST, an `act_result` percept is the FACT, and the mind's
+admission gate (`mind/memory`) decides what of it becomes memory. E3 job-board
+deliberation, the §5.5 urgency interrupt, and the K=10 situated memory window (2 seeded
+serendipity picks from the older half — the mind-side formativeness this note's "what
+dies" section already flagged as new design, since I's world-side salience table cannot
+exist under the seam) all sit above that loop. See specs/016-deliberation.
 
 **Update (TASK-0018, 2026-08-28): the nightly-digestion heritage is also ported for
 real.** `mind/consolidate/` lands the machinery *shape* the doctrine list above names —
