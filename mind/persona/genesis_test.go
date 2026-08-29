@@ -14,13 +14,10 @@ import (
 	"kithcraft/mind/llm"
 )
 
-func demoCastEntries() []CastEntry {
-	return []CastEntry{
-		{CastID: "Aldric", Profession: "armorer", BiomeVariant: "plains"},
-		{CastID: "Petra", Profession: "farmer", BiomeVariant: "desert"},
-		{CastID: "Yenna", Profession: "fisherman", BiomeVariant: "taiga"},
-	}
-}
+// demoCastEntries delegates to the exported DemoCast (persona.go) — TASK-
+// 0021's daemon wiring needs the same three entries, so persona.go is now
+// the one place that spells them.
+func demoCastEntries() []CastEntry { return DemoCast() }
 
 // genesisServer replies to every request with the given persona JSON as
 // E1's text content, capturing each request body it decodes so a test can

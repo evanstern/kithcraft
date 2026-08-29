@@ -43,14 +43,17 @@ func TestPersona_NoMethodsOnPersonaType(t *testing.T) {
 // (plan.md: "a test reading the source, same as S2's reflection lock, since
 // Go has no per-file import visibility") — this test parses the package's
 // non-test source and asserts its exported top-level function set is
-// exactly {Genesis, Load, Validate, WriteOnce}. WriteOnce's own refusal is
-// proven at runtime by TestWriteOnce_RefusesExistingFile below; Validate
-// (Phase 2) is read-only over its Persona argument and has no write path of
-// its own. Genesis (Phase 3) DOES write, but only by calling WriteOnce
-// internally (genesis.go) — it opens no write path WriteOnce doesn't
-// already guard, so it is not a second, independent way to overwrite an
-// existing persona. This test proves there is no OTHER exported function
-// that could.
+// exactly {DemoCast, Genesis, Load, Validate, WriteOnce}. WriteOnce's own
+// refusal is proven at runtime by TestWriteOnce_RefusesExistingFile below;
+// Validate (Phase 2) is read-only over its Persona argument and has no
+// write path of its own. Genesis (Phase 3) DOES write, but only by calling
+// WriteOnce internally (genesis.go) — it opens no write path WriteOnce
+// doesn't already guard, so it is not a second, independent way to
+// overwrite an existing persona. DemoCast (TASK-0021 T001) is a pure data
+// literal — the three-member cast pairing, no dir/client argument, no I/O —
+// added to this want-list the same way Validate was (specs/013-persona-
+// genesis history): a read-only addition, not a new write path. This test
+// proves there is no OTHER exported function that could write one.
 func TestPersona_ExportedFunctionSurface_IsExactlyLoadAndWriteOnce(t *testing.T) {
 	_, thisFile, _, ok := runtime.Caller(0)
 	if !ok {
@@ -81,7 +84,7 @@ func TestPersona_ExportedFunctionSurface_IsExactlyLoadAndWriteOnce(t *testing.T)
 		}
 	}
 	sort.Strings(funcs)
-	want := []string{"Genesis", "Load", "Validate", "WriteOnce"}
+	want := []string{"DemoCast", "Genesis", "Load", "Validate", "WriteOnce"}
 	if !reflect.DeepEqual(funcs, want) {
 		t.Fatalf("persona package's exported top-level functions = %v, want exactly %v — any addition is a new candidate write path to an existing persona", funcs, want)
 	}

@@ -50,3 +50,15 @@ type Persona struct {
 //	CastID "Aldric" — profession "armorer",   biome variant "plains"
 //	CastID "Petra"  — profession "farmer",    biome variant "desert"
 //	CastID "Yenna"  — profession "fisherman", biome variant "taiga"
+
+// DemoCast returns the three-member demo cast pairing above as Genesis
+// input (TASK-0021 T001): the single source of truth for it, so the daemon
+// and this package's own tests (genesis_test.go's demoCastEntries) name the
+// same three entries instead of two copies drifting apart.
+func DemoCast() []CastEntry {
+	return []CastEntry{
+		{CastID: "Aldric", Profession: "armorer", BiomeVariant: "plains"},
+		{CastID: "Petra", Profession: "farmer", BiomeVariant: "desert"},
+		{CastID: "Yenna", Profession: "fisherman", BiomeVariant: "taiga"},
+	}
+}
