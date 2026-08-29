@@ -254,4 +254,14 @@
       (exit 0); two pre-existing size_budget_exempt overage warnings
       (`body-protocol-seam.md`, `villager-brain-api.md`) are non-blocking
       by design, unchanged from before this pass.
-- [ ] T013 Card ACs ticked with citing proofs; board/spec synced at PR time
+- [x] T013 Card ACs ticked with citing proofs; board/spec synced at PR time.
+      TASK-0020's 9 acceptance criteria all ticked via `backlog` CLI, each
+      with a citing proof (unit test class/method + live evidence where
+      observed, or unit-proof-only with an honest "live half deferred to
+      I2 (TASK-0022)" note where §4's token-namespace finding blocked live
+      build/interrupt/resume — the same pattern TASK-0019's AC#5/#8 used).
+      DoD #1 (tests) and #2 (wiki/freshness) ticked; DoD #3 (spec/backlog
+      sync) and the terminal `-s Done` transition left for the orchestrator
+      at PR/merge time, per TASK-0019's own precedent — no PR exists yet.
+      Status set to `In Progress`. Full citations: TASK-0020's own comment
+      thread (`backlog task view TASK-0020`).
