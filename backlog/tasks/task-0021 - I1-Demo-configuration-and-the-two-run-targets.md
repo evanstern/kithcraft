@@ -4,7 +4,7 @@ title: I1 - Demo configuration and the two run targets
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
-updated_date: '2026-08-29 03:25'
+updated_date: '2026-08-29 03:27'
 labels:
   - integration
   - m-0-build
@@ -48,12 +48,18 @@ Spec: specs/021-demo-config
 - [ ] #4 The grief-period knob (R-3) and the danger-tuning knob (R-6) exist as config, with danger tuning off by default
 - [ ] #5 Per-class call/token counters and the E6-input-tokens instrument report at session end
 - [ ] #6 Every knob above is config, not a constant in code
+- [ ] #7 Spec phase: Phase 1 — The daemon runtime loop (US1 machinery + US2 machinery)
+- [ ] #8 Spec phase: Phase 2 — Knobs and the report (US3 + US4)
+- [ ] #9 Spec phase: Phase 3 — The documented sequence and the live proof (US1 + US2 live)
+- [ ] #10 Spec phase: Phase 4 — Gates and closure
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 claimed by sweep-0007-0022 orchestrator 2026-08-29 (lane 5; deps M3/M7/V3/V5 all merged); spec 021 stub + link ride this claim commit
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: config plumbing and documented startup; every knob is ruled (R-1, R-3, R-6) — assembly of tested parts, judgment already settled (runbook lane 5)
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
