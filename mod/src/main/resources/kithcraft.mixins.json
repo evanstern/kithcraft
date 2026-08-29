@@ -5,7 +5,9 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": [
 		"VillagerGoalPackagesMixin",
-		"VillagerGossipMixin"
+		"VillagerGossipMixin",
+		"VillageSiegeMixin",
+		"ZombieConversionMixin"
 	],
 	"client": [],
 	"server": [],
@@ -14,6 +16,8 @@
 	},
 	"kithcraftPurposes": {
 		"VillagerGoalPackagesMixin": "Suppresses villager breeding (FR-004, card AC #2): drops VillagerMakeLove from VillagerGoalPackages.getIdlePackage's returned behavior list before any Brain is built from it. registerBrainGoals is private and Brain.addActivity is additive-only, so this is the only place a stock vanilla behavior can be omitted (specs/014-augmented-villager/research/brain-26.2.md).",
-		"VillagerGossipMixin": "Suppresses gossip exchange AND, as a direct side effect, iron-golem summoning (FR-004, card AC #2): Villager.gossip(ServerLevel, Villager, long) calls spawnGolemIfNeeded from inside its own body, so cancelling gossip at HEAD covers both targets in one injection -- the Mixin budget lands at 2 overrides, not 3 (brain-26.2.md §5)."
+		"VillagerGossipMixin": "Suppresses gossip exchange AND, as a direct side effect, iron-golem summoning (FR-004, card AC #2): Villager.gossip(ServerLevel, Villager, long) calls spawnGolemIfNeeded from inside its own body, so cancelling gossip at HEAD covers both targets in one injection -- the Mixin budget lands at 2 overrides, not 3 (brain-26.2.md §5).",
+		"VillageSiegeMixin": "Suppresses zombie sieges unconditionally, regardless of eligibility (FR-002, card AC #2): VillageSiege.tick(ServerLevel, boolean) is the sole per-tick entry point of the entire siege mechanism (VillageSiege implements CustomSpawner, one class); cancelling at HEAD stops the clock-marker gate / 10% nightly roll / eligibility+setup / spawn-drip state machine before any of it runs (specs/019-death-remains/research/death-26.2.md R-5a). R-5b found 26.2 eligibility is pure POI-occupancy density with no door/population count, so a 3-villager cast always qualifies once a bed is claimed -- this Mixin is doing real work, not covering an unreachable case.",
+		"ZombieConversionMixin": "Makes zombie-villager conversion terminal-equivalent to death, no cured path (FR-003, card AC #3): Zombie.killedEntity(ServerLevel, LivingEntity, DamageSource) calls Zombie.convertVillagerToZombieVillager(ServerLevel, Villager) on a difficulty-gated roll against a Villager victim; that method's entire body (bytecode offset 0) is a call to Villager.convertTo(EntityTypes.ZOMBIE_VILLAGER, ...), so cancelling convertVillagerToZombieVillager at HEAD to return false means convertTo never runs -- no entity substitution begins, and the victim's own die() (already synchronously released its POIs before this attacker-side hook fires) falls through to its ordinary loot-drop/removal path unchanged, same as any other death (specs/019-death-remains/research/death-26.2.md R-6, javap -p -c on Zombie 2026-08-28). Total Mixin surface: V3's 2 + siege (1) + this (1) = 4, decision-0002's committed ceiling."
 	}
 }

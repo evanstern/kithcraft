@@ -5,6 +5,7 @@ import dev.kithcraft.mod.cast.Cast;
 import dev.kithcraft.mod.cast.CastData;
 import dev.kithcraft.mod.cast.CastSeeder;
 import dev.kithcraft.mod.live.BodySession;
+import dev.kithcraft.mod.live.LiveDeathHandling;
 import dev.kithcraft.mod.tokens.TokenRegistryData;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
@@ -44,6 +45,7 @@ public class KithcraftMod implements ModInitializer {
 	private TokenRegistryData pendingTokens;
 	private BlockPos pendingOrigin;
 	private long lastDuskSetupAttempt = -1000L;
+	private LiveDeathHandling deathHandling;
 
 	@Override
 	public void onInitialize() {
@@ -74,6 +76,14 @@ public class KithcraftMod implements ModInitializer {
 		// Deferred to onServerTick below, retried until the cast is actually found.
 		pendingTokens = level.getDataStorage().computeIfAbsent(TokenRegistryData.TYPE);
 		pendingOrigin = origin;
+		// T011 dev-server proof (card AC #9): every token that still resolves at boot, so a
+		// retired token's absence here after a restart is directly observable in the log.
+		LOGGER.info("[live] token registry live entries at boot: {}", pendingTokens.liveEntries());
+
+		// T007-T009: registers the Fabric API death hooks (no new Mixin — see
+		// LiveDeathHandling's class doc). One registration per server start; the supplier
+		// reads this.duskPairing lazily since it isn't set up until a later tick.
+		deathHandling = LiveDeathHandling.register(pendingTokens, () -> duskPairing);
 	}
 
 	private static List<Villager> findCastVillagers(ServerLevel level) {
@@ -114,6 +124,9 @@ public class KithcraftMod implements ModInitializer {
 		}
 		if (duskPairing != null) {
 			duskPairing.tick(worldTime);
+		}
+		if (deathHandling != null) {
+			deathHandling.tick(server.overworld(), worldTime);
 		}
 		if (attached == null) {
 			if (worldTime - lastAttachAttempt < 20) {

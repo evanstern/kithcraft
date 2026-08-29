@@ -1,12 +1,13 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, its bounded E2/E3 deliberation loop, its E6 nightly consolidation and R-9 archival, and the first vendor-side Fabric mod code), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, one ratified decision, PDLC machinery, the mind daemon with its own event-sourced memory, its E1-generated persona firewall, its bounded E2/E3 deliberation loop, its E6 nightly consolidation and R-9 archival, and the first vendor-side Fabric mod code now including death/remains machinery), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
-verified_against: b05139e3d24f441351d5aa43df5c33b044d25245
+  - specs/019-death-remains/spec.md
+verified_against: 07f69ed7bb6b86e2d7a184b25631a835cfb4c0b5
 ---
 
 # Overview
@@ -44,7 +45,13 @@ readable, its body token retired and never reissued) — and, as of TASK-0009 (V
 `mind/deliberate/`: the bounded E2/E3 deliberation loop, porting toolloop's REQUEST/FACT/gate
 shape (decision-0003, [[promptworld-lineage]]) onto intent/intent_ack/act_result, plus the
 §5.5 urgency interrupt and the K=10 situated memory window — a villager now claims or
-declines a posted job with an authored reason of its own, rather than executing a command.
+declines a posted job with an authored reason of its own, rather than executing a command. Since TASK-0019 (V5) the mod
+also carries death/remains machinery: zombie sieges suppressed and zombie-conversion
+cancelled to death-equivalent (two more targeted Mixins, [[villager-brain-api]]), a
+named grave + belongings chest placed at the death site with no villager agency
+required, a configurable grief period holding the dead villager's bed/job-site
+unclaimed, an optional job-board posting, and the dead villager's body token retired
+and never reissued.
 
 ## How it works
 
