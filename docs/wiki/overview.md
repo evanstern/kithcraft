@@ -7,7 +7,7 @@ sources:
   - docs/design/kithcraft-brief.md
   - CLAUDE.md
   - specs/019-death-remains/spec.md
-verified_against: 8b87adc9c1d534bab978b2d51b0cf2197e3bdf01
+verified_against: 07f69ed7bb6b86e2d7a184b25631a835cfb4c0b5
 ---
 
 # Overview
