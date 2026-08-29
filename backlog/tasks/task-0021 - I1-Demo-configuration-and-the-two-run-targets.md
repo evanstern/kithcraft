@@ -4,7 +4,7 @@ title: I1 - Demo configuration and the two run targets
 status: In Progress
 assignee: []
 created_date: '2026-08-21 23:40'
-updated_date: '2026-08-29 03:27'
+updated_date: '2026-08-29 04:16'
 labels:
   - integration
   - m-0-build
@@ -42,16 +42,16 @@ Spec: specs/021-demo-config
 
 ## Acceptance Criteria
 <!-- AC:BEGIN -->
-- [ ] #1 One documented command sequence brings up the daemon and the mod jar as independently started artifacts and yields a server with three personas seeded and bound
-- [ ] #2 Restarting the daemon mid-session and reconnecting leaves the villagers with their memories (T-4 mind-restart independence)
-- [ ] #3 The vanilla daylight cycle is kept per ruling R-1: nine day/night cycles across the evening, recorded as a ruling rather than an unexamined default
-- [ ] #4 The grief-period knob (R-3) and the danger-tuning knob (R-6) exist as config, with danger tuning off by default
-- [ ] #5 Per-class call/token counters and the E6-input-tokens instrument report at session end
-- [ ] #6 Every knob above is config, not a constant in code
-- [ ] #7 Spec phase: Phase 1 — The daemon runtime loop (US1 machinery + US2 machinery)
-- [ ] #8 Spec phase: Phase 2 — Knobs and the report (US3 + US4)
-- [ ] #9 Spec phase: Phase 3 — The documented sequence and the live proof (US1 + US2 live)
-- [ ] #10 Spec phase: Phase 4 — Gates and closure
+- [x] #1 One documented command sequence brings up the daemon and the mod jar as independently started artifacts and yields a server with three personas seeded and bound
+- [x] #2 Restarting the daemon mid-session and reconnecting leaves the villagers with their memories (T-4 mind-restart independence)
+- [x] #3 The vanilla daylight cycle is kept per ruling R-1: nine day/night cycles across the evening, recorded as a ruling rather than an unexamined default
+- [x] #4 The grief-period knob (R-3) and the danger-tuning knob (R-6) exist as config, with danger tuning off by default
+- [x] #5 Per-class call/token counters and the E6-input-tokens instrument report at session end
+- [x] #6 Every knob above is config, not a constant in code
+- [x] #7 Spec phase: Phase 1 — The daemon runtime loop (US1 machinery + US2 machinery)
+- [x] #8 Spec phase: Phase 2 — Knobs and the report (US3 + US4)
+- [x] #9 Spec phase: Phase 3 — The documented sequence and the live proof (US1 + US2 live)
+- [x] #10 Spec phase: Phase 4 — Gates and closure
 <!-- AC:END -->
 
 ## Implementation Notes
@@ -60,11 +60,23 @@ Spec: specs/021-demo-config
 claimed by sweep-0007-0022 orchestrator 2026-08-29 (lane 5; deps M3/M7/V3/V5 all merged); spec 021 stub + link ride this claim commit
 
 tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: config plumbing and documented startup; every knob is ruled (R-1, R-3, R-6) — assembly of tested parts, judgment already settled (runbook lane 5)
+
+Phase 4 (T010) AC proofs — AC #1: docs/design/demo-runbook.md (one file, §1-3 build+both start orders) followed verbatim in specs/021-demo-config/research/bringup-observation.md §1-3 — daemon and mod jar started independently, server up with a session attached, personas seeded/bound via the documented re-bind path (stub personas matching persona.DemoCast(), zero calls — this dispatch made no live API calls; a real E1 genesis run needs the operator's key per the runbook's §4).
+
+AC #2 (T-4): bringup-observation.md §4, the headline check — one memory admitted pre-kill (world_time=100), daemon SIGTERM'd, restarted against the same rundir, the SAME body token reconnected (HandleConnection's 'matched by body token alone'), a second memory admitted post-restart (world_time=5000); session-report.log + the memory log show both records with the gap visible, nothing synthetic in between. Honest caveat: driven via a scripted mind/seamtest.DialUnix double against the live daemon, not the live mod's own session (bringup-observation.md §5 explains why: the live mod's self_state-only heartbeat produces no admissible memories, so its session alone could not exercise the check). Follow-up flagged for refactor-triage/I2, not fixed here: the live mod's Continuity.java always sends firstSession() and mints a fresh body token per attach — the daemon-side reconnect mechanism this AC proves is real, but the live mod does not yet exercise it end-to-end.
+
+AC #3 (R-1): docs/design/demo-runbook.md §5 records the ruling (vanilla daylight cycle kept, nine cycles across the ~3h evening, 27 consolidations for the 3-villager cast, citing llm-routing-and-budget.md §7.1/A-2); mind/consolidate/cycle.go:60 CycleTicks=24000 is deliberately a constant, not a knob (plan.md design decision 4) — R-1 is recorded as a ruling in the run doc, not left as an unexamined default.
+
+AC #4/#6: R-3 (grief period) — mod/.../death/GriefPeriod.java:23 configuredTicks() reads System property kithcraft.griefPeriodTicks, default 24000, GriefPeriodTest.configOverridableNotAConstant proves override-not-constant. R-6 (danger tuning, new) — mod/.../death/DangerTuning.java:23 enabled() reads kithcraft.dangerTuning, default OFF (Boolean.getBoolean false when unset); DangerTuningTest proves off-by-default + override-not-constant + the shouldSuppress decision table. mind/cmd/minddaemon/config.go's envOr/envOrBool (config_test.go TestEnvOr_ConfigNotConstant/TestEnvOrBool_ConfigNotConstant) cover the daemon-side socket/rundir/genesis knobs the same way. Config-not-constant audit: all four knobs read configuration at call time, none baked into a call site.
+
+AC #5: mind/cmd/minddaemon/report.go Runtime.Report — every llm.E1..E6 row emitted zeroed rather than omitted, plus each body's admitted-count-per-villager-day series, unconditional. Both lifetimes observed: report_test.go's TestReport_ZeroCallPathEmitsZeroed (fresh runtime, no Client, no bodies) and TestReport_IncludesAdmittedInstrumentCounts (one admitted percept lands 'day 0: 1 admitted') cover the unit lifetime; bringup-observation.md's live run actually produced session-report.log with 'obs-body-1 day 0: 1 admitted' after the pre-kill admission, appended for real by the live daemon, not just asserted in a test.
+
+Refactor-triage/I2 flags (Phase 3 findings, not fixed in this phase): (1) the live mod's Continuity.java always sends firstSession() and mints a fresh body token per attach regardless of a prior session, per its own doc — the mind-restart-independence mechanism (AC #2) is proven daemon-side and via a test double, not yet through the live mod's own reconnect path. (2) the live mod's self_state-only heartbeat produced zero body-store opens across ~2m40s of continuous ticking spanning the kill+restart in bringup-observation.md §5 — structurally unadmittable per admission.go's rules (no subject, background urgency), and whether self_state percepts even reach the daemon at all was not distinguished in this pass. Both are docs+observation findings only, no code changed for either.
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
-- [ ] #1 Tests pass
-- [ ] #2 Docs and wiki are updated and pass freshness tests
-- [ ] #3 Spec and Backlog are in sync
+- [x] #1 Tests pass
+- [x] #2 Docs and wiki are updated and pass freshness tests
+- [x] #3 Spec and Backlog are in sync
 <!-- DOD:END -->

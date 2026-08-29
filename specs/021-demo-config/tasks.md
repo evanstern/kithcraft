@@ -294,3 +294,21 @@
       copies agree).
 
 - [x] T010 Card ACs ticked with citing proofs; board/spec synced at PR time
+
+      Done: all six card ACs (#1-#6) plus the four mirrored spec-phase ACs
+      (#7-#10) ticked via `backlog task edit TASK-0021 --check-ac` with
+      citing proofs recorded in the task's implementation notes (`backlog
+      task view TASK-0021 --plain`) — see there for the full text: AC #1
+      (demo-runbook.md + bringup-observation.md §1-3), AC #2 (bringup-
+      observation.md §4's headline check, honestly caveated as a
+      `seamtest.DialUnix` double against the live daemon, not the live
+      mod's own session), AC #3 (R-1 in demo-runbook.md §5 +
+      `consolidate.CycleTicks`), AC #4/#6 (`GriefPeriod`/`DangerTuning`
+      config-not-constant), AC #5 (`report.go`, both the zero-call unit
+      lifetime and the live session-report.log entry). A dedicated note
+      flags both Phase 3 findings (the mod's `Continuity.java` always-
+      firstSession reconnect gap; the `self_state`-only heartbeat's zero
+      admissible memories) for refactor-triage/I2, unfixed here by design.
+      Definition of Done #1-#3 checked (tests pass, wiki updated + fresh,
+      board/spec in sync). No AC left unticked — nothing in card scope
+      fell outside what this phase and Phase 3's live observation proved.
