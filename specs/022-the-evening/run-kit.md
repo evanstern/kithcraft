@@ -1,0 +1,200 @@
+# Run kit — the evening (I2)
+
+**For:** the operator, at a keyboard, during the ~3-hour run (checkpoint 5). Everything here
+is traceable to `docs/design/demo-build-plan.md` §4/§5.2 and `docs/design/llm-routing-and-
+budget.md` §2.4/§3. Staged by TASK-0022 Phase 1 (sweep); walked by the operator in Phase 2.
+
+**Read `docs/design/demo-runbook.md` first** — bring-up, both start orders, rehearsal vs live
+genesis, the R-1/R-3/R-6 knobs. This kit assumes the daemon and mod jar are already up.
+
+---
+
+## 0. Before you start
+
+- [ ] **Decide on the M5/M6 live-wiring gap first — see Watch List #1.** `mind/cmd/
+      minddaemon/runtime.go`'s `HandlePercept` never composes an intent (its own comment: "no
+      deliberation/converse wiring lives here (M5)"); `specs/021-demo-config/plan.md` design
+      decision 2 defers this deliberately to I2. **As the branch stands, the live daemon fires
+      E1 (genesis, pre-session) and E6 (nightly consolidation) only** — E2/E3/E4/E5 never run
+      against the real mod, so beats 4–6 (job-board, build-alongside, dusk conversation) will
+      not happen live. Two options, pick one before scheduling the 3h block:
+      (a) get the wiring written first (real code — a small new dispatch, out of this
+      docs-only phase's scope), or
+      (b) run now and record beats 4–6 as "not observed — known wiring gap" in the findings
+      doc, owned by a new task at write-up.
+- [ ] `ANTHROPIC_API_KEY` exported — **unless** `mind/run/persona/{Aldric,Petra,Yenna}.json`
+      already exist (a prior live genesis, e.g. TASK-0013's run, or copied in): then
+      `-genesis=false` re-binds for zero calls and no key is needed for genesis. A key is
+      still needed for anything E2–E6 will call once (a) above is resolved.
+- [ ] ~3 hours blocked, player present throughout (FR-003 — no agent substitutes for this).
+- [ ] Recording set up (screen + audio) — R-1's framing is a **cut**, not an engineered take;
+      capture the whole evening and pick the best dusk afterward (§3 below, A-quality note).
+- [ ] `dangerTuning` per-take choice made and stated: OFF (default, representative play) or
+      `-Dkithcraft.dangerTuning=true` via `JAVA_TOOL_OPTIONS` (recorded-take-only, despawns a
+      hostile spawning within 24 blocks of the cast — demo-runbook.md §5).
+- [ ] Grief-period default (24000 ticks / one cycle) is fine unless a different value is
+      wanted for this take (`-Dkithcraft.griefPeriodTicks=<ticks>`, same idiom).
+- [ ] Builds green at this branch — confirmed this session: `go build ./cmd/minddaemon` and
+      `./gradlew build` both exit 0, no code changes made.
+- [ ] `docs/design/demo-runbook.md` confirmed current against merged code this session (flags,
+      env vars, system properties all cross-checked live — see report). No drift found; no fix
+      needed.
+
+---
+
+## 1. Beat checklist
+
+Plan §4's seven beats. Check each; note the evidence line/command actually used.
+
+- [ ] **1. Three villagers — names, generated personas, desires.**
+      Look for: nameplates Aldric/Petra/Yenna in world; each with a distinct persona.
+      Capture: `mind/run/persona/{Aldric,Petra,Yenna}.json` present, mode 0444, each with
+      generated values/desires; mod log `[live] attached to villager <uuid>` ×3; session-
+      report.log's `E1: calls=…` row (3 if fresh genesis, 0 if re-bind — re-bind is
+      zero-call **by design**, not a miss).
+
+- [ ] **2. Schedules — wake / work / socialize / sleep.**
+      Look for: villagers moving through a full day unattended — waking, at their job site,
+      converging at dusk, asleep in claimed beds at night.
+      Capture: `[dusk] pairing signal: {} + {} at {} (eta {}s, world_time {})` — expect one
+      per pair per dusk, ~9 across the evening (Watch List #2 on the eta value); visual check
+      of villagers in beds at night; console `/data get entity … Brain.memories."minecraft:
+      job_site"` (known to intermittently return nothing — Watch List #3, not new).
+
+- [ ] **3. Persistent memory.**
+      Look for: memory surviving the evening (and a daemon restart, if one happens).
+      Capture: `mind/run/villagers/<body>.jsonl` growing across the run; a restart shows a
+      gap in `world_time`, never backfilled; session-report.log's `E6: calls=…` row (~27 for
+      a full 9-cycle evening) and its "E6-input admitted buffer size per villager-day" section
+      (one line per body per day).
+
+- [ ] **4. The job-board book.**
+      Look for: player writes a blueprint into the lectern book; a villager walks to it,
+      reads it; a claim appears.
+      Capture: `[board] {name} reads the board: {…}` (repeats per visit, per villager —
+      confirmed firing live in `specs/020-job-board/research/board-observation.md`); claim
+      outcome has no log line — read the board in-world for `readableContent()`'s claim line,
+      per board-observation.md §3's method. **Gated on Watch List #1**: without E3 wired, no
+      live claim will ever be generated by the real mind.
+
+- [ ] **5. The blueprint build alongside the player.**
+      Look for: block placement progressing at the build site while the player builds nearby.
+      Capture: `/execute if block <site origin> minecraft:air run say BUILD_SITE_EMPTY` —
+      staying true means nothing placed (board-observation.md §4's method). **Gated on Watch
+      List #1 and #4**: even with a claim, the live token-namespace gap TASK-0020 found means
+      placement will not start through today's wiring.
+
+- [ ] **6. Dusk conversation — the day, the work, the player.**
+      Look for: chat/nameplate text exchanged between two villagers at dusk.
+      Capture: in-game chat log for the exchange; session-report.log's `E4:`/`E5: calls=…`
+      rows. **Gated on Watch List #1**: expect zero live conversations as the branch stands.
+
+- [ ] **7. Night danger — walls and torches protect friends.**
+      Look for: no zombie siege; ordinary hostile-mob danger; a death (if one happens) leaves
+      a grave and belongings, not silence.
+      Capture: `[death] {} died; grave body=… place=… belongings thing=… ({} item(s))`,
+      `[death] grief hold started: … until tick …` / `released`; absence of any siege-related
+      message; `[danger-tuning] suppressing hostile spawn near cast: …` only if the knob is on.
+
+---
+
+## 2. Spell-breaker checklist
+
+Plan §5.2's three, walked as concrete checks. **The test that matters throughout: does the
+player start walking past?** — record a plain yes/no with a one-line reason for each.
+
+- [ ] **Tedium (M6, V4).**
+  - [ ] Ambient/conversation lines do not repeat within a cycle (watch E5/E4 across the
+        evening's ~9 cycles for a repeated line).
+  - [ ] A conversation reaches a natural end, not a turn-cap cutoff mid-sentence (only
+        checkable if Watch List #1 is resolved before the run).
+  - [ ] Posting an order is one gesture — write in the book, nothing to phrase carefully.
+  - [ ] **Walking-past test:** does the player start ignoring the board, the ambient lines, or
+        a specific villager by the end of the evening?
+
+- [ ] **Micromanagement (V3, V5, M5, V4).**
+  - [ ] No player intervention required to keep a villager fed, escorted, or on-task across
+        the whole evening.
+  - [ ] Job-board work gets done without the player re-posting (gated on Watch List #1).
+  - [ ] A claimed build proceeds without supervision or hand-fed materials (gated on Watch
+        List #1/#4).
+  - [ ] No siege ever fires.
+  - [ ] **Walking-past test:** does the player ever feel like they are running the village
+        rather than living beside it?
+
+- [ ] **Politeness-policing (M3, M5, M6, V5).**
+  - [ ] No moralizing/lecturing dialogue toward the player, regardless of player conduct.
+  - [ ] A refusal (if observed) is grounded in the villager's own wants/commitments, never the
+        player's conduct — no compliance gate, no cooldown.
+  - [ ] Friendly fire draws no engine guardrail (structural — confirm no lockout/crash).
+  - [ ] **Walking-past test:** does the player start avoiding a villager to dodge a lecture?
+
+---
+
+## 3. A-n measurement sheet
+
+Every figure replaced by its measured value at write-up (T005). Capture source and threshold
+for each; pricing is `llm-routing-and-budget.md` §3 (Opus 5 $5/$25, Sonnet 5 $2/$10, Haiku 4.5
+$1/$5 per MTok, cache read 10%/write 125% of base input).
+
+| # | Assumption | Capture source | Threshold |
+|---|---|---|---|
+| **A-1** | 3 villagers, ~3h continuous, player present | wall clock start/end; session-report.log timestamp | none — setup fact |
+| **A-2** | 9 day/night cycles in 3h; ~5.8 min sleep window | count of `[dusk] pairing signal` lines ÷ pairs/cycle, or E6 `calls=` ÷ 3 villagers | ~9 cycles → E6 calls ≈ 27 |
+| **A-3** | Prompt caching hits ~90% on the stable prefix | session-report.log per-class `cache_read=`/`cache_creation=` | cache_read ≫ cache_creation after each class's first call per villager |
+| **A-4** | 8 E2 deliberation calls/villager/cycle | session-report.log `E2: calls=` ÷ (3 × cycles observed) | ~8/villager/cycle (≈216 total for a full evening) — **N/A while Watch List #1 stands: expect 0** |
+| **A-5** | ~8 E3 job-board calls/villager across the evening | session-report.log `E3: calls=` | ~24 total — **N/A while Watch List #1 stands: expect 0** |
+| **A-6** | E4: 12/dusk (cast) + 30 player-directed | session-report.log `E4: calls=` | ~138 total — **N/A while Watch List #1 stands: expect 0** |
+| **A-7** | E5: 1 batched call/villager/cycle, pool serves <200ms | session-report.log `E5: calls=` (~27 total); serve latency has **no capture path** — see Watch List #6 | ~9/villager; <200ms unmeasured this run unless #6 is fixed |
+| **A-8** | `change_report` restriction holds → episodic buffer ~80/villager-day | session-report.log's "E6-input admitted buffer size per villager-day" section, per body per day | ~80/villager-day; **upgrade trigger at ~150** (llm-routing-and-budget.md §6.3 ponytail) |
+| **Cost ceiling** | ~$20 ceiling; baseline $5.17 (~$4.00 cached) | `Σ (class calls × input_tok × input_$ + output_tok × output_$ + cache terms)` from session-report.log's per-class row × §3's pricing table | flag if projected total > $20; compare to $5.17 baseline |
+| **E4 latency** | first-token < 3s ceiling | **no capture path in this build** — `mind/converse/converse.go`'s `Turn.FirstTokenLatency` is computed but never logged or reported (Watch List #6) | unmeasurable live without a fix; also N/A while #1 stands |
+
+---
+
+## 4. Watch list
+
+Compiled from merged tasks' own honest flags, plus two found while staging this kit (#1, #6).
+Each: where to look during the run, and what finding it becomes at write-up if it fires.
+
+1. **[NEW, found staging this kit] M5/M6 never wired into the live daemon runtime.**
+   Where: `mind/cmd/minddaemon/runtime.go` `HandlePercept` — no intent is ever composed there;
+   `mind/deliberate` and `mind/converse` are tested packages with no caller in `cmd/
+   minddaemon`. Deliberate per `specs/021-demo-config/plan.md` design decision 2 ("wiring
+   beyond what the ACs need stays for I2's findings"). Live symptom: session-report.log's
+   E2/E3/E4/E5 rows stay at `calls=0` all evening despite percepts flowing; no live claim, no
+   live conversation. Becomes: beats 4–6 and spell-breaker checks gated on them go "not
+   observed — known wiring gap," owned by a new task (wire `mind/deliberate` +
+   `mind/converse` into the daemon runtime) — see §0's decision point.
+
+2. **[TASK-0014] Dusk pair-formation signal lead measured 1.82–4.96s, not the nominal ~10s.**
+   Where: the `eta {}s` field in every `[dusk] pairing signal` log line. Becomes: if E4's
+   opening-turn pre-generation (`OpeningSlot`) still reliably fills within the shorter lead, no
+   new finding; if it falls back to a live stream every time, note the latency impact — M6's
+   card names this exact open question.
+
+3. **[TASK-0014] JOB_SITE claim flakiness.**
+   Where: `/data get entity … Brain.memories."minecraft:job_site"` intermittently empty.
+   Becomes: reconfirms the already-documented gap (`docs/wiki/villager-brain-api.md`) unless
+   it visibly blocks the WORK activity for the whole evening, which would be new.
+
+4. **[TASK-0020] Build placement structurally unreachable; JOB_SITE/WORK timing question.**
+   Where: `BUILD_SITE_EMPTY` check staying true all evening (§1 beat 5); root cause already
+   identified in `specs/020-job-board/research/board-observation.md` §4 —
+   `LiveBuildExecution.findClaimant` checks `DuskPairing`'s seat tokens while a live claim
+   rides `BodySession`'s separate generic attach token, two namespaces that never match.
+   Becomes: confirms the known finding; the fix task should likely bundle with #1's wiring
+   work, since both are daemon/vendor integration glue.
+
+5. **[TASK-0021] Mod-side reconnect identity gap; `self_state`-only heartbeat admits nothing.**
+   Where: if the daemon is restarted mid-run, watch the mod console for `"reader ended"`,
+   `"dial failed, will retry"`, or a second `"attached to villager"` line — none appeared in
+   I1's own observation. Becomes: fresh live confirmation of the flag already carried on
+   TASK-0021's card for refactor-triage.
+
+6. **[NEW, found staging this kit] E4 first-token latency has no capture path.**
+   Where: `mind/converse/converse.go`'s `stream()` computes `firstToken` and returns it on
+   `Turn.FirstTokenLatency`, but nothing logs it and it is not in session-report.log. Becomes:
+   the A-n sheet's E4 latency row is unmeasurable this run without a small fix (surface
+   `FirstTokenLatency` in the session-end report or a per-turn log line) — owned by a new task,
+   and moot until #1 is resolved regardless.
