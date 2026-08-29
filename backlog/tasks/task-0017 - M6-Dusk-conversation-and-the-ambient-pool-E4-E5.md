@@ -1,10 +1,10 @@
 ---
 id: TASK-0017
 title: 'M6 - Dusk conversation and the ambient pool (E4, E5)'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:47'
+updated_date: '2026-08-29 02:03'
 labels:
   - mind
   - m-0-build
@@ -77,6 +77,12 @@ AC#8 politeness_test.go TestPromptAssembly_NoModeratingLexicon (structural: conv
 AC#9-12 spec phases 1-4 all complete: specs/017-dusk-conversation/tasks.md T001-T013 all checked.
 Gates (T011): go vet ./... and go test -race -count=1 ./... green in mind/ (commit e86913c). Wiki (T012): docs/wiki/overview.md amended and re-pinned to e86913c (commit 72ffa64) — the only note whose prose tracks per-milestone build status; all other notes' declared sources are untouched by this branch.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+M6 delivered via PR #21 (merge 287cf03, merge commit, pins preserved). mind/converse/: the two-Speaker dusk exchange on E4's ratified config (Sonnet 5, streaming, effort low, thinking off, cached prefix, ~300 max_tokens) with transcript + interlocutor slice + memory window per turn and closing-marker termination (safety bound proven never to fire); pre-generation Slot/Pool keyed (pairID, day) — race-safe one-shot Take, late-fill discard, live-stream fallback honoring TASK-0014's 1.82–4.96s measured signal lead; E5 AmbientPool (Haiku 4.5, one batched call/villager/day, ~8 lines, <200ms measured, no intra-cycle repeat, day rollover) with specific-remark escalation and a model-free Stall. Tedium + politeness-policing checks structural. Honest limits on the card: live <3s ceiling and live V3-signal wiring land at I2. Also carried the honest fix for villager-brain-api's pre-existing TASK-0014 staleness (chunk-ticket trap fold-in). Spec-bridge derivation: 4 phases 13/13, Done-eligible. ~650k subagent tokens across 4 sonnet dispatches (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->

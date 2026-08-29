@@ -1,10 +1,10 @@
 ---
 id: TASK-0018
 title: 'M7 - Nightly consolidation, and how the dead stay conversationally alive (E6)'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:52'
+updated_date: '2026-08-29 02:03'
 labels:
   - mind
   - m-0-build
@@ -81,7 +81,7 @@ Deferred, flagged for refactor-triage: daemon-level wiring of Ledger/Archive/Run
 ## Final Summary
 
 <!-- SECTION:FINAL_SUMMARY:BEGIN -->
-M7/E6 nightly consolidation and R-9 archival, complete. mind/consolidate/: an event-sourced nightly ledger (ledger.go) triggered by the sleep event and timed on world_time only; the digest cycle (cycle.go) rendering the admitted buffer under the m1..mN ordinal convention and mapping accepted references back to durable (world_time, hash) identity, with no formativeness scoring pass and no-marker-on-failure covering transport failure, cancellation, and over-limit detection; death-carry retrieval-frequency weighting (deathcarry.go) exported as a selector hook for M6 to adopt at merge; R-9 archival (archive.go) plus a new Ingester.Archived hook in mind/seam refusing session opens for archived minds. All against the fake vendor and scripted/mocked clients, no live API calls. go vet + go test -count=1 ./... green across all 9 mind/ packages. Wiki re-grounded: [[body-protocol-seam]] (genuinely stale), [[promptworld-lineage]], [[overview]] amended and re-pinned; CAPSULES.md regenerated; [[villager-brain-api]]'s pre-existing TASK-0014 staleness is unrelated and left untouched. All 6 card ACs plus 4 spec-phase ACs ticked with citing tests. Deferred and flagged for refactor-triage: daemon-level wiring of RunNight/Archive into cmd/minddaemon's actual runtime loop.
+M7 delivered via PR #23 (merge 5dd2c48, merge commit, pins preserved). mind/consolidate/: E6 nightly digest on Opus 5 per the registry — sleep-event trigger with all arithmetic on world_time (no wall clock, no Batch API path, both structurally checked); append-only JSONL Ledger with Watermark reducer; the m1..mN ordinal convention round-tripped to durable (world_time, hash) pairs; no-marker-on-failure across transport failure, cancellation, and over-limit (StopReasonMaxTokens — I's truncation lesson); empty night lands a marker; multi-night accumulation. Death carry: pure retrieval-frequency weighting (spike 10.0 citing I's salience band, halves per cycle, floors at 1.0 — RM-7 never deletes), exported SelectionWeights hook now consumable by mind/converse post-merge. R-9 archival: archived minds refuse session opens fail-closed, log stays readable, token retired never-reissued persisted. Deferred + named for refactor-triage: daemon-level wiring of Ledger/Archive/RunNight into cmd/minddaemon. Spec-bridge derivation: 4 phases 8/8, Done-eligible. ~747k subagent tokens across 4 sonnet dispatches (cc/claude-sonnet-5[1m], verified per dispatch).
 <!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done

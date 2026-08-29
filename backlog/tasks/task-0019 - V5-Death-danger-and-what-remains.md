@@ -1,10 +1,10 @@
 ---
 id: TASK-0019
 title: 'V5 - Death, danger, and what remains'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 20:20'
+updated_date: '2026-08-29 02:03'
 labels:
   - vendor
   - m-0-build
@@ -100,6 +100,12 @@ Status intentionally left at In Progress, NOT advanced to Done, even though spec
 
 AC #6 ticked by orchestrator ruling (plan.md 'The V4 decoupling'): the tend-grave entry rides the board READ CHANNEL (Q-6) — the mechanism V4 formalizes — as fixture-independent posting content (GraveBoardEntry, GraveBoardEntryTest x2); when TASK-0020 lands its board book the entry rides it without rework. Deviation note per plan; the hold-open fallback was declined because the tested artifact exists.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+V5 delivered via PR #24 (merge 3a7f572, merge commit, pins preserved). The named escalation trigger did NOT fire: R-4/R-5 verified first at the brain-26.2.md standard (research/death-26.2.md) — POI release synchronous with no engine cooldown (grief period is an explicit vendor hold via PoiManager.take/release, config kithcraft.griefPeriodTicks default 24000); siege trigger VillageSiege.tick suppressed with one HEAD-cancel exactly where death §1 assumed; 26.2 eligibility is pure POI density so the 3-villager cast qualifies — suppressed regardless. ZombieConversionMixin makes conversion death-equivalent (R-6: sole call site, victim's die() falls through normally). Mixin surface: 4 = decision-0002's ceiling, MixinConfigTest-asserted; belongings capture needed NO new Mixin (Fabric API ALLOW_DEATH before dropAllDeathLoot). Grave always places (bounded deterministic search); tend-grave posting rides the board read channel (AC #6 orchestrator ruling per plan's V4-decoupling). Live dev-server proof (research/death-observation.md, forced /damage kill recorded as deliberate): grave + chest placed, grief hold released at the configured tick, zero sieges across two server lifetimes, retired token b-5 absent across restart. Honest gaps recorded: empty-inventory carry and live witness delivery not observed live (unit proofs cover); JOB_SITE hold unexercised (pre-existing TASK-0014 gap, flagged for refactor-triage). 127 tests. Spec-bridge derivation: 4 phases 14/14, Done-eligible. ~1.06M subagent tokens across 5 sonnet dispatches incl. one stopped idle-looper (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->

@@ -1,10 +1,10 @@
 ---
 id: TASK-0016
 title: 'M5 - Deliberation and the job-board decision (E2, E3)'
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-08-21 23:39'
-updated_date: '2026-08-28 19:51'
+updated_date: '2026-08-29 02:03'
 labels:
   - mind
   - m-0-build
@@ -89,6 +89,12 @@ AC #9 (design check, no politeness-policing): mind/deliberate/politeness_test.go
 
 AC #10-13 (spec phases 1-4): specs/016-deliberation/tasks.md T001-T013 all checked with citing proofs; go vet + go test -count=1 ./... green in mind/; wiki re-grounded (overview.md, promptworld-lineage.md re-pinned, CAPSULES regenerated, freshness gate green).
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+M5 delivered via PR #22 (merge 27be6ae, merge commit, pins preserved). mind/deliberate/: the bounded deliberation loop porting toolloop's REQUEST/FACT/gate shape onto intent/intent_ack/act_result — OnFact fires only on act_result delivery, wired to M2's admission gate end-to-end; verb vocabulary read solely from the session manifest (source-scan guard); token-only targets and non-empty authored reasons rejected before compose; E3 job-board deliberation on text/origin:read with the four-field §2.3 context in the variable suffix (stable prefix byte-identical); the §5.5 urgency interrupt as a mutex'd state machine that structurally cannot fire its own call and coalesces to exactly one follow-up; the K=10 situated window (top K−2 salience-halved-per-day + 2 seeded older-half picks). Scripted-evening design check: three postings, one intent each, no re-posting, persona-grounded decline. 33 tests -race green. Spec-bridge derivation: 4 phases 13/13, Done-eligible. ~692k subagent tokens across 4 sonnet dispatches (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
