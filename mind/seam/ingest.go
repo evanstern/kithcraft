@@ -68,6 +68,16 @@ type Ingester struct {
 	// default) never refuses — Ingester itself has no notion of
 	// archival; a real daemon wires *consolidate.Archive.IsArchived here.
 	Archived func(body string) bool
+
+	// OnSessionOpen, if set, runs synchronously once a session_open for
+	// body is accepted — the connection's first frame or a later
+	// multiplexed one — carrying the manifest capabilities that frame
+	// declared (§6.2). TASK-0023 T001/T002: a live Vendor and
+	// deliberation Loop for a body can only be built once its declared
+	// verb set (mind/deliberate.ManifestVerbs) is known, and capabilities
+	// arrive on session_open only, never on a percept. Nil is the safe,
+	// do-nothing default.
+	OnSessionOpen func(conn Conn, session, body string, capabilities map[string]any)
 }
 
 // NewIngester returns an empty Ingester ready to use.

@@ -63,6 +63,7 @@ func main() {
 	ing := seam.NewIngester()
 	ing.Archived = rt.Archive.IsArchived
 	ing.OnPercept = rt.HandlePercept
+	ing.OnSessionOpen = rt.HandleSessionOpen
 
 	fmt.Printf("minddaemon: listening on %s\n", *socket)
 	serve(ln, ing)

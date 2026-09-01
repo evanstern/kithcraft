@@ -24,8 +24,9 @@ sources:
   - mind/fakevendor/fakevendor.go
   - mind/seam/ingest.go
   - mind/consolidate/archive.go
+  - mind/cmd/minddaemon/vendor.go
 size_budget_exempt: pre-existing since TASK-0009/0012 (one synthesis note tracking the seam, wire, and every vendor landing across TASK-0007..0015); a summary-style split is a separate task, out of TASK-0015's scope
-verified_against: f9fcec3161774a64dec94e6a469be84dda7e2395
+verified_against: 33e2f08323f32d7496f50f0462633859ed707f6e
 ---
 
 # Body-protocol seam
@@ -297,3 +298,25 @@ mod-internal integration fix, not a seam or wire change: no percept type, verb, 
 field moved. This note's claim about `BodySession` above ("the minimal live wiring proving
 this on a dev server... no Mixin — plain API only") was re-checked against the current file
 and holds unchanged; nothing else in this note's prose changed.
+
+**Re-verified 2026-08-31 (TASK-0023 Phase 4):** `mind/seam/ingest.go` gained one new hook,
+`Ingester.OnSessionOpen func(conn Conn, session, body string, capabilities map[string]any)`
+(nil-by-default, same idiom as `OnPercept`/`Archived`), fired synchronously by
+`HandleConnection` (`session.go`) on a connection's first `session_open` frame and every
+later multiplexed one, carrying the manifest capabilities that frame declared (§6.2). This
+is mind-side wiring, not a wire or protocol change — no new percept, verb, or manifest
+field, and no vendor-visible surface moved. It exists because `cmd/minddaemon`'s live
+Vendor and deliberation loop (`mind/cmd/minddaemon/vendor.go`, TASK-0023 T001/T002) need a
+body's declared verb set to build `Config.Verbs`, and capabilities arrive on
+`session_open` only, never on a percept — the same "capabilities arrive once, at open"
+fact this note's `Handshake.MANIFEST`/L-7 paragraphs already describe from the vendor
+side. Proven at the seam layer by `TestOnSessionOpen_FiresForFirstFrameAndMultiplex`
+(`mind/seam/session_test.go`). Also structurally confirmed live and NOT yet closeable: T009's
+dev-server observation (`specs/023-daemon-wiring/research/live-wiring-observation.md` §3)
+found the live mod's `BodySession.open` mints an opaque per-boot body token
+(`ground.issueBody`, e.g. `b-14`), never a cast member's name — so `cmd/minddaemon`'s
+`rt.Personas[body]` lookup, fed by this very hook, can never bind the live-attached body's
+own persona through this path today. That is a Runtime-side binding gap downstream of this
+hook, not a defect in the hook or the seam it sits on; flagged for the operator, not fixed
+here. This note's "First implementations" section's inventory of `mind/seam/session.go`'s
+responsibilities otherwise holds unchanged.
