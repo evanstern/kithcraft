@@ -1,6 +1,6 @@
 ---
 name: overview
-description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, PDLC machinery, the mind daemon now with a real runtime loop bringing up a demo-ready world, event-sourced memory, persona firewall, bounded deliberation loop, nightly consolidation and archival, and the first vendor-side Fabric mod code now including death/remains and job-board/blueprint-build machinery), and where each kind of truth lives. Load first for orientation.
+description: The system's shape — what Kithcraft is (Minecraft mod giving the player LLM villagers as company), what exists at this stage (design artifacts, PDLC machinery, a real daemon runtime now wiring E2-E5 deliberation/conversation live (persona binding structurally blocked), event-sourced memory, persona firewall, nightly consolidation, and vendor-side Fabric mod code including death/remains and job-board/blueprint-build), and where each kind of truth lives. Load first for orientation.
 kind: concept
 sources:
   - README.md
@@ -9,7 +9,9 @@ sources:
   - specs/019-death-remains/spec.md
   - specs/020-job-board/spec.md
   - specs/021-demo-config/spec.md
-verified_against: f9fcec3161774a64dec94e6a469be84dda7e2395
+  - specs/023-daemon-wiring/spec.md
+size_budget_exempt: pre-existing overage since TASK-0021 (a running project-shape summary that grows one clause per landed milestone); a summary-style split is a separate task, out of TASK-0023's scope
+verified_against: 33e2f08323f32d7496f50f0462633859ed707f6e
 ---
 
 # Overview
@@ -149,3 +151,26 @@ live daemon, not through the live mod's own reconnect path — the live mod's `C
 always sends `firstSession()` and mints a fresh body token per attach today, and its
 `self_state`-only heartbeat produced zero admissible memories across the observation window;
 both are flagged there as follow-ups, not fixed in this phase.
+
+**Re-verified 2026-08-31 (TASK-0023 Phase 4).** The not-closed addendum two paragraphs above
+("the daemon's live wiring of V3's pair-formation signal, and a live E6 digest call are
+unproven here by design") shrinks, honestly and only partly: TASK-0023 (M8) wired
+`mind/deliberate/` (E2/E3) and `mind/converse/` (E4/E5) into `cmd/minddaemon`'s Runtime —
+E2/E3 composition with persona+K=10-window context, the §5.5 interrupt, the dusk
+Slot/Pool/Exchange, and the E5 ambient pool are all now real callers in
+`mind/cmd/minddaemon/{deliberation,conversation,vendor}.go`, proven against the fake vendor
+through the REAL daemon binary (not package tests alone), `go test -race` green. But **live
+persona binding does not work on a real dev server today** — a structural gap, not a timing
+one: `specs/023-daemon-wiring/research/live-wiring-observation.md` §3 found the live mod's
+`BodySession.open` mints an opaque per-boot body token (`ground.issueBody`, e.g. `b-14`),
+never a cast member's name, so `HandleSessionOpen`'s `rt.Personas[body]` lookup can never
+bind the one live-attached body's own persona — contradicting the "body token IS a CastID"
+convention T004's own Phase-2 wiring assumed. Two more pre-existing ceilings the same
+observation reconfirmed, neither new: `DuskPairing`'s pairing-signal sighting is composed
+and logged but never sent over a live session (`KithcraftMod`'s single-`BodySession` scope,
+[[body-protocol-seam]]'s live-wiring note); and whether `self_state` heartbeats reach the
+daemon at all is still open, unchanged from `specs/021-demo-config`'s own prior finding. Net
+effect: E2–E5 are wired and daemon-proven, but no live E2/E3 deliberation or dusk exchange
+was observed reaching the daemon this session, and the persona-binding gap above is why —
+flagged for the operator, not patched in this task (card AC #8; TASK-0023's own tasks.md
+T009/T010).

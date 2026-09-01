@@ -229,11 +229,31 @@
 
 ## Phase 4 — Gates and closure
 
-- [ ] T010 Full gates: go vet + go test -count=1 ./... green; gradle green
-      if mod touched; scope clean; no new Mixins/protocol surface
-      (card AC #8)
-- [ ] T011 Wiki re-ground: overview's not-closed addendum shrinks honestly
-      (E2–E5 now wired; what remains for the evening); body-protocol-seam if
-      seam-facing claims change; CAPSULES if descriptions change; freshness
-      green
-- [ ] T012 Card ACs ticked with citing proofs; board/spec synced at PR time
+- [x] T010 Full gates: `go vet ./...` clean; `go test -count=1 -race ./...`
+      all green (11 packages, `mind/seamtest` no test files); `git diff
+      origin/main --stat -- mod/` empty — mod/ untouched, gradle not run
+      (nothing to check); scope confined to `mind/` + specs/backlog/runbook
+      bookkeeping; no new Mixins (mod/ untouched); the only new surface is
+      `seam.Ingester.OnSessionOpen` — a mind-side Go hook (nil-by-default,
+      same idiom as `OnPercept`/`Archived`), not a wire/protocol change, no
+      new percept/verb/manifest field (card AC #8).
+- [x] T011 Wiki re-ground: `overview.md` re-verified 2026-08-31 — the
+      not-closed addendum shrinks honestly (E2–E5 now wired and daemon-proven
+      against the fake vendor through the real binary) but stays open on the
+      live persona-binding gap, recorded precisely, not glossed; description
+      capsule rewritten to note E2–E5 wiring under the 500-char budget;
+      `size_budget_exempt` added (pre-existing body overage since TASK-0021,
+      a running summary, split out of scope) matching the existing
+      `body-protocol-seam`/`villager-brain-api` precedent.
+      `body-protocol-seam.md` re-verified and re-pinned (was STALE: its
+      `mind/seam/ingest.go` source changed under T002) — new paragraph
+      documents `Ingester.OnSessionOpen`, cites the live-observation's §3
+      binding-gap finding as downstream of the hook, not a defect in it.
+      `promptworld-lineage.md` checked — its port language (toolloop →
+      `mind/deliberate`) already covers E2/E3/interrupt/window accurately;
+      daemon-wiring is Runtime composition, not a doctrine-port change, so
+      left unchanged. CAPSULES.md regenerated (description changed).
+      Freshness gate green: `cli.mjs freshness` exit 0, "11 note(s) fresh
+      against their pinned sources" (three pre-existing size warns, all
+      `size_budget_exempt`, not fails).
+- [x] T012 Card ACs ticked with citing proofs; board/spec synced at PR time
