@@ -163,11 +163,39 @@
 
 ## Phase 3 — Proofs (FR-006 + FR-007)
 
-- [ ] T008 Real-binary fake-vendor proofs: board text percept → live
+- [x] T008 Real-binary fake-vendor proofs: board text percept → live
       claim/decline with authored reason; urgent mid-deliberation →
       coalesced follow-up; scripted pair signal → pre-generated opening +
       multi-turn exchange with latency in the report; pool serve/refresh
       (card AC #6)
+      Three of four proofs already existed from Phases 1-2 (deliberation.go/
+      conversation.go's own T00x notes); the one gap was the dusk-exchange
+      proof only ever exercising ONE turn (the reply's own ClosingMarker
+      closed the exchange after the opener) where spec.md US3 scenario 1
+      names a "multi-turn exchange" explicitly. Closed by extending
+      `sseTextServer` (conversation_test.go) to answer calls in sequence
+      (textMessageServer's own per-call-index cycling, applied to SSE) and
+      rewriting `TestDuskExchange_PairSignalConvergesAndRecordsLatency` to
+      script the ClosingMarker onto the SECOND call only, with a 50ms pause
+      between the two pairing signals biasing deterministically toward the
+      pregen-served path (documented in the test's own doc comment: the
+      live-fallback path is equally valid per T005's package doc, but
+      racing it here would make the test non-deterministic, not prove
+      anything this proof needs) — now asserts exactly 2 model hits (pregen
+      fill + Petra's one live call, no wasted fallback), two alternating-
+      body intents, and FirstTokenLatency recorded for BOTH speakers in the
+      session report. 5x repeated `-run` green, `-race` clean. FR-006's SET
+      is enumerated as a single named, greppable entry point —
+      `TestFR006_ProofSet` (conversation_test.go, doc-only/instant-skip) —
+      citing all four proofs by name: (a)
+      `TestLiveE3Deliberation_PerceptInIntentOutWithAuthoredReason`
+      (deliberation_test.go — decline itself proven at the mind/deliberate
+      package level, the wire mechanism is verb-agnostic, not duplicated
+      here); (b) `TestLiveInterrupt_CancelsInFlightAndProducesOneFollowUp`
+      (deliberation_test.go); (c)
+      `TestDuskExchange_PairSignalConvergesAndRecordsLatency` (this file,
+      above); (d) `TestAmbientTrigger_ServeAndEscalate` (this file — day-
+      crossing refill already proven there, no separate gap).
 - [ ] T009 Dev-server observation (research/live-wiring-observation.md): at
       least one live E2/E3 deliberation and one dusk exchange end-to-end;
       bounded checks, honest not-observed records where substrate timing

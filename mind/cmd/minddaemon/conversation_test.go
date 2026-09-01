@@ -77,13 +77,18 @@ func personSightingPercept(id, doing string) map[string]any {
 	}
 }
 
-// sseTextServer always answers with reply after delay (mind/converse's own
-// countingSSEServer precedent) — used for E4 dusk-exchange calls.
-func sseTextServer(t *testing.T, reply string, delay time.Duration) (*httptest.Server, *atomic.Int32) {
+// sseTextServer answers each request in turn with replies[i % len(replies)]
+// after delay (mind/converse's own countingSSEServer precedent, cycling the
+// same way textMessageServer already does for E5) — used for E4 dusk-
+// exchange calls. A single reply is the common case (every call gets the
+// same text); T008's multi-turn proof passes more than one so a later call
+// can carry converse.ClosingMarker while an earlier one doesn't.
+func sseTextServer(t *testing.T, delay time.Duration, replies ...string) (*httptest.Server, *atomic.Int32) {
 	t.Helper()
 	var calls atomic.Int32
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		calls.Add(1)
+		n := calls.Add(1) - 1
+		reply := replies[int(n)%len(replies)]
 		w.Header().Set("Content-Type", "text/event-stream")
 		flusher := w.(http.Flusher)
 		write := func(typ, data string) {
@@ -170,15 +175,29 @@ func TestConsolidationPrefixFor_CarriesPersonaText(t *testing.T) {
 	}
 }
 
-// TestDuskExchange_PairSignalConvergesAndRecordsLatency is card AC #3
-// (spec.md US3): two live sessions' pairing-signal sightings converge into
-// a live E4 exchange over their own sessions (T005), each speaker's Stable
-// prefix is built from ITS bound persona (T004 — exchangeSpeaker would
-// fail closed otherwise, per the assertions below), and the spoken turn's
-// FirstTokenLatency lands in the session report (T007).
+// TestDuskExchange_PairSignalConvergesAndRecordsLatency is card AC #3/#6
+// (spec.md US3, FR-006 proof set item (c)): two live sessions' pairing-
+// signal sightings converge into a live E4 exchange over their own
+// sessions (T005), each speaker's Stable prefix is built from ITS bound
+// persona (T004 — exchangeSpeaker would fail closed otherwise, per the
+// assertions below), the opening turn is genuinely pre-generated (no
+// live call for it — hits stays at exactly 2, not 3), the exchange runs a
+// SECOND, alternating-body turn rather than stopping at one (the
+// ClosingMarker only appears on the reply this test hands to the second
+// call), and both turns' FirstTokenLatency land in the session report
+// (T007).
+//
+// The 50ms pause between the two signals is deliberate, not padding: it
+// gives the pregen Fill an in-process-server's worth of head start to
+// finish before convergence's Take(0) ("check now, don't wait" —
+// pregen.go's own doc) checks it, so this test exercises the pregen-served
+// path deterministically rather than racing the equally-valid, equally-
+// documented live-fallback path (T005's package doc) — a race this test
+// isn't trying to settle.
 func TestDuskExchange_PairSignalConvergesAndRecordsLatency(t *testing.T) {
-	const reply = "Evening, friend. " + converse.ClosingMarker
-	srv, _ := sseTextServer(t, reply, 5*time.Millisecond)
+	const opening = "Evening, friend."
+	const reply = "And to you — fair skies tonight. " + converse.ClosingMarker
+	srv, hits := sseTextServer(t, 5*time.Millisecond, opening, reply)
 	client := llm.New(option.WithBaseURL(srv.URL), option.WithAPIKey("test-key"))
 
 	rt, dbl := startConversationDaemon(t, client, map[string]persona.Persona{
@@ -195,34 +214,54 @@ func TestDuskExchange_PairSignalConvergesAndRecordsLatency(t *testing.T) {
 	if err := dbl.Send(seamtest.Percept("s-1", "Aldric", 1, 100, pairingSignalPercept("p-1", "Petra", "Petra"))); err != nil {
 		t.Fatalf("Aldric's pairing signal: %v", err)
 	}
+	time.Sleep(50 * time.Millisecond) // let the pregen Fill finish before convergence checks it
 	if err := dbl.Send(seamtest.Percept("s-1", "Petra", 1, 100, pairingSignalPercept("p-2", "Aldric", "Aldric"))); err != nil {
 		t.Fatalf("Petra's pairing signal (convergence): %v", err)
 	}
 
-	waitUntil(t, 2*time.Second, func() bool { return len(dbl.Intents()) >= 1 })
-	intent := dbl.Intents()[0]
-	if intent["body"] != "Aldric" {
-		t.Fatalf("spoke on body %v, want Aldric (the designated opener — the first side to signal)", intent["body"])
+	waitUntil(t, 2*time.Second, func() bool { return len(dbl.Intents()) >= 2 })
+	intents := dbl.Intents()
+
+	opener := intents[0]
+	if opener["body"] != "Aldric" {
+		t.Fatalf("first turn spoke on body %v, want Aldric (the designated opener — the first side to signal)", opener["body"])
 	}
-	payload, _ := intent["payload"].(map[string]any)
-	if payload["verb"] != "speak" {
-		t.Fatalf("intent verb = %v, want speak", payload["verb"])
+	openerPayload, _ := opener["payload"].(map[string]any)
+	if openerPayload["verb"] != "speak" {
+		t.Fatalf("opener intent verb = %v, want speak", openerPayload["verb"])
 	}
-	target, _ := payload["target"].(map[string]any)
-	if got := target["text"]; got != "Evening, friend." {
-		t.Fatalf("spoken text = %q, want the reply with ClosingMarker stripped", got)
+	openerTarget, _ := openerPayload["target"].(map[string]any)
+	if got := openerTarget["text"]; got != opening {
+		t.Fatalf("opener spoken text = %q, want %q", got, opening)
+	}
+
+	responder := intents[1]
+	if responder["body"] != "Petra" {
+		t.Fatalf("second turn spoke on body %v, want Petra — the multi-turn exchange must alternate speakers", responder["body"])
+	}
+	responderPayload, _ := responder["payload"].(map[string]any)
+	responderTarget, _ := responderPayload["target"].(map[string]any)
+	if got := responderTarget["text"]; got != "And to you — fair skies tonight." {
+		t.Fatalf("responder spoken text = %q, want the reply with ClosingMarker stripped", got)
+	}
+
+	if got := hits.Load(); got != 2 {
+		t.Fatalf("fake model server hit %d times, want exactly 2 (the pregen fill + Petra's one live call — no wasted fallback call for the opener)", got)
 	}
 
 	// The exchange goroutine records FirstTokenLatency after Exchange
-	// returns, a beat after the intent itself is written.
+	// returns, a beat after the intents themselves are written.
 	waitUntil(t, 2*time.Second, func() bool {
 		rt.mu.Lock()
 		defer rt.mu.Unlock()
-		return len(rt.bodies["Aldric"].turnLatencies) >= 1
+		return len(rt.bodies["Aldric"].turnLatencies) >= 1 && len(rt.bodies["Petra"].turnLatencies) >= 1
 	})
 	report := rt.reportText()
 	if !strings.Contains(report, "Aldric: ") || strings.Contains(report, "Aldric: (no dusk exchange turns)") {
 		t.Fatalf("session report missing Aldric's FirstTokenLatency:\n%s", report)
+	}
+	if !strings.Contains(report, "Petra: ") || strings.Contains(report, "Petra: (no dusk exchange turns)") {
+		t.Fatalf("session report missing Petra's FirstTokenLatency (the multi-turn responder):\n%s", report)
 	}
 }
 
@@ -235,7 +274,7 @@ func TestDuskExchange_UnconfirmedPairAbortsAfterTimeout(t *testing.T) {
 	pairConvergeTimeout = 50 * time.Millisecond
 	defer func() { pairConvergeTimeout = old }()
 
-	srv, hits := sseTextServer(t, "Evening.", 0)
+	srv, hits := sseTextServer(t, 0, "Evening.")
 	client := llm.New(option.WithBaseURL(srv.URL), option.WithAPIKey("test-key"))
 	rt, dbl := startConversationDaemon(t, client, map[string]persona.Persona{
 		"Aldric": {CastID: "Aldric", Name: "Aldric", Anchor: "steady"},
@@ -308,4 +347,30 @@ func TestAmbientTrigger_ServeAndEscalate(t *testing.T) {
 	if got := secondTarget["text"]; got != "Oh, that broken cart? I saw it this morning." {
 		t.Errorf("second (escalated) line = %q, want the scripted escalate reply", got)
 	}
+}
+
+// TestFR006_ProofSet is not itself a proof — it is FR-006's named entry
+// point (card AC #6, T008): `go test -run TestFR006_ProofSet -v` prints
+// this doc without exercising anything twice. Every fake-vendor proof
+// spec.md's US1-US4 requires runs through the REAL daemon binary (a real
+// net.Listener, a real seam.Ingester, a real dialed seamtest.Double) —
+// never only a mind/deliberate or mind/converse package double:
+//
+//	(a) board text percept -> live claim/decline intent, authored reason
+//	    TestLiveE3Deliberation_PerceptInIntentOutWithAuthoredReason
+//	    (deliberation_test.go). Decline rides the identical wire mechanism
+//	    (seam.Pending/ManifestVerbs is verb-agnostic — it composes whatever
+//	    verb the model's structured output names); proven for "claim" here
+//	    and for both verbs at the package level by mind/deliberate's own
+//	    tests, not duplicated at this layer.
+//	(b) urgent mid-deliberation -> cancel + exactly one coalesced follow-up
+//	    TestLiveInterrupt_CancelsInFlightAndProducesOneFollowUp
+//	    (deliberation_test.go)
+//	(c) scripted pair signal -> pre-generated opening + multi-turn exchange,
+//	    FirstTokenLatency recorded for both speakers
+//	    TestDuskExchange_PairSignalConvergesAndRecordsLatency (this file)
+//	(d) ambient pool day-crossing refill -> generic serve + targeted escalate
+//	    TestAmbientTrigger_ServeAndEscalate (this file)
+func TestFR006_ProofSet(t *testing.T) {
+	t.Skip("doc-only entry point — see the FR-006 SET enumerated in this test's doc comment; each proof runs as its own named test")
 }
