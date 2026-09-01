@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"kithcraft/mind/llm"
@@ -90,5 +91,32 @@ func (rt *Runtime) reportText() string {
 	}
 	rt.mu.Unlock()
 
+	// TASK-0023 phase 2 (T007, watch-list #6): every dusk-exchange turn's
+	// FirstTokenLatency (mind/converse.Turn), per villager, raw values in
+	// arrival order — the smallest useful surfacing; conversation.go's
+	// recordLatencies is the only writer.
+	line("-- E4 dusk exchange FirstTokenLatency per villager (M6 Turn) --")
+	rt.mu.Lock()
+	if len(bodies) == 0 {
+		line("  (no bodies seen this session)")
+	}
+	for _, body := range bodies {
+		lat := rt.bodies[body].turnLatencies
+		if len(lat) == 0 {
+			line("  %s: (no dusk exchange turns)", body)
+			continue
+		}
+		line("  %s: %s", body, formatLatencies(lat))
+	}
+	rt.mu.Unlock()
+
 	return string(b)
+}
+
+func formatLatencies(ds []time.Duration) string {
+	parts := make([]string, len(ds))
+	for i, d := range ds {
+		parts[i] = d.Round(time.Millisecond).String()
+	}
+	return strings.Join(parts, ", ")
 }

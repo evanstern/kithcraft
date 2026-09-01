@@ -108,7 +108,7 @@ func (rt *Runtime) runDeliberation(body string, bs *bodyStore, trig map[string]a
 		fmt.Fprintf(os.Stderr, "minddaemon: deliberation trigger for body %q but no ANTHROPIC_API_KEY — skipped (rehearsal mode)\n", body)
 		return
 	}
-	p, ok := rt.personaFor(body)
+	p, ok := rt.personaFor(bs)
 	if !ok {
 		fmt.Fprintf(os.Stderr, "minddaemon: deliberation trigger for body %q but no bound persona (stub cast) — skipped\n", body)
 		return
@@ -145,16 +145,31 @@ func (rt *Runtime) runDeliberation(body string, bs *bodyStore, trig map[string]a
 	}
 }
 
-// personaFor is Phase 1's placeholder cast-entry <-> body-token binding
-// (spec.md Edge Cases; plan.md decision 5 is Phase 2's real one, closing
-// I1's ponytail): a body token that literally names a loaded CastID is
-// bound; anything else has no persona yet, so deliberation skips with a
-// log line rather than guessing one. rt.Personas is populated once at
-// startup (LoadOrGenesisCast) before serving begins, so reading it here
-// needs no lock.
-func (rt *Runtime) personaFor(body string) (persona.Persona, bool) {
-	p, ok := rt.Personas[body]
-	return p, ok
+// personaFor returns bs's bound persona (TASK-0023 phase 2, T004, closing
+// I1's ponytail): bound once at attach (HandleSessionOpen, runtime.go) from
+// a body token that literally names a loaded CastID — the primary
+// mechanism this wire actually supports (see runtime.go's top-of-file
+// comment for what was checked and ruled out) — or, later, opportunistically
+// by conversation.go's bindPersonaIfUnbound off a pairing-signal sighting
+// naming this body. Unbound (spec.md's stub-cast edge case) is not an
+// error: every caller here treats false as "skip with a log line," never a
+// crash.
+func (rt *Runtime) personaFor(bs *bodyStore) (persona.Persona, bool) {
+	rt.mu.Lock()
+	defer rt.mu.Unlock()
+	return bs.persona, bs.hasPersona
+}
+
+// consolidationPrefixFor renders a bound persona into E6's stable prefix
+// shape (T004, closing I1's empty-ConsolidationStablePrefix ponytail): the
+// firewall anchor is the persona's own Anchor line, since E6's output
+// becomes belief/narrative text that must not drift the villager (§1.2's
+// persona firewall).
+func consolidationPrefixFor(p persona.Persona) prompt.ConsolidationStablePrefix {
+	return prompt.ConsolidationStablePrefix{
+		Persona:        p.Name + " — " + p.Anchor,
+		FirewallAnchor: p.Anchor,
+	}
 }
 
 // deliberationContext picks E2 vs E3 (deliberate.TriggerE3 on trig — a

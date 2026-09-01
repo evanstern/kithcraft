@@ -9,16 +9,24 @@
 // deliberation/converse wiring lives here (M5) — this file never composes
 // an intent.
 //
-// ponytail: persona identity (fixed CastIDs: Aldric/Petra/Yenna) and body
-// identity (opaque per-boot session tokens) are disjoint namespaces in this
-// build (see T003's fix in mod/ for the same fact on the vendor side) — a
-// live session's memory/ledger stores are keyed by its `body` token, not by
-// a CastID, matching consolidate/archive.go's own mind-identity-is-body-
-// token convention. Binding a body's stream to a specific persona's name
-// for E6's stable prefix is deliberation-adjacent work M5's real mind-
-// identity layer will do; RunNight below uses an empty ConsolidationStable
-// Prefix, which still exercises the real E6 call/parse/ledger path end to
-// end.
+// ponytail (closed by TASK-0023 phase 2, T004): persona identity (fixed
+// CastIDs: Aldric/Petra/Yenna) and body identity (opaque per-boot session
+// tokens) are still disjoint namespaces on the wire itself — a live
+// session's memory/ledger stores stay keyed by its `body` token, not a
+// CastID, matching consolidate/archive.go's own mind-identity-is-body-
+// token convention. What T004 closes is HOW a body's token gets bound to a
+// persona at all: neither the session_open manifest (mod/.../Handshake.
+// MANIFEST is a fixed, world-independent constant — identical bytes for
+// every body, per its own class doc) nor an ordinary percept (self_state
+// carries no identity either) names a cast member. The two REAL signals
+// this build's wire ever carries are (1) a body token that literally IS a
+// loaded CastID (the demo/dev-server convention DemoCast's ids already
+// give bodies, Phase 1's placeholder promoted to the real mechanism here)
+// and (2) the dusk pairing-signal sighting's `thing.descriptor`
+// (mod/.../PairingSignal.java's `content(otherBody, otherName)`), which
+// literally carries the OTHER body's cast display name — conversation.go's
+// bindPersonaIfUnbound learns from it. See HandleSessionOpen and
+// personaFor below for where each binds.
 package main
 
 import (
@@ -28,8 +36,10 @@ import (
 	"os"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"kithcraft/mind/consolidate"
+	"kithcraft/mind/converse"
 	"kithcraft/mind/deliberate"
 	"kithcraft/mind/llm"
 	"kithcraft/mind/memory"
@@ -65,6 +75,19 @@ type bodyStore struct {
 	delibOnce sync.Once
 	interrupt *deliberate.Interrupt
 	triggerCh chan map[string]any
+
+	// TASK-0023 phase 2 (T004): this body's bound persona, set once at
+	// attach (HandleSessionOpen) or later, opportunistically, by
+	// conversation.go's bindPersonaIfUnbound — see runtime.go's own
+	// top-of-file comment for the binding mechanism. personaFor
+	// (deliberation.go) is the only reader.
+	persona    persona.Persona
+	hasPersona bool
+
+	// TASK-0023 phase 2 (T005/T007): every dusk-exchange turn's
+	// FirstTokenLatency this body has spoken, in arrival order — the
+	// session report's smallest useful surfacing (report.go).
+	turnLatencies []time.Duration
 }
 
 // Runtime is the daemon's assembled, non-skeleton state. Client/Digester
@@ -80,8 +103,16 @@ type Runtime struct {
 	Digester    consolidate.Digester
 	Personas    map[string]persona.Persona
 
+	// TASK-0023 phase 2 (T005/T006): the daemon-wide dusk-exchange pregen
+	// pool (M6's Pool, conversation.go) and ambient-line pool (M6's
+	// AmbientPool) — one of each for the whole runtime, keyed internally
+	// by pair/villager the same way rt.bodies is keyed by body.
+	convPool *converse.Pool
+	ambient  *converse.AmbientPool
+
 	mu     sync.Mutex
 	bodies map[string]*bodyStore
+	pairs  map[converse.PairKey]*pendingPair // T005's convergence bookkeeping (conversation.go), guarded by mu
 }
 
 // NewRuntime opens runDir's stores (T001): the shared archive eagerly (its
@@ -103,6 +134,9 @@ func NewRuntime(runDir string) (*Runtime, error) {
 		PersonaDir:  personaDir,
 		Archive:     archive,
 		bodies:      map[string]*bodyStore{},
+		convPool:    converse.NewPool(),
+		ambient:     converse.NewAmbientPool(),
+		pairs:       map[converse.PairKey]*pendingPair{},
 	}
 	if os.Getenv("ANTHROPIC_API_KEY") != "" {
 		rt.Client = llm.New()
@@ -196,7 +230,12 @@ func (rt *Runtime) bodyOrOpen(body string) (*bodyStore, error) {
 // conn/session a body's Vendor and deliberation Loop read from —
 // capabilities arrive on session_open only, never on a percept, and
 // mind/deliberate/loop.go's Config.Verbs doc requires the body's actual
-// declared verb set, not an invented one.
+// declared verb set, not an invented one. Phase 2 (T004) also binds this
+// body's persona here, once: a body token that literally names a loaded
+// CastID binds immediately (the primary mechanism — see this file's
+// top-of-file comment); anything else stays unbound until conversation.go
+// learns it from a pairing-signal sighting, or forever, matching spec.md's
+// stub-cast edge case.
 func (rt *Runtime) HandleSessionOpen(conn seam.Conn, session, body string, capabilities map[string]any) {
 	bs, err := rt.bodyOrOpen(body)
 	if err != nil {
@@ -205,6 +244,9 @@ func (rt *Runtime) HandleSessionOpen(conn seam.Conn, session, body string, capab
 	}
 	rt.mu.Lock()
 	bs.capabilities, bs.conn, bs.session = capabilities, conn, session
+	if !bs.hasPersona {
+		bs.persona, bs.hasPersona = rt.Personas[body]
+	}
 	rt.mu.Unlock()
 }
 
@@ -248,9 +290,16 @@ func (rt *Runtime) HandlePercept(conn seam.Conn, body string, msg map[string]any
 	rt.mu.Unlock()
 
 	rt.classifyAndTrigger(body, bs, payload)
+	// TASK-0023 phase 2: pairing (T005) and ambient (T006) are their own
+	// classifications of the same percept stream, orthogonal to E2/E3/
+	// urgent — plan.md design decision 1's "triggers are classifications
+	// of existing percepts" applied a second time, in conversation.go.
+	rt.handlePairSignal(body, bs, worldTime, payload)
+	rt.handleAmbientTrigger(body, bs, worldTime, payload)
 
 	if consolidate.SleepTriggered(prev, worldTime) {
 		rt.runNight(body, bs, worldTime)
+		rt.refillAmbient(body, bs, worldTime)
 	}
 }
 
@@ -258,13 +307,21 @@ func (rt *Runtime) HandlePercept(conn seam.Conn, body string, msg map[string]any
 // logs and skips rather than failing loudly — the same window is retried
 // at the next boundary a Digester is available for (consolidate.RunNight's
 // own no-marker-on-failure rule, extended by construction: skipping lands
-// no marker either).
+// no marker either). Phase 2 (T004): the stable prefix now carries this
+// body's bound persona when one exists (closing I1's empty-
+// ConsolidationStablePrefix ponytail); an unbound body still runs E6 with
+// an empty prefix exactly as Phase 1 did — RunNight itself is not gated on
+// persona binding, only the prefix content is.
 func (rt *Runtime) runNight(body string, bs *bodyStore, worldTime int64) {
 	if rt.Digester == nil {
 		fmt.Fprintf(os.Stderr, "minddaemon: sleep boundary at world_time %d for body %q but no ANTHROPIC_API_KEY — consolidation skipped, window not marked (will retry)\n", worldTime, body)
 		return
 	}
-	if err := consolidate.RunNight(context.Background(), bs.log, bs.ledger, rt.Digester, prompt.ConsolidationStablePrefix{}, worldTime); err != nil {
+	var prefix prompt.ConsolidationStablePrefix
+	if p, ok := rt.personaFor(bs); ok {
+		prefix = consolidationPrefixFor(p)
+	}
+	if err := consolidate.RunNight(context.Background(), bs.log, bs.ledger, rt.Digester, prefix, worldTime); err != nil {
 		fmt.Fprintf(os.Stderr, "minddaemon: RunNight for body %q: %v\n", body, err)
 	}
 }

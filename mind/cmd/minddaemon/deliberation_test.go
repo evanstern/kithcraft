@@ -128,11 +128,14 @@ func gatedIntentServer(t *testing.T, verb, reason string) (srv *httptest.Server,
 }
 
 // startDeliberationDaemon wires a Runtime around srv's fake model client,
-// binds body to persona p (Phase 1's direct body==CastID placeholder
-// binding, deliberation.go's personaFor), and serves it on a real UDS
-// listener. Returns the dialed Double and a cleanup-free teardown left to
-// t.Cleanup.
-func startDeliberationDaemon(t *testing.T, srv *httptest.Server, body string, p persona.Persona) (*Runtime, *seamtest.Double) {
+// sets rt.Personas (TASK-0023 phase 2, T004: HandleSessionOpen binds a
+// body's persona from rt.Personas ONCE at attach, so the whole cast map
+// must be set before session_open is ever sent — the same "populated once
+// at startup, before serving begins" invariant LoadOrGenesisCast's own doc
+// already states, now load-bearing for a race detector too, not just
+// documentation), and serves it on a real UDS listener. Returns the dialed
+// Double and a cleanup-free teardown left to t.Cleanup.
+func startDeliberationDaemon(t *testing.T, srv *httptest.Server, body string, personas map[string]persona.Persona) (*Runtime, *seamtest.Double) {
 	t.Helper()
 	rt, err := NewRuntime(t.TempDir())
 	if err != nil {
@@ -140,7 +143,7 @@ func startDeliberationDaemon(t *testing.T, srv *httptest.Server, body string, p 
 	}
 	t.Cleanup(func() { rt.Close() })
 	rt.Client = llm.New(option.WithBaseURL(srv.URL), option.WithAPIKey("test-key"))
-	rt.Personas = map[string]persona.Persona{body: p}
+	rt.Personas = personas
 
 	ing := seam.NewIngester()
 	ing.OnPercept = rt.HandlePercept
@@ -174,8 +177,8 @@ func TestLiveE3Deliberation_PerceptInIntentOutWithAuthoredReason(t *testing.T) {
 	const reason = "Building shelters is exactly my trade, and that wall has bothered me all week."
 	srv, hits := simpleIntentServer(t, "claim", reason)
 
-	_, dbl := startDeliberationDaemon(t, srv, "b-villager", persona.Persona{
-		Name: "Aldric", Anchor: "steady and exacting", Values: []string{"craft", "care"},
+	_, dbl := startDeliberationDaemon(t, srv, "b-villager", map[string]persona.Persona{
+		"b-villager": {Name: "Aldric", Anchor: "steady and exacting", Values: []string{"craft", "care"}},
 	})
 
 	if err := dbl.Send(seamtest.Percept("s-1", "b-villager", 1, 100, boardPostingPercept("p-1", "Build a shelter by the north wall. — the player"))); err != nil {
@@ -229,8 +232,8 @@ func TestLiveInterrupt_CancelsInFlightAndProducesOneFollowUp(t *testing.T) {
 	// run LIFO, so this unblocks the first (cancelled) request's still-open
 	// handler before Close() waits on it.
 	t.Cleanup(func() { close(release) })
-	_, dbl := startDeliberationDaemon(t, srv, "b-villager", persona.Persona{
-		Name: "Aldric", Anchor: "steady", Values: []string{"craft"},
+	_, dbl := startDeliberationDaemon(t, srv, "b-villager", map[string]persona.Persona{
+		"b-villager": {Name: "Aldric", Anchor: "steady", Values: []string{"craft"}},
 	})
 
 	if err := dbl.Send(seamtest.Percept("s-1", "b-villager", 1, 100, boardPostingPercept("p-1", "Build a shelter. — the player"))); err != nil {
@@ -316,13 +319,13 @@ func TestDeliberation_NilClient_LogsAndSkips(t *testing.T) {
 }
 
 // TestDeliberation_NoBoundPersona_LogsAndSkips is spec.md's stub-cast edge
-// case: a body whose token names no loaded CastID (Phase 1's placeholder
-// binding, deliberation.go's personaFor) skips deliberation with a log
-// line rather than crashing, even with a live model client configured.
+// case: a body whose token names no loaded CastID (deliberation.go's
+// personaFor, bound once at attach per TASK-0023 phase 2 T004) skips
+// deliberation with a log line rather than crashing, even with a live
+// model client configured.
 func TestDeliberation_NoBoundPersona_LogsAndSkips(t *testing.T) {
 	srv, hits := simpleIntentServer(t, "claim", "should never be seen")
-	rt, dbl := startDeliberationDaemon(t, srv, "b-stub-nobody", persona.Persona{})
-	rt.Personas = map[string]persona.Persona{} // no bound persona for any body
+	_, dbl := startDeliberationDaemon(t, srv, "b-stub-nobody", map[string]persona.Persona{}) // no bound persona for any body
 
 	if err := dbl.Send(seamtest.Percept("s-1", "b-stub-nobody", 1, 100, boardPostingPercept("p-1", "Build a shelter. — the player"))); err != nil {
 		t.Fatalf("percept: %v", err)

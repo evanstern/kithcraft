@@ -63,18 +63,103 @@
 
 ## Phase 2 — Conversation live (US3 + US4)
 
-- [ ] T004 Body-to-persona binding in Runtime (closing I1's empty-prefix
+- [x] T004 Body-to-persona binding in Runtime (closing I1's empty-prefix
       ponytail); E6 prefix gains persona text; E2/E4 prefixes bound the same
-      way (card AC #3 binding half)
-- [ ] T005 Dusk exchange off the live pair signal: Slot fill on signal
+      way (card AC #3 binding half).
+      Investigated what the wire actually carries before choosing a
+      mechanism (runtime.go's top-of-file comment records the finding):
+      `mod/.../session/Handshake.java`'s MANIFEST is a fixed,
+      world-independent constant — identical capabilities for every body,
+      by that class's own doc — so session_open carries no cast identity at
+      all, and `self_state` (`mod/.../percept/SelfState.java`) carries none
+      either. Two real signals exist: (1) a body token that literally IS a
+      loaded CastID — the demo/dev-server convention Phase 1's placeholder
+      already assumed, promoted here to the real mechanism, bound once at
+      attach (`runtime.go`'s `HandleSessionOpen`, guarded by `hasPersona` so
+      a reconnect never downgrades an established binding); (2) the dusk
+      pairing-signal sighting's `thing.descriptor`
+      (`mod/.../brain/PairingSignal.java`'s `content(otherBody, otherName)`
+      literally carries the OTHER body's cast display name) —
+      `conversation.go`'s `bindPersonaIfUnbound` learns from it
+      opportunistically, T005's own wiring. `personaFor` (deliberation.go)
+      now reads the cached binding instead of the map directly; E6's
+      `runNight` (runtime.go) builds `consolidationPrefixFor` from it,
+      closing I1's empty-`ConsolidationStablePrefix` ponytail; E4's
+      `exchangeSpeaker` (conversation.go) reuses the SAME `stablePrefixFor`
+      E2/E3 already used ("Phase 1's stablePrefixFor grows up"). Proven by
+      `TestConsolidationPrefixFor_CarriesPersonaText` (pure-function, E6's
+      half) and by `TestDuskExchange_PairSignalConvergesAndRecordsLatency`
+      failing closed if either speaker's binding were missing (E4's half) —
+      both `mind/cmd/minddaemon/conversation_test.go`. Deviation from
+      Phase-1 test scaffolding: `startDeliberationDaemon`
+      (deliberation_test.go) mutated `rt.Personas` AFTER the listener
+      goroutine started, which Phase 1's lazy per-call map read tolerated
+      but T004's bind-at-attach caching turned into a real data race
+      (caught by `-race`); fixed by taking the whole `map[string]persona.
+      Persona` up front, matching the "populated once at startup, before
+      serving begins" invariant `LoadOrGenesisCast`'s own doc already
+      stated.
+- [x] T005 Dusk exchange off the live pair signal: Slot fill on signal
       percepts, Exchange at convergence between the two live sessions (speak
       intents out per side), abort-discard + live fallback semantics held
-      under live timing (card AC #3)
-- [ ] T006 AmbientPool wired: refill on the world_time day crossing Runtime
+      under live timing (card AC #3).
+      `mind/cmd/minddaemon/conversation.go`: `isPairSignal` classifies the
+      exact shape `PairingSignal.content`/`Sightings.sightingContent`
+      compose (a `k:person` sighting doing "walking to the gathering
+      place") — recorded bounded heuristic (package doc): DuskPairing fires
+      this TWICE per approaching pair (once per perceiver, each naming the
+      OTHER member), so this build treats the FIRST signal for a
+      (pairID,day) as starting the pregen Fill for its sender (the
+      designated opener — always live-attached by construction) and the
+      SECOND, from the other side, AS convergence itself — the wire carries
+      no separate "arrived"/"met" percept yet. `handlePairSignal` fills M6's
+      `Pool.Begin` on the first signal and runs `runExchange` (in-process,
+      each speaker's own `Out`/`Session` per plan.md's Risks note) on the
+      second; `pendingPair`/`abortPair` implement abort-discard via a
+      `pairConvergeTimeout` (30s, well past PairingSignal.LEAD_SECONDS=10s;
+      var not const so tests can shorten it) with identity-checked timers
+      so a superseded pair's stale timer can never touch a different
+      pending pair sharing its key (a documented first-signal race:
+      last-write-wins on `rt.pairs[key]`, the loser's Fill/timer are inert).
+      `Config.OpeningWait` stays at its zero default (TASK-0014's own
+      short-lead finding, already the package's precedent) — the live
+      fallback fires whenever pregen isn't ready, which is expected and
+      "first-class" per V3's measured 1.82-4.96s lead. Proven by
+      `TestDuskExchange_PairSignalConvergesAndRecordsLatency` (convergence
+      → live exchange → spoken intent on the opener's OWN session,
+      `-race` green) and `TestDuskExchange_UnconfirmedPairAbortsAfterTimeout`
+      (abort-discard: no leaked pending pair, never spoken).
+- [x] T006 AmbientPool wired: refill on the world_time day crossing Runtime
       tracks, serve via speak intents, IsTargeted/Escalate reachable
-      (card AC #4)
-- [ ] T007 FirstTokenLatency surfaced into session-report.log (watch-list #6
-      closed) (card AC #5)
+      (card AC #4).
+      `refillAmbient` (conversation.go) rides the SAME `consolidate.
+      SleepTriggered` check `runNight` already reacts to (runtime.go's
+      `HandlePercept`), one batched E5 call per villager per crossing.
+      Ambient trigger chosen as directed: the smallest live trigger this
+      build has for "a player passing a villager" — any `sighting` of a
+      `k:person` thing that ISN'T T005's exact pairing-signal shape
+      (`handleAmbientTrigger`). Reuses the wire's own optional-field
+      semantics for targeting rather than inventing one: `Sightings.
+      sightingContent`'s `doing` MAY be null (mod's own doc) — absent/empty
+      is the generic case (`converse.IsTargeted("")` false → `AmbientPool.
+      Serve`, falling back to `Stall` when the pool has nothing); present
+      is "about something specific" (`IsTargeted` true → `converse.
+      Escalate`). `speakLine` composes the speak intent via the SAME
+      `wireVendor` T001 already wired. Proven by
+      `TestAmbientTrigger_ServeAndEscalate`: day-crossing refill, a generic
+      sighting served from the pool, a specific one escalated — both as
+      live speak intents in order, `-race` green.
+- [x] T007 FirstTokenLatency surfaced into session-report.log (watch-list #6
+      closed) (card AC #5).
+      `bodyStore.turnLatencies` (runtime.go) collects every dusk-exchange
+      turn's `converse.Turn.FirstTokenLatency`, filed under its OWN
+      speaker's body (`conversation.go`'s `recordLatencies`) since a shared
+      Exchange's turns alternate between two different bodies. `report.go`
+      adds a per-villager section (raw values, arrival order — smallest
+      useful form, mirroring the existing E6-instrument section's own
+      per-body/sorted style). Proven by
+      `TestDuskExchange_PairSignalConvergesAndRecordsLatency`'s report
+      assertion (the spoken villager's line is present and non-empty).
 
 ## Phase 3 — Proofs (FR-006 + FR-007)
 
