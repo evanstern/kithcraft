@@ -1,10 +1,10 @@
 ---
 id: TASK-0023
 title: M8 - Wire deliberation and conversation into the live daemon (E2-E5)
-status: To Do
+status: In Progress
 assignee: []
 created_date: '2026-09-01 02:13'
-updated_date: '2026-09-01 02:13'
+updated_date: '2026-09-01 02:14'
 labels:
   - mind
   - m-0-build
@@ -31,6 +31,8 @@ As a villager, I want my deliberation and my voice wired into the body I actuall
 **Depends on.** TASK-0016, TASK-0017, TASK-0021 (all merged). **Blocks TASK-0022's Phase 2** — the operator's evening follows this task's merge.
 
 **References.** docs/design/llm-routing-and-budget.md (§2.2 triggers, §5.5 interrupt, §5.2 pre-generation), specs/016/017/021's recorded deferrals and conventions, specs/022-the-evening/run-kit.md §0 + watch-list (#1, #6), docs/design/demo-build-plan.md §4 (beats 4-6).
+
+Spec: specs/023-daemon-wiring
 <!-- SECTION:DESCRIPTION:END -->
 
 ## Acceptance Criteria
@@ -44,6 +46,12 @@ As a villager, I want my deliberation and my voice wired into the body I actuall
 - [ ] #7 Dev-server observation: at least one live E2/E3 deliberation and one dusk exchange end-to-end, with honest not-observed records where known substrate timing questions bite
 - [ ] #8 No new Mixins; no protocol extension; known adjacent gaps (reconnect identity, heartbeat admissibility) stay out of scope unless glue-sized, judged and recorded
 <!-- AC:END -->
+
+## Implementation Notes
+
+<!-- SECTION:NOTES:BEGIN -->
+claimed by sweep-0007-0022 orchestrator 2026-08-31 (lane 5 amendment — operator wire-first ruling at checkpoint 5); spec 023 stub + link ride this claim commit
+<!-- SECTION:NOTES:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
