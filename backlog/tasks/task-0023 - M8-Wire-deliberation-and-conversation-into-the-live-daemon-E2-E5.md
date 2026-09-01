@@ -1,10 +1,10 @@
 ---
 id: TASK-0023
 title: M8 - Wire deliberation and conversation into the live daemon (E2-E5)
-status: In Progress
+status: Done
 assignee: []
 created_date: '2026-09-01 02:13'
-updated_date: '2026-09-01 03:45'
+updated_date: '2026-09-01 03:47'
 labels:
   - mind
   - m-0-build
@@ -86,6 +86,12 @@ OPERATOR-FACING FINDINGS (Phase 4 sign-off / refactor-triage input) — three it
 
 Item (1) is the one item requiring an operator decision before the evening's live run; (2) and (3) are pre-existing and best routed to refactor-triage.
 <!-- SECTION:NOTES:END -->
+
+## Final Summary
+
+<!-- SECTION:FINAL_SUMMARY:BEGIN -->
+M8 delivered via PR #27 (merge 92edf49, merge commit, pins preserved). E2-E5 wired into cmd/minddaemon: live Vendor promoting the evening-test envelope contract (reconnect-safe); per-body deliberation loops with §2.2/TriggerE3 classification, K=10 window over the existing Log.Events() export, ErrDone honored; §5.5 interrupt on live ingest proven through the real listener under -race; persona binding at attach with E6/E2/E4 prefixes gaining real persona text (I1's ponytail closed); dusk exchange off the pair-signal shape with pregen + convergence-on-second-signal + 30s timeout; ambient pool refill/serve/escalate; FirstTokenLatency per villager in the session report (watch-list #6 closed). FR-006 proof set consolidated (TestFR006_ProofSet, all four beats through the real binary, multi-turn dusk). One additive seam hook (Ingester.OnSessionOpen, mind-side not wire). AC #7 honestly UNTICKED: the dev-server observation (rehearsal, zero calls) found live persona binding STRUCTURALLY blocked — BodySession mints opaque per-boot tokens, never CastIDs — the operator's pre-evening decision; DuskPairing signal-over-live-session and self_state admissibility reconfirmed as refactor-triage items. Spec-bridge derivation: 4 phases 12/12, Done-eligible with the one honest AC gap recorded. ~1.07M subagent tokens across 4 sonnet dispatches (cc/claude-sonnet-5[1m], verified per dispatch).
+<!-- SECTION:FINAL_SUMMARY:END -->
 
 ## Definition of Done
 <!-- DOD:BEGIN -->
