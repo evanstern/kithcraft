@@ -4,7 +4,7 @@ title: M8 - Wire deliberation and conversation into the live daemon (E2-E5)
 status: In Progress
 assignee: []
 created_date: '2026-09-01 02:13'
-updated_date: '2026-09-01 02:14'
+updated_date: '2026-09-01 02:16'
 labels:
   - mind
   - m-0-build
@@ -45,12 +45,18 @@ Spec: specs/023-daemon-wiring
 - [ ] #6 Fake-vendor-through-real-binary proofs: live claim/decline with authored reason, interrupt coalescing, pre-generated dusk opening, multi-turn exchange, pool serve/refresh
 - [ ] #7 Dev-server observation: at least one live E2/E3 deliberation and one dusk exchange end-to-end, with honest not-observed records where known substrate timing questions bite
 - [ ] #8 No new Mixins; no protocol extension; known adjacent gaps (reconnect identity, heartbeat admissibility) stay out of scope unless glue-sized, judged and recorded
+- [ ] #9 Spec phase: Phase 1 — Deliberation live (US1 + US2)
+- [ ] #10 Spec phase: Phase 2 — Conversation live (US3 + US4)
+- [ ] #11 Spec phase: Phase 3 — Proofs (FR-006 + FR-007)
+- [ ] #12 Spec phase: Phase 4 — Gates and closure
 <!-- AC:END -->
 
 ## Implementation Notes
 
 <!-- SECTION:NOTES:BEGIN -->
 claimed by sweep-0007-0022 orchestrator 2026-08-31 (lane 5 amendment — operator wire-first ruling at checkpoint 5); spec 023 stub + link ride this claim commit
+
+tier: sonnet (default) · model cc/claude-sonnet-5[1m] · rubric: assembly of merged tested parts; the deferred judgment calls are settled by the written surfaces the card cites (M5's Proposer/ErrDone + WindowItem, M6's Slot/Pool + AmbientPool, I1's Runtime conventions) — no unsettled design (runbook lane 5 amendment)
 <!-- SECTION:NOTES:END -->
 
 ## Definition of Done
