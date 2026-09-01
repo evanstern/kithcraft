@@ -338,3 +338,59 @@ func TestContinuity_ReconnectAfterRestart_NoBackfillAndBodyTokenMatch(t *testing
 		t.Fatalf("reconnect must not invent anything for the gap; mind sent %#v", out)
 	}
 }
+
+// TestOnSessionOpen_FiresForFirstFrameAndMultiplex proves TASK-0023 T001/
+// T002's manifest hook: it fires with the capabilities the frame actually
+// declared for the connection's first session_open AND for a later
+// multiplexed one — the only two places a body's declared verb set can be
+// learned (mind/deliberate/loop.go's Config.Verbs doc).
+func TestOnSessionOpen_FiresForFirstFrameAndMultiplex(t *testing.T) {
+	conn := newFakeConn()
+	ing := NewIngester()
+	type call struct {
+		body string
+		caps map[string]any
+	}
+	calls := make(chan call, 2)
+	ing.OnSessionOpen = func(c Conn, session, body string, capabilities map[string]any) {
+		if c != conn {
+			t.Errorf("OnSessionOpen conn = %v, want the connection itself", c)
+		}
+		if session != "s-1" {
+			t.Errorf("OnSessionOpen session = %q, want s-1", session)
+		}
+		calls <- call{body, capabilities}
+	}
+	done := runWithIngester(conn, ing)
+	conn.script(sessionOpen("b-1", nil))
+	conn.script(sessionOpen("b-2", nil))
+
+	// Wait for both hooks to fire BEFORE closing the stream: fakeConn's
+	// ReadMessage selects between its in/inErr channels, so scripting a
+	// close before HandleConnection has drained the queued frames would
+	// race the close against them (Go's select picks pseudo-randomly
+	// among ready cases).
+	var got []call
+	for len(got) < 2 {
+		select {
+		case c := <-calls:
+			got = append(got, c)
+		case <-time.After(2 * time.Second):
+			t.Fatalf("OnSessionOpen fired %d times, want 2 (first frame + multiplex)", len(got))
+		}
+	}
+	conn.closeStream()
+	if err := waitDone(t, done); err != nil {
+		t.Fatalf("HandleConnection: %v", err)
+	}
+
+	if got[0].body != "b-1" || got[1].body != "b-2" {
+		t.Fatalf("OnSessionOpen bodies = %v, want [b-1 b-2]", got)
+	}
+	wantCaps := map[string]any{"percept_types": []any{"sighting"}}
+	for _, g := range got {
+		if !equalValue(g.caps, wantCaps) {
+			t.Errorf("OnSessionOpen(%s) capabilities = %#v, want %#v", g.body, g.caps, wantCaps)
+		}
+	}
+}

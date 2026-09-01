@@ -83,6 +83,10 @@ func HandleConnection(conn Conn, ing *Ingester) error {
 	if seq, ok := first["seq"].(int64); ok {
 		ing.Attach(str(first["body"]), seq)
 	}
+	if ing.OnSessionOpen != nil {
+		caps, _ := pl["capabilities"].(map[string]any)
+		ing.OnSessionOpen(conn, m.session, str(first["body"]), caps)
+	}
 
 	for {
 		msg, err := conn.ReadMessage()
@@ -108,6 +112,10 @@ func HandleConnection(conn Conn, ing *Ingester) error {
 			}
 			attached[body] = true
 			ing.Attach(body, seq)
+			if ing.OnSessionOpen != nil {
+				caps, _ := payloadOf(msg)["capabilities"].(map[string]any)
+				ing.OnSessionOpen(conn, m.session, body, caps)
+			}
 		case "session_close":
 			ing.Observe(body, seq)
 			delete(attached, body)

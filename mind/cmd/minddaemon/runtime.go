@@ -30,6 +30,7 @@ import (
 	"sync"
 
 	"kithcraft/mind/consolidate"
+	"kithcraft/mind/deliberate"
 	"kithcraft/mind/llm"
 	"kithcraft/mind/memory"
 	"kithcraft/mind/persona"
@@ -46,6 +47,24 @@ type bodyStore struct {
 	gate          *memory.Gate
 	instrument    *memory.Instrument
 	lastWorldTime int64
+
+	// TASK-0023 phase 1 (T001-T003): this body's live manifest/session,
+	// set at session_open (Runtime.HandleSessionOpen) and read by
+	// wireVendor and the deliberation loop — all fields below are guarded
+	// by Runtime.mu, the same lock lastWorldTime above already uses.
+	capabilities map[string]any
+	conn         seam.Conn
+	session      string
+	mindSeq      int64
+	loop         *deliberate.Loop // the Loop currently in flight, if any (HandlePercept.Deliver's target)
+
+	// The per-body deliberation loop: one goroutine draining triggerCh so
+	// at most one deliberate.Loop.Run is ever in flight for this body
+	// (plan.md design decision 2). Built lazily, once, on this body's
+	// first E2/E3/urgent trigger (deliberation.go).
+	delibOnce sync.Once
+	interrupt *deliberate.Interrupt
+	triggerCh chan map[string]any
 }
 
 // Runtime is the daemon's assembled, non-skeleton state. Client/Digester
@@ -172,11 +191,30 @@ func (rt *Runtime) bodyOrOpen(body string) (*bodyStore, error) {
 	return bs, nil
 }
 
-// HandlePercept is the real listener's Ingester.OnPercept hook (T001/T002):
-// runs the admission gate (mind/memory.Gate) and appends admitted percepts
-// to that body's log, then checks the sleep signal on the message's own
-// world_time and runs a night's consolidation when it fires. No intent is
-// ever composed here — M5 owns deliberation.
+// HandleSessionOpen is the real listener's Ingester.OnSessionOpen hook
+// (TASK-0023 T001/T002): records the manifest capabilities and the live
+// conn/session a body's Vendor and deliberation Loop read from —
+// capabilities arrive on session_open only, never on a percept, and
+// mind/deliberate/loop.go's Config.Verbs doc requires the body's actual
+// declared verb set, not an invented one.
+func (rt *Runtime) HandleSessionOpen(conn seam.Conn, session, body string, capabilities map[string]any) {
+	bs, err := rt.bodyOrOpen(body)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "minddaemon: opening stores for body %q at session_open: %v\n", body, err)
+		return
+	}
+	rt.mu.Lock()
+	bs.capabilities, bs.conn, bs.session = capabilities, conn, session
+	rt.mu.Unlock()
+}
+
+// HandlePercept is the real listener's Ingester.OnPercept hook (T001/T002,
+// TASK-0023 T002/T003): runs the admission gate (mind/memory.Gate) and
+// appends admitted percepts to that body's log, routes an act_result to
+// whichever deliberate.Loop.Run is waiting on it (Loop.Deliver — M5's ONLY
+// path to a Run's OnFact), classifies the percept against the live E2/E3/
+// urgent triggers, then checks the sleep signal on the message's own
+// world_time and runs a night's consolidation when it fires.
 func (rt *Runtime) HandlePercept(conn seam.Conn, body string, msg map[string]any) {
 	worldTime, _ := msg["world_time"].(int64)
 	payload, _ := msg["payload"].(map[string]any)
@@ -185,6 +223,15 @@ func (rt *Runtime) HandlePercept(conn seam.Conn, body string, msg map[string]any
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "minddaemon: opening stores for body %q: %v\n", body, err)
 		return
+	}
+
+	if pt, _ := payload["percept_type"].(string); pt == "act_result" {
+		rt.mu.Lock()
+		l := bs.loop
+		rt.mu.Unlock()
+		if l != nil {
+			l.Deliver(payload)
+		}
 	}
 
 	if admit, _ := bs.gate.Decide(payload); admit {
@@ -199,6 +246,8 @@ func (rt *Runtime) HandlePercept(conn seam.Conn, body string, msg map[string]any
 	prev := bs.lastWorldTime
 	bs.lastWorldTime = worldTime
 	rt.mu.Unlock()
+
+	rt.classifyAndTrigger(body, bs, payload)
 
 	if consolidate.SleepTriggered(prev, worldTime) {
 		rt.runNight(body, bs, worldTime)
