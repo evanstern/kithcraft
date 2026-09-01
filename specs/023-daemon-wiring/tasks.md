@@ -196,10 +196,36 @@
       `TestDuskExchange_PairSignalConvergesAndRecordsLatency` (this file,
       above); (d) `TestAmbientTrigger_ServeAndEscalate` (this file — day-
       crossing refill already proven there, no separate gap).
-- [ ] T009 Dev-server observation (research/live-wiring-observation.md): at
+- [x] T009 Dev-server observation (research/live-wiring-observation.md): at
       least one live E2/E3 deliberation and one dusk exchange end-to-end;
       bounded checks, honest not-observed records where substrate timing
       bites (card AC #7); adjacent-gap judgments recorded (card AC #8)
+      No `ANTHROPIC_API_KEY` in this session's env, so rehearsal mode
+      throughout per this dispatch's own instruction — zero live model
+      calls, confirmed by session-report.log's all-zero E1-E6 rows.
+      Bring-up (Order A), session attach, world/cast persistence across a
+      mod-server restart, and mod-side `self_state` heartbeat emission all
+      confirmed live; `pause-when-empty-seconds` gotcha reconfirmed and
+      fixed per demo-runbook.md §2. Neither a live E2/E3 trigger nor a
+      dusk exchange reached the daemon this session — recorded honestly
+      with two structural citations, not a timing shrug: (1) NEW finding —
+      `BodySession.open`'s live body token (`ground.issueBody`, confirmed
+      live as opaque `b-14`/`b-6`) is never a CastID, so `HandleSessionOpen`'s
+      `rt.Personas[body]` lookup can never bind the live-attached body's own
+      persona — contradicts runtime.go's own T004 "demo/dev-server
+      convention" comment; judged not glue-sized, flagged for Phase
+      4/operator, not patched here (FR-008). (2) `DuskPairing`'s own class
+      javadoc already says its pairing-signal sighting is composed and
+      logged but never sent over a live WireClient session
+      (`BodySession`'s single-body ceiling) — pre-existing, not new,
+      confirmed by reading the code rather than waiting out a ~20-minute
+      day/night cycle; this is also why the live first/second-signal
+      ordering and `pairConvergeTimeout` calibration questions could not be
+      checked live (no live second signal exists to order or time out).
+      self_state reaching the daemon at all reconfirmed as an open question
+      from specs/021-demo-config's own prior observation (more evidence,
+      still not root-caused, out of this dispatch's scope). Full writeup:
+      `specs/023-daemon-wiring/research/live-wiring-observation.md`.
 
 ## Phase 4 — Gates and closure
 
